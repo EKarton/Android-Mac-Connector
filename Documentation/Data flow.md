@@ -23,16 +23,16 @@ Notification message format:
 
 ``` 
 {
-	"message": {
-		"token": "<TOKEN>",
-		"notification": {
-			"title": "<TITLE OF NOTIFICATION>",
-			"body": "<BODY TEXT>"
-		},
-		"data": {
-			...
-		}
-	}
+  "message": {
+    "token": "<TOKEN>",
+    "notification": {
+      "title": "<TITLE OF NOTIFICATION>",
+      "body": "<BODY TEXT>"
+    },
+    "data": {
+      ...
+    }
+  }
 }
 ```
 
@@ -40,12 +40,12 @@ Data message format:
 
 ``` 
 {
-	"message": {
-		"token": "<TOKEN>",
-		"data": {
-			...
-		}
-	}
+  "message": {
+    "token": "<TOKEN>",
+    "data": {
+      ...
+    }
+  }
 }
 ```
 
@@ -61,8 +61,8 @@ Data message format:
 
 ``` 
 {
-	"address": "<phone number>",
-	"body": "<body>"
+  "address": "<phone number>",
+  "body": "<body>"
 }
 ```
 
@@ -80,41 +80,41 @@ Data message format:
 
 1. The Mac device makes a request to the server (POST /api/v1/<device-id>/sms/messages):
 
-	```
-	{
-		"address": "<phone number>",
-		"body": "<sms body>",
-	}
-	```
+  ```
+  {
+    "address": "<phone number>",
+    "body": "<sms body>",
+  }
+  ```
 
 2. The server receives the request, generates a random UUID, and sends this payload to the FCM:
 
-	``` 
-	{
-		"message": {
-			"token": "<DEVICE TOKEN>",
-			"data": {
-				"device_origin_id": "<MAC DEVICE ID>",
-				"device_dest_id": "<ANDROID DEVICE ID>",
-				"action": "send_sms",
-				"uuid": "<UUID>",
-				"data": {
-					"address": "<phone number>",
-					"body": "<sms body>",
-				}
-			}
-		}
-	}
-	```
+  ``` 
+  {
+    "message": {
+      "token": "<DEVICE TOKEN>",
+      "data": {
+        "device_origin_id": "<MAC DEVICE ID>",
+        "device_dest_id": "<ANDROID DEVICE ID>",
+        "action": "send_sms",
+        "uuid": "<UUID>",
+        "data": {
+          "address": "<phone number>",
+          "body": "<sms body>",
+        }
+      }
+    }
+  }
+  ```
 
 3. The server returns an OK response to the Mac device with this payload:
 
-	``` 
-	{
-		"status": "requested",
-		"message-uuid": "<UUID>"
-	}
-	```
+  ``` 
+  {
+    "status": "requested",
+    "message-uuid": "<UUID>"
+  }
+  ```
 
 4. The Mac device repeatedly polls the server on this endpoint: GET /api/v1/<device-id>/sms/messages/<UUID>/status
 
@@ -122,11 +122,11 @@ Data message format:
 
 6. When the SMS message is sent successfully, it sends an HTTP request to the server (PUT /api/v1/<device-id>/sms/messages/<UUID>/status):
 
-	``` 
-	{
-		"status": "sent",
-	}
-	```
+  ``` 
+  {
+    "status": "sent",
+  }
+  ```
 
 7. The Mac device notices that the status changed from "requested" to "sent", and stops polling
 
@@ -138,36 +138,36 @@ When getting SMS conversations from the Android device to the Mac device:
 
 2. The server receives the request, and sends this payload to FCM:
 
-	```
-	{
-		"message": {
-			"token": "<DEVICE TOKEN>",
-			"data": {
-				"action": "update_sms_threads",
-			}
-		}
-	}
-	```
+  ```
+  {
+    "message": {
+      "token": "<DEVICE TOKEN>",
+      "data": {
+        "action": "update_sms_threads",
+      }
+    }
+  }
+  ```
 
 3. The server also obtains the last list of SMS threads from the database, and returns the data to the Mac device
 
 4. When the Android device receives the request, it obtains the SMS threads and makes an authenticated request to the server (PUT /api/v1/<device-id>/sms/threads)
 
-	``` 
-	{
-		"sms-threads": [
-			{
-				"thread-id": "<THREAD ID>"
-				"contact-name": "<CONTACT NAME>",
-				"last-time-message-sent": "<TIMESTAMP>",
-				"last-message-body-sent": "<TIMESTAMP>",
-				"num-unread-messages": "<NUM_UNREAD_MESSAGES>",
-			},
-			...
-		],
-		"last-updated": <TIMESTAMP>
-	}
-	```
+  ``` 
+  {
+    "sms-threads": [
+      {
+        "thread-id": "<THREAD ID>"
+        "contact-name": "<CONTACT NAME>",
+        "last-time-message-sent": "<TIMESTAMP>",
+        "last-message-body-sent": "<TIMESTAMP>",
+        "num-unread-messages": "<NUM_UNREAD_MESSAGES>",
+      },
+      ...
+    ],
+    "last-updated": <TIMESTAMP>
+  }
+  ```
 
 5. The server receives the request, updates the database with the new content, and returns an OK response
 
@@ -177,19 +177,19 @@ When getting SMS conversations from the Android device to the Mac device:
 
 2. The server receives the request, and sends this payload to the FCM:
 
-	``` 
-	{
-		"message": {
-			"token": "<DEVICE TOKEN>",
-			"data": {
-				"action": "update_sms_thread_messages",
-				"data": {
-					"thread_id": "<THREAD_ID>"
-				}
-			}
-		}
-	}
-	```
+  ``` 
+  {
+    "message": {
+      "token": "<DEVICE TOKEN>",
+      "data": {
+        "action": "update_sms_thread_messages",
+        "data": {
+          "thread_id": "<THREAD_ID>"
+        }
+      }
+    }
+  }
+  ```
 
 3. The server also obtains the last list of messages of that thread from the database, and returns the data to the Mac device
 
