@@ -62,7 +62,7 @@ Data message format:
 
   ``` 
   {
-    "address": "<phone number>",
+    "phone_number": "<phone number>",
     "body": "<body>",
     "timestamp": "<timestamp>"
   }
@@ -100,7 +100,7 @@ Data message format:
           "device_dest_id": "<ANDROID DEVICE ID>",
           "action": "send_sms",
           "uuid": "<UUID>",
-          "address": "<phone number>",
+          "phone_number": "<phone number>",
           "body": "<sms body>",
         }
       }

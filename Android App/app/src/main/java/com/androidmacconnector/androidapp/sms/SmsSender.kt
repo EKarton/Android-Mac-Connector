@@ -32,16 +32,16 @@ class SendSmsRequestFcmSubscriber(private val service: SmsSenderService) : FcmSu
     override fun onMessageReceived(remoteMessage: RemoteMessage) {
         Log.d(LOG_TAG, "${remoteMessage.data}")
 
-        if (remoteMessage.data["address"].isNullOrBlank()) {
-            Log.e(LOG_TAG, "Address is empty ${remoteMessage.data["address"]}")
+        if (remoteMessage.data["phone_number"].isNullOrBlank()) {
+            Log.e(LOG_TAG, "Phone number is empty: ${remoteMessage.data["phone_number"]}")
             return
         }
 
         if (remoteMessage.data["body"].isNullOrBlank()) {
-            Log.e(LOG_TAG, "Body is empty ${remoteMessage.data["body"]}")
+            Log.e(LOG_TAG, "Body is empty: ${remoteMessage.data["body"]}")
             return
         }
 
-        service.sendSmsMessage(remoteMessage.data["address"]!!, remoteMessage.data["body"]!!)
+        service.sendSmsMessage(remoteMessage.data["phone_number"]!!, remoteMessage.data["body"]!!)
     }
 }

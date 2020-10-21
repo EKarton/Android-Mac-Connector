@@ -2,6 +2,7 @@ package com.androidmacconnector.androidapp.sms
 
 import android.Manifest
 import android.app.Activity
+import android.content.ContentResolver
 import android.net.Uri
 import android.provider.ContactsContract
 import android.provider.Telephony
@@ -24,7 +25,7 @@ interface GetSmsMessagesFromThreadService {
 /**
  * A class used to handle all types of SMS-related tasks
  */
-class SmsQueryService(private val activity: Activity) : GetSmsThreadsService,
+class SmsQueryService(private val contentResolver: ContentResolver) : GetSmsThreadsService,
     GetSmsMessagesFromThreadService {
 
     fun getRequiredPermissions(): List<String> {
@@ -55,7 +56,7 @@ class SmsQueryService(private val activity: Activity) : GetSmsThreadsService,
     }
 
     private fun getSmsConversations(): List<SmsThread> {
-        val cursor = activity.contentResolver.query(
+        val cursor = contentResolver.query(
             Telephony.Sms.Conversations.CONTENT_URI,
             null,
             null,
@@ -86,7 +87,7 @@ class SmsQueryService(private val activity: Activity) : GetSmsThreadsService,
         val projection = arrayOf("_id", "thread_id", "address", "person", "date", "body", "type");
         val selection = "thread_id = ?";
         val selectionArgs = arrayOf(threadId)
-        val cursor = activity.contentResolver.query(
+        val cursor = contentResolver.query(
             Telephony.Sms.Inbox.CONTENT_URI,
             projection,
             selection,
@@ -108,7 +109,7 @@ class SmsQueryService(private val activity: Activity) : GetSmsThreadsService,
         val projection = arrayOf("_id", "thread_id", "address", "person", "date", "body", "type");
         val selection = "thread_id = ?";
         val selectionArgs = arrayOf(threadId)
-        val cursor = activity.contentResolver.query(
+        val cursor = contentResolver.query(
             Telephony.Sms.CONTENT_URI,
             projection,
             selection,
@@ -135,7 +136,7 @@ class SmsQueryService(private val activity: Activity) : GetSmsThreadsService,
             Uri.encode(phoneNumber)
         )
         val projection = arrayOf(ContactsContract.PhoneLookup.DISPLAY_NAME)
-        val cursor = activity.contentResolver.query(uri, projection, null, null, null)
+        val cursor = contentResolver.query(uri, projection, null, null, null)
 
         var contactName: String? = null;
 
@@ -155,7 +156,7 @@ class SmsQueryService(private val activity: Activity) : GetSmsThreadsService,
             arrayOf("_id", "address", "person", "date", "body", "read", "date", "type");
         val selection = "thread_id = ?";
         val selectionArgs = arrayOf(threadId)
-        val cursor = activity.contentResolver.query(
+        val cursor = contentResolver.query(
             Telephony.Sms.CONTENT_URI,
             projection,
             selection,

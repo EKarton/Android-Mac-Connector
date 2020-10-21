@@ -7,7 +7,7 @@ import com.android.volley.toolbox.JsonObjectRequest
 import com.android.volley.toolbox.Volley
 import com.androidmacconnector.androidapp.R
 import com.androidmacconnector.androidapp.sms.MySmsMessage
-import com.androidmacconnector.androidapp.sms.ReceivedSmsMessage
+import com.androidmacconnector.androidapp.services.ReceivedSmsMessage
 import com.androidmacconnector.androidapp.sms.SmsThreadSummary
 import org.json.JSONException
 import org.json.JSONObject
@@ -46,7 +46,7 @@ class AndroidMacConnectorServiceImpl(private val context: Context) : AndroidMacC
         private const val UPDATE_SMS_MESSAGES_FOR_THREAD_PATH = "/api/v1/%s/sms/threads/%s/messages"
     }
 
-    private val requestQueue: RequestQueue = Volley.newRequestQueue(context)
+    private val requestQueue: RequestQueue = VolleyRequestQueue.getInstance(context.applicationContext).requestQueue
 
     override fun notifyReceivedSmsMessage(
         newSmsMessage: ReceivedSmsMessage,
@@ -183,6 +183,29 @@ class AndroidMacConnectorServiceImpl(private val context: Context) : AndroidMacC
 
     private fun getServerPort(): Int {
         return context.getString(R.string.port).toInt()
+    }
+}
+
+class VolleyRequestQueue(context: Context) {
+    companion object {
+        @Volatile
+        private var INSTANCE: VolleyRequestQueue? = null
+        fun getInstance(context: Context) =
+            INSTANCE ?: synchronized(this) {
+                INSTANCE ?: VolleyRequestQueue(context).also {
+                    INSTANCE = it
+                }
+            }
+    }
+
+    val requestQueue: RequestQueue by lazy {
+        // applicationContext is key, it keeps you from leaking the
+        // Activity or BroadcastReceiver if someone passes one in.
+        Volley.newRequestQueue(context.applicationContext)
+    }
+
+    fun <T> addToRequestQueue(req: Request<T>) {
+        requestQueue.add(req)
     }
 }
 

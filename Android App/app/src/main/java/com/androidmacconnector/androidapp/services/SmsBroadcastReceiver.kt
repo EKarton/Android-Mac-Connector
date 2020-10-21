@@ -1,6 +1,5 @@
-package com.androidmacconnector.androidapp.sms
+package com.androidmacconnector.androidapp.services
 
-import android.Manifest
 import android.annotation.TargetApi
 import android.content.BroadcastReceiver
 import android.content.Context
@@ -8,7 +7,7 @@ import android.content.Intent
 import android.os.Build
 import android.telephony.SmsMessage
 import android.util.Log
-import com.androidmacconnector.androidapp.data.AndroidMacConnectorService
+import com.androidmacconnector.androidapp.data.AndroidMacConnectorServiceImpl
 import com.androidmacconnector.androidapp.data.NotifyReceivedSmsMessageHandler
 import org.json.JSONObject
 
@@ -16,9 +15,10 @@ import org.json.JSONObject
  * This class is responsible for receiving SMS messages from Android
  */
 abstract class SmsBroadcastReceiver : BroadcastReceiver() {
-    private val TAG: String = SmsBroadcastReceiver::class.java.simpleName
 
-    abstract fun onReceiveSmsMessages(smsMessages: List<SmsMessage>)
+    companion object {
+        private const val LOG_TAG = "SmsBroadcastReceiver"
+    }
 
     @TargetApi(Build.VERSION_CODES.M)
     override fun onReceive(context: Context, intent: Intent) {
@@ -36,11 +36,11 @@ abstract class SmsBroadcastReceiver : BroadcastReceiver() {
                 val smsMessage = getSmsMessageFromPdu(pdus[i] as ByteArray, format)
                 smsMessages.add(smsMessage)
 
-                Log.d(TAG, "Received SMS message: $smsMessage")
+                Log.d(LOG_TAG, "Received SMS message: $smsMessage")
             }
         }
 
-        this.onReceiveSmsMessages(smsMessages)
+        this.onReceiveSmsMessages(context, smsMessages)
     }
 
     private fun getSmsMessageFromPdu(pdu: ByteArray, format: String?): SmsMessage {
@@ -51,18 +51,10 @@ abstract class SmsBroadcastReceiver : BroadcastReceiver() {
             return SmsMessage.createFromPdu(pdu)
         }
     }
-}
 
-/**
- * A class used to send sms messages to its corresponding devices
- */
-class SmsReceiverService(private val webService: AndroidMacConnectorService) :
-    SmsBroadcastReceiver() {
-    fun getRequiredPermissions(): List<String> {
-        return arrayListOf(Manifest.permission.RECEIVE_SMS)
-    }
+    private fun onReceiveSmsMessages(context: Context, smsMessages: List<SmsMessage>) {
+        val webService = AndroidMacConnectorServiceImpl(context)
 
-    override fun onReceiveSmsMessages(smsMessages: List<SmsMessage>) {
         // Get the contact info for each sms message
         smsMessages.forEach {
             val phoneNumber = it.displayOriginatingAddress
