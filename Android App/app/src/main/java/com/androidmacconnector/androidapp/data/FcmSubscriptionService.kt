@@ -115,19 +115,21 @@ abstract class FcmSubscriber(private val handler: (RemoteMessage) -> Unit) {
     abstract fun getMessageAction(): String
 }
 
-class SendSmsRequestFcmSubscriber(handler: (RemoteMessage) -> Unit): FcmSubscriber(handler) {
+class SendSmsRequestFcmSubscriber(handler: (RemoteMessage) -> Unit) : FcmSubscriber(handler) {
     override fun getMessageAction(): String {
         return "send_sms"
     }
 }
 
-class UpdateSmsThreadsRequestFcmSubscriber(handler: (RemoteMessage) -> Unit): FcmSubscriber(handler) {
+class UpdateSmsThreadsRequestFcmSubscriber(handler: (RemoteMessage) -> Unit) :
+    FcmSubscriber(handler) {
     override fun getMessageAction(): String {
         return "update_sms_threads"
     }
 }
 
-class UpdateSmsForThreadRequestFcmSubscriber(handler: (RemoteMessage) -> Unit): FcmSubscriber(handler) {
+class UpdateSmsForThreadRequestFcmSubscriber(handler: (RemoteMessage) -> Unit) :
+    FcmSubscriber(handler) {
     override fun getMessageAction(): String {
         return "update_sms_thread_messages"
     }
