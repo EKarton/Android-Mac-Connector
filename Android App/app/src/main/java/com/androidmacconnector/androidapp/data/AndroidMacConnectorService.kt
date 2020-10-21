@@ -8,7 +8,6 @@ import com.android.volley.toolbox.Volley
 import com.androidmacconnector.androidapp.R
 import com.androidmacconnector.androidapp.sms.MySmsMessage
 import com.androidmacconnector.androidapp.sms.ReceivedSmsMessage
-import com.androidmacconnector.androidapp.sms.SmsThread
 import com.androidmacconnector.androidapp.sms.SmsThreadSummary
 import org.json.JSONException
 import org.json.JSONObject
