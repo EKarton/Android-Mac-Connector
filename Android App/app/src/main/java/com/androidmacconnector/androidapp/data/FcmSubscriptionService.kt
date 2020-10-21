@@ -64,7 +64,7 @@ class FcmSubscriptionServiceImpl : FirebaseMessagingService(), FcmSubscriptionSe
             val action = remoteMessage.data["action"]
 
             actionToSubscribers[action]?.forEach {
-                it.getHandler()(remoteMessage)
+                it.onMessageReceived(remoteMessage)
             }
         }
     }
@@ -107,30 +107,45 @@ class FcmSubscriptionServiceImpl : FirebaseMessagingService(), FcmSubscriptionSe
     }
 }
 
-abstract class FcmSubscriber(private val handler: (RemoteMessage) -> Unit) {
-    internal fun getHandler(): (RemoteMessage) -> Unit {
-        return handler
-    }
+interface FcmSubscriber {
 
-    abstract fun getMessageAction(): String
+    /**
+     * Returns which action this subscriber is responsible for
+     */
+    fun getMessageAction(): String
+
+    /**
+     * Called when it receives a message with an action that matches this.getMessageAction()
+     */
+    fun onMessageReceived(remoteMessage: RemoteMessage)
 }
 
-class SendSmsRequestFcmSubscriber(handler: (RemoteMessage) -> Unit) : FcmSubscriber(handler) {
+class SendSmsRequestFcmSubscriber: FcmSubscriber {
     override fun getMessageAction(): String {
         return "send_sms"
     }
-}
 
-class UpdateSmsThreadsRequestFcmSubscriber(handler: (RemoteMessage) -> Unit) :
-    FcmSubscriber(handler) {
-    override fun getMessageAction(): String {
-        return "update_sms_threads"
+    override fun onMessageReceived(remoteMessage: RemoteMessage) {
+        TODO("Not yet implemented")
     }
 }
 
-class UpdateSmsForThreadRequestFcmSubscriber(handler: (RemoteMessage) -> Unit) :
-    FcmSubscriber(handler) {
+class UpdateSmsThreadsRequestFcmSubscriber: FcmSubscriber {
+    override fun getMessageAction(): String {
+        return "update_sms_threads"
+    }
+
+    override fun onMessageReceived(remoteMessage: RemoteMessage) {
+        TODO("Not yet implemented")
+    }
+}
+
+class UpdateSmsForThreadRequestFcmSubscriber: FcmSubscriber {
     override fun getMessageAction(): String {
         return "update_sms_thread_messages"
+    }
+
+    override fun onMessageReceived(remoteMessage: RemoteMessage) {
+        TODO("Not yet implemented")
     }
 }

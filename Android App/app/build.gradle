@@ -10,7 +10,7 @@ android {
     buildToolsVersion "30.0.2"
 
     defaultConfig {
-        applicationId "com.androidmaccontinuity.androidapp"
+        applicationId 'com.androidmacconnector.androidapp'
         minSdkVersion 19
         targetSdkVersion 30
         versionCode 1

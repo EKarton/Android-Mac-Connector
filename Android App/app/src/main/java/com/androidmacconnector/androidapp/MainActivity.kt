@@ -139,17 +139,9 @@ class MainActivity : AppCompatActivity() {
     }
 
     fun testing() {
-        val subscriber1 = SendSmsRequestFcmSubscriber {
-
-        }
-
-        val subscriber2 = UpdateSmsThreadsRequestFcmSubscriber {
-
-        }
-
-        val subscriber3 = UpdateSmsForThreadRequestFcmSubscriber {
-
-        }
+        val subscriber1 = SendSmsRequestFcmSubscriber()
+        val subscriber2 = UpdateSmsThreadsRequestFcmSubscriber()
+        val subscriber3 = UpdateSmsForThreadRequestFcmSubscriber()
 
         val pubSubService = FcmSubscriptionServiceImpl()
         pubSubService.addSubscriber(subscriber1)

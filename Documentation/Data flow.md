@@ -1,6 +1,6 @@
 # Introduction
 
-This document is about how messages get sent back and forth to achieve the required features ([link]()). These features can be broken down into smaller tasks:
+This document is about how messages get sent back and forth to achieve the required features ([link](Design\ Document.md)). These features can be broken down into smaller tasks:
 
 1. Receive sms text from my Android phone to my Mac
 
@@ -50,14 +50,15 @@ Data message format:
 ```
 
  * Note:
-   * For each message sent out, make sure that they do not have any of these keys: "from", "notification", "message_type", or any key that starts with "google" or "gcm"
-   * Reference: [link](https://firebase.google.com/docs/cloud-messaging/concept-options#data_messages)
+   * For each message sent out, make sure that they do not have any of these keys: "from", "notification", "message_type", or any key that starts with "google" or "gcm" ([link](https://firebase.google.com/docs/cloud-messaging/concept-options#data_messages))
+   * The data values can only be strings (no recursive objects)
+
 
 # Solutions to achieve desired tasks:
 
 ### Receive sms text from the Android phone to the Mac device
 
-1. When the Android device receives an SMS text, it sends a request to the server (POST /api/v1/<device-id>/sms/messages/new)
+1. When the Android device receives an SMS text, it sends a request to the server (**POST** ```/api/v1/<device-id>/sms/messages/new```)
 
   ``` 
   {
@@ -69,9 +70,9 @@ Data message format:
 
 2. The server receives the request, adds a new entry to the database
 
-3. The Mac device repeatedly polls (GET /api/v1/<device-id>/sms/messages/new), gets the new updates
+3. The Mac device repeatedly polls (**GET** ```/api/v1/<device-id>/sms/messages/new```), gets the new updates
 
-4. The Mac device makes a request to the server (DELETE /api/v1/<device-id>/sms/messages/new/<uuid>)
+4. The Mac device makes a request to the server (**DELETE** ```/api/v1/<device-id>/sms/messages/new/<uuid>```)
 
 5. The server receives the request, and deletes the new message in the queue
 
@@ -79,7 +80,7 @@ Data message format:
 
 ### Send sms text from my Mac to my Android phone
 
-1. The Mac device makes a request to the server (POST /api/v1/<device-id>/sms/messages):
+1. The Mac device makes a request to the server (**POST** ```/api/v1/<device-id>/sms/messages```):
 
     ```
     {
@@ -99,10 +100,8 @@ Data message format:
           "device_dest_id": "<ANDROID DEVICE ID>",
           "action": "send_sms",
           "uuid": "<UUID>",
-          "data": {
-            "address": "<phone number>",
-            "body": "<sms body>",
-          }
+          "address": "<phone number>",
+          "body": "<sms body>",
         }
       }
     }
@@ -117,11 +116,11 @@ Data message format:
     }
     ```
 
-4. The Mac device repeatedly polls the server on this endpoint: GET /api/v1/<device-id>/sms/messages/<UUID>/status
+4. The Mac device repeatedly polls the server on this endpoint: **GET** ```/api/v1/<device-id>/sms/messages/<UUID>/status```
 
 5. The Android device receives the FCM request, and sends the SMS message
 
-6. When the SMS message is sent successfully, the Android device sends an HTTP request to the server (PUT /api/v1/<device-id>/sms/messages/<UUID>/status):
+6. When the SMS message is sent successfully, the Android device sends an HTTP request to the server (**PUT** ```/api/v1/<device-id>/sms/messages/<UUID>/status```):
 
     ``` 
     {
@@ -135,7 +134,7 @@ Data message format:
 
 When getting SMS conversations from the Android device to the Mac device:
 
-1. The Mac device makes an HTTP request to the server (GET /api/v1/<device-id>/sms/threads)
+1. The Mac device makes an HTTP request to the server (**GET** ```/api/v1/<device-id>/sms/threads```)
 
 2. The server receives the request, and sends this payload to FCM:
 
@@ -152,7 +151,7 @@ When getting SMS conversations from the Android device to the Mac device:
 
 3. The server also obtains the last list of SMS threads from the database, and returns the data to the Mac device
 
-4. When the Android device receives the request, it obtains the SMS threads and makes an authenticated request to the server (PUT /api/v1/<device-id>/sms/threads)
+4. When the Android device receives the request, it obtains the SMS threads and makes an authenticated request to the server (**PUT** ```/api/v1/<device-id>/sms/threads```)
 
     ``` 
     {
@@ -174,7 +173,7 @@ When getting SMS conversations from the Android device to the Mac device:
 
 ### When getting SMS messages of a particular thread on an Android device in the Mac device:
 
-1. The Mac device makes an HTTP request to the server (GET /api/v1/<device-id>/sms/threads/<thread-id>/messages)
+1. The Mac device makes an HTTP request to the server (**GET** ```/api/v1/<device-id>/sms/threads/<thread-id>/messages```)
 
 2. The server receives the request, and sends this payload to the FCM:
 
@@ -184,9 +183,7 @@ When getting SMS conversations from the Android device to the Mac device:
         "token": "<DEVICE TOKEN>",
         "data": {
           "action": "update_sms_thread_messages",
-          "data": {
-            "thread_id": "<THREAD_ID>"
-          }
+          "thread_id": "<THREAD_ID>"
         }
       }
     }
@@ -194,6 +191,6 @@ When getting SMS conversations from the Android device to the Mac device:
 
 3. The server also obtains the last list of messages of that thread from the database, and returns the data to the Mac device
 
-4. The Android device receives the request, obtains the SMS messages for that thread, and makes an authenticated request to the server (PUT /api/v1/<device-id>/sms/threads/<thread-id>/messages)
+4. The Android device receives the request, obtains the SMS messages for that thread, and makes an authenticated request to the server (**PUT** ```/api/v1/<device-id>/sms/threads/<thread-id>/messages```)
 
 5. The server receives the request, authorizes the request, updates the database with new content, and returns an OK response
