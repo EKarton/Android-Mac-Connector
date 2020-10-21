@@ -1,4 +1,4 @@
-package com.androidmacconnector.androidapp
+package com.androidmacconnector.androidapp.data
 
 import android.app.NotificationChannel
 import android.app.NotificationManager
@@ -9,10 +9,12 @@ import android.media.RingtoneManager
 import android.os.Build
 import android.util.Log
 import androidx.core.app.NotificationCompat
+import com.androidmacconnector.androidapp.MainActivity
+import com.androidmacconnector.androidapp.R
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
 
-class MyFirebaseService : FirebaseMessagingService() {
+class FirebaseReceiverService : FirebaseMessagingService() {
     private val TAG = "MyFirebaseService"
 
     /**
