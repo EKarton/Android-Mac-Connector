@@ -56,7 +56,8 @@ abstract class SmsBroadcastReceiver : BroadcastReceiver() {
 /**
  * A class used to send sms messages to its corresponding devices
  */
-class SmsReceiverService(private val webService: AndroidMacConnectorService) : SmsBroadcastReceiver() {
+class SmsReceiverService(private val webService: AndroidMacConnectorService) :
+    SmsBroadcastReceiver() {
     fun getRequiredPermissions(): List<String> {
         return arrayListOf(Manifest.permission.RECEIVE_SMS)
     }
@@ -69,7 +70,7 @@ class SmsReceiverService(private val webService: AndroidMacConnectorService) : S
             val timestamp = (it.timestampMillis / 1000).toInt()
             val sms = ReceivedSmsMessage(phoneNumber, body, timestamp)
 
-            webService.notifyReceivedSmsMessage(sms, object: NotifyReceivedSmsMessageHandler() {
+            webService.notifyReceivedSmsMessage(sms, object : NotifyReceivedSmsMessageHandler() {
                 override fun onSuccess(response: JSONObject) {
                     TODO("Not yet implemented")
                 }

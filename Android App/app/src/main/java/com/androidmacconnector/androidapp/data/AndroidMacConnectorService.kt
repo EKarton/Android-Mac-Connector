@@ -9,6 +9,7 @@ import com.androidmacconnector.androidapp.R
 import com.androidmacconnector.androidapp.sms.MySmsMessage
 import com.androidmacconnector.androidapp.sms.ReceivedSmsMessage
 import com.androidmacconnector.androidapp.sms.SmsThread
+import com.androidmacconnector.androidapp.sms.SmsThreadSummary
 import org.json.JSONException
 import org.json.JSONObject
 import java.net.URI
@@ -26,7 +27,7 @@ interface AndroidMacConnectorService {
         handler: UpdateSmsSentStatusHandler
     )
 
-    fun updateSmsThreads(threads: SmsThread, handler: UpdateSmsThreadsHandler)
+    fun updateSmsThreads(threads: List<SmsThreadSummary>, handler: UpdateSmsThreadsHandler)
     fun updateSmsMessagesForThread(
         threadId: String,
         messages: List<MySmsMessage>,
@@ -113,7 +114,10 @@ class AndroidMacConnectorServiceImpl(private val context: Context) : AndroidMacC
         requestQueue.add(request)
     }
 
-    override fun updateSmsThreads(threads: SmsThread, handler: UpdateSmsThreadsHandler) {
+    override fun updateSmsThreads(
+        threads: List<SmsThreadSummary>,
+        handler: UpdateSmsThreadsHandler
+    ) {
         val jsonBody = JSONObject()
 
         val apiEndpoint = java.lang.String.format(UPDATE_SMS_THREADS_PATH, "<device-id>")

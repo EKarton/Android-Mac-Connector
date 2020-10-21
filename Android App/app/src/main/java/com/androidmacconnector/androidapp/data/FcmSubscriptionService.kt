@@ -119,33 +119,3 @@ interface FcmSubscriber {
      */
     fun onMessageReceived(remoteMessage: RemoteMessage)
 }
-
-class SendSmsRequestFcmSubscriber: FcmSubscriber {
-    override fun getMessageAction(): String {
-        return "send_sms"
-    }
-
-    override fun onMessageReceived(remoteMessage: RemoteMessage) {
-        TODO("Not yet implemented")
-    }
-}
-
-class UpdateSmsThreadsRequestFcmSubscriber: FcmSubscriber {
-    override fun getMessageAction(): String {
-        return "update_sms_threads"
-    }
-
-    override fun onMessageReceived(remoteMessage: RemoteMessage) {
-        TODO("Not yet implemented")
-    }
-}
-
-class UpdateSmsForThreadRequestFcmSubscriber: FcmSubscriber {
-    override fun getMessageAction(): String {
-        return "update_sms_thread_messages"
-    }
-
-    override fun onMessageReceived(remoteMessage: RemoteMessage) {
-        TODO("Not yet implemented")
-    }
-}

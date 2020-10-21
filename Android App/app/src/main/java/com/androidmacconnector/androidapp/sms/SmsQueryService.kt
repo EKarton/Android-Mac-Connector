@@ -5,6 +5,13 @@ import android.app.Activity
 import android.net.Uri
 import android.provider.ContactsContract
 import android.provider.Telephony
+import android.util.Log
+import com.androidmacconnector.androidapp.data.AndroidMacConnectorService
+import com.androidmacconnector.androidapp.data.FcmSubscriber
+import com.androidmacconnector.androidapp.data.UpdateSmsMessagesForThreadHandler
+import com.androidmacconnector.androidapp.data.UpdateSmsThreadsHandler
+import com.google.firebase.messaging.RemoteMessage
+import org.json.JSONObject
 
 interface GetSmsThreadsService {
     fun getSmsThreadsSummary(): List<SmsThreadSummary>
@@ -17,7 +24,8 @@ interface GetSmsMessagesFromThreadService {
 /**
  * A class used to handle all types of SMS-related tasks
  */
-class SmsQueryService(private val activity: Activity): GetSmsThreadsService, GetSmsMessagesFromThreadService {
+class SmsQueryService(private val activity: Activity) : GetSmsThreadsService,
+    GetSmsMessagesFromThreadService {
 
     fun getRequiredPermissions(): List<String> {
         return arrayListOf(Manifest.permission.READ_SMS, Manifest.permission.READ_CONTACTS)
@@ -143,7 +151,8 @@ class SmsQueryService(private val activity: Activity): GetSmsThreadsService, Get
      * Returns a list of SMS messages from a particular thread
      */
     override fun getSmsMessagesFromThread(threadId: String): List<MySmsMessage> {
-        val projection = arrayOf("_id", "address", "person", "date", "body", "read", "date", "type");
+        val projection =
+            arrayOf("_id", "address", "person", "date", "body", "read", "date", "type");
         val selection = "thread_id = ?";
         val selectionArgs = arrayOf(threadId)
         val cursor = activity.contentResolver.query(
@@ -172,7 +181,8 @@ class SmsQueryService(private val activity: Activity): GetSmsThreadsService, Get
                     type = "inbox";
                 }
 
-                val smsMessage = MySmsMessage(messageId, address, person, body, readState, timeInSeconds, type)
+                val smsMessage =
+                    MySmsMessage(messageId, address, person, body, readState, timeInSeconds, type)
                 smsMessages.add(smsMessage)
 
                 cursor.moveToNext()
@@ -181,6 +191,62 @@ class SmsQueryService(private val activity: Activity): GetSmsThreadsService, Get
 
         cursor?.close();
         return smsMessages
+    }
+}
+
+class UpdateSmsThreadsRequestFcmSubscriber(
+    private val smsQueryService: SmsQueryService,
+    private val webService: AndroidMacConnectorService
+) : FcmSubscriber {
+    companion object {
+        private const val LOG_TAG = "UpdateSmsThreads"
+    }
+
+    override fun getMessageAction(): String {
+        return "update_sms_threads"
+    }
+
+    override fun onMessageReceived(remoteMessage: RemoteMessage) {
+        Log.d(LOG_TAG, "Message received: ${remoteMessage.data}")
+
+        val threads = smsQueryService.getSmsThreadsSummary()
+        webService.updateSmsThreads(threads, object : UpdateSmsThreadsHandler() {
+            override fun onSuccess(response: JSONObject) {}
+            override fun onError(exception: Exception?) {}
+        })
+    }
+}
+
+class UpdateSmsForThreadRequestFcmSubscriber(
+    private val smsQueryService: SmsQueryService,
+    private val webService: AndroidMacConnectorService
+) : FcmSubscriber {
+    companion object {
+        private const val LOG_TAG = "UpdateSmsForThread"
+    }
+
+    override fun getMessageAction(): String {
+        return "update_sms_thread_messages"
+    }
+
+    override fun onMessageReceived(remoteMessage: RemoteMessage) {
+        Log.d(LOG_TAG, "Message received: ${remoteMessage.data}")
+
+        if (remoteMessage.data["thread_id"].isNullOrEmpty()) {
+            Log.e(LOG_TAG, "Empty thread_id")
+            return
+        }
+
+        val threadId = remoteMessage.data["thread_id"]!!
+        val messages = smsQueryService.getSmsMessagesFromThread(threadId)
+
+        webService.updateSmsMessagesForThread(
+            threadId,
+            messages,
+            object : UpdateSmsMessagesForThreadHandler() {
+                override fun onSuccess(response: JSONObject) {}
+                override fun onError(exception: Exception?) {}
+            })
     }
 }
 
