@@ -46,7 +46,7 @@ class SmsQueryService(private val activity: Activity): GetSmsThreadsService, Get
         }
     }
 
-    private fun getSmsConversations(): List<SmsConversation> {
+    private fun getSmsConversations(): List<SmsThread> {
         val cursor = activity.contentResolver.query(
             Telephony.Sms.Conversations.CONTENT_URI,
             null,
@@ -55,7 +55,7 @@ class SmsQueryService(private val activity: Activity): GetSmsThreadsService, Get
             Telephony.Sms.Conversations.DEFAULT_SORT_ORDER
         );
 
-        val smsConversations = arrayListOf<SmsConversation>();
+        val smsConversations = arrayListOf<SmsThread>();
 
         if (cursor != null && cursor.moveToFirst()) {
             for (i in 0 until cursor.count) {
@@ -63,7 +63,7 @@ class SmsQueryService(private val activity: Activity): GetSmsThreadsService, Get
                 val numMessages = cursor.getString(cursor.getColumnIndexOrThrow("msg_count"))
                 val msgSnippet = cursor.getString(cursor.getColumnIndexOrThrow("snippet"))
 
-                val conversation = SmsConversation(threadId, numMessages.toInt(), msgSnippet)
+                val conversation = SmsThread(threadId, numMessages.toInt(), msgSnippet)
                 smsConversations.add(conversation)
 
                 cursor.moveToNext()
@@ -184,7 +184,7 @@ class SmsQueryService(private val activity: Activity): GetSmsThreadsService, Get
     }
 }
 
-data class SmsConversation(
+data class SmsThread(
     val threadId: String,
     val numMessages: Int,
     val msgSnippet: String

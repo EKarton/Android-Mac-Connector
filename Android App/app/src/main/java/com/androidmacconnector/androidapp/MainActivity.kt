@@ -9,6 +9,7 @@ import android.util.Log
 import android.widget.EditText
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import com.androidmacconnector.androidapp.data.*
 import com.androidmacconnector.androidapp.sms.SmsQueryService
 import com.androidmacconnector.androidapp.sms.SmsReceiverService
 import com.androidmacconnector.androidapp.sms.SmsSenderService
@@ -33,9 +34,10 @@ class MainActivity : AppCompatActivity() {
 
         val textbox = findViewById<EditText>(R.id.myTextBox)
 
+        val webService = AndroidMacConnectorServiceImpl(this)
         val smsQueryService = SmsQueryService(this)
         val smsSenderService = SmsSenderService()
-        val smsReceiverService = SmsReceiverService()
+        val smsReceiverService = SmsReceiverService(webService)
 
         val requiredPermissions =
             smsReceiverService.getRequiredPermissions() + smsQueryService.getRequiredPermissions() + smsSenderService.getRequiredPermissions()
@@ -134,5 +136,24 @@ class MainActivity : AppCompatActivity() {
     override fun onPause() {
         super.onPause()
         unregisterReceiver(smsBroadcastReceiver)
+    }
+
+    fun testing() {
+        val subscriber1 = SendSmsRequestFcmSubscriber {
+
+        }
+
+        val subscriber2 = UpdateSmsThreadsRequestFcmSubscriber {
+
+        }
+
+        val subscriber3 = UpdateSmsForThreadRequestFcmSubscriber {
+
+        }
+
+        val pubSubService = FcmSubscriptionServiceImpl()
+        pubSubService.addSubscriber(subscriber1)
+        pubSubService.addSubscriber(subscriber2)
+        pubSubService.addSubscriber(subscriber3)
     }
 }

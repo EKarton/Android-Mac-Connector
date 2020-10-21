@@ -40,7 +40,7 @@ Data message format:
 
 ``` 
 {
-  "message": {
+  "message": {a
     "token": "<TOKEN>",
     "data": {
       ...
@@ -62,7 +62,8 @@ Data message format:
   ``` 
   {
     "address": "<phone number>",
-    "body": "<body>"
+    "body": "<body>",
+    "timestamp": "<timestamp>"
   }
   ```
 
@@ -120,7 +121,7 @@ Data message format:
 
 5. The Android device receives the FCM request, and sends the SMS message
 
-6. When the SMS message is sent successfully, it sends an HTTP request to the server (PUT /api/v1/<device-id>/sms/messages/<UUID>/status):
+6. When the SMS message is sent successfully, the Android device sends an HTTP request to the server (PUT /api/v1/<device-id>/sms/messages/<UUID>/status):
 
     ``` 
     {

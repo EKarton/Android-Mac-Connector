@@ -1,0 +1,5 @@
+<resources>
+    <string name='protocol'>http</string>
+    <string name='hostname'>localhost</string>
+    <string name='port'>8080</string>
+</resources>

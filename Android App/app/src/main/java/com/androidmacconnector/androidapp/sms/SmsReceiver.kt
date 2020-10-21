@@ -8,6 +8,9 @@ import android.content.Intent
 import android.os.Build
 import android.telephony.SmsMessage
 import android.util.Log
+import com.androidmacconnector.androidapp.data.AndroidMacConnectorService
+import com.androidmacconnector.androidapp.data.NotifyReceivedSmsMessageHandler
+import org.json.JSONObject
 
 /**
  * This class is responsible for receiving SMS messages from Android
@@ -53,7 +56,7 @@ abstract class SmsBroadcastReceiver : BroadcastReceiver() {
 /**
  * A class used to send sms messages to its corresponding devices
  */
-class SmsReceiverService : SmsBroadcastReceiver() {
+class SmsReceiverService(private val webService: AndroidMacConnectorService) : SmsBroadcastReceiver() {
     fun getRequiredPermissions(): List<String> {
         return arrayListOf(Manifest.permission.RECEIVE_SMS)
     }
@@ -64,6 +67,17 @@ class SmsReceiverService : SmsBroadcastReceiver() {
             val phoneNumber = it.displayOriginatingAddress
             val body = it.messageBody
             val timestamp = (it.timestampMillis / 1000).toInt()
+            val sms = ReceivedSmsMessage(phoneNumber, body, timestamp)
+
+            webService.notifyReceivedSmsMessage(sms, object: NotifyReceivedSmsMessageHandler() {
+                override fun onSuccess(response: JSONObject) {
+                    TODO("Not yet implemented")
+                }
+
+                override fun onError(exception: Exception?) {
+                    TODO("Not yet implemented")
+                }
+            })
         }
     }
 }

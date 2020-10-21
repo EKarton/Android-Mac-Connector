@@ -14,39 +14,63 @@ import com.androidmacconnector.androidapp.R
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
 
-class FirebaseReceiverService : FirebaseMessagingService() {
-    private val TAG = "MyFirebaseService"
+/**
+ * This class represents a Firebase Cloud Messaging (Fcm) subscriber,
+ * where FCM messages get allocated to their appropriate subscribers
+ */
+interface FcmSubscriptionService {
+    fun addSubscriber(subscriber: FcmSubscriber)
+}
+
+class FcmSubscriptionServiceImpl : FirebaseMessagingService(), FcmSubscriptionService {
+
+    companion object {
+        private const val LOG_TAG = "FcmMessageService"
+    }
+
+    private val actionToSubscribers = HashMap<String, HashSet<FcmSubscriber>>()
+
+    override fun addSubscriber(subscriber: FcmSubscriber) {
+        val action = subscriber.getMessageAction()
+
+        if (!actionToSubscribers.containsKey(action)) {
+            actionToSubscribers[action] = HashSet()
+        }
+
+        actionToSubscribers[action]?.add(subscriber)
+    }
 
     /**
      * Is called when a new token has been received for FCM
      */
     override fun onNewToken(token: String) {
-        Log.d(TAG, "Received new token: $token")
+        Log.d(LOG_TAG, "Received new token: $token")
     }
 
     /**
      * Is called when a new message is received to this device
      */
     override fun onMessageReceived(remoteMessage: RemoteMessage) {
-        Log.d(TAG, "Received new message: ${remoteMessage.data}")
+        Log.d(LOG_TAG, "Received new message: ${remoteMessage.data}")
 
-        // Check if message contains a data payload.
-        if (remoteMessage.data.isNotEmpty()) {
-            Log.d(TAG, "Message data payload: ${remoteMessage.data}")
-        }
-
-        // Check if message contains a notification payload.
+        // Send a notification if the message contains a notification payload.
         remoteMessage.notification?.let {
-            Log.d(TAG, "Message Notification Body: ${it.body}")
+            Log.d(LOG_TAG, "Message Notification Body: ${it.body}")
             sendNotification(it.body!!)
         }
 
+        // Check if it has a data entry, and if so, call the appropriate subscribers
+        if (remoteMessage.data.isNotEmpty()) {
+            val action = remoteMessage.data["action"]
+
+            actionToSubscribers[action]?.forEach {
+                it.getHandler()(remoteMessage)
+            }
+        }
     }
 
     /**
      * Create and show a simple notification containing the received FCM message.
-     *
-     * @param messageBody FCM message body received.
      */
     private fun sendNotification(messageBody: String) {
         val intent = Intent(this, MainActivity::class.java)
@@ -80,5 +104,31 @@ class FirebaseReceiverService : FirebaseMessagingService() {
         }
 
         notificationManager.notify(0 /* ID of notification */, notificationBuilder.build())
+    }
+}
+
+abstract class FcmSubscriber(private val handler: (RemoteMessage) -> Unit) {
+    internal fun getHandler(): (RemoteMessage) -> Unit {
+        return handler
+    }
+
+    abstract fun getMessageAction(): String
+}
+
+class SendSmsRequestFcmSubscriber(handler: (RemoteMessage) -> Unit): FcmSubscriber(handler) {
+    override fun getMessageAction(): String {
+        return "send_sms"
+    }
+}
+
+class UpdateSmsThreadsRequestFcmSubscriber(handler: (RemoteMessage) -> Unit): FcmSubscriber(handler) {
+    override fun getMessageAction(): String {
+        return "update_sms_threads"
+    }
+}
+
+class UpdateSmsForThreadRequestFcmSubscriber(handler: (RemoteMessage) -> Unit): FcmSubscriber(handler) {
+    override fun getMessageAction(): String {
+        return "update_sms_thread_messages"
     }
 }

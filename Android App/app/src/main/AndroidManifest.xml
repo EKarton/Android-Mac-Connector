@@ -26,7 +26,7 @@
 
         <!-- The firebase messaging service -->
         <service
-            android:name="com.androidmacconnector.androidapp.data.FirebaseReceiverService"
+            android:name="com.androidmacconnector.androidapp.data.FcmSubscriptionServiceImpl"
             android:exported="false">
             <intent-filter>
                 <action android:name="com.google.firebase.MESSAGING_EVENT" />
