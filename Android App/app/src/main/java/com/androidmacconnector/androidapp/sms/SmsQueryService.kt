@@ -1,7 +1,6 @@
 package com.androidmacconnector.androidapp.sms
 
 import android.Manifest
-import android.app.Activity
 import android.content.ContentResolver
 import android.net.Uri
 import android.provider.ContactsContract
