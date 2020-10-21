@@ -1,4 +1,4 @@
-package com.androidmaccontinuity.androidapp
+package com.androidmacconnector.androidapp
 
 import org.junit.Test
 

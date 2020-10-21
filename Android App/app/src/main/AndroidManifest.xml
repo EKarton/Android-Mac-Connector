@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.androidmaccontinuity.androidapp">
+    package="com.androidmacconnector.androidapp">
 
     <uses-permission android:name="android.permission.INTERNET"/>
     <uses-permission android:name="android.permission.READ_SMS" />
@@ -16,7 +16,7 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.AndroidToMacContinuity">
 
-        <activity android:name="com.androidmaccontinuity.androidapp.MainActivity">
+        <activity android:name="com.androidmacconnector.androidapp.MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -26,7 +26,7 @@
 
         <!-- The firebase messaging service -->
         <service
-            android:name="com.androidmaccontinuity.androidapp.MyFirebaseService"
+            android:name="com.androidmacconnector.androidapp.MyFirebaseService"
             android:exported="false">
             <intent-filter>
                 <action android:name="com.google.firebase.MESSAGING_EVENT" />

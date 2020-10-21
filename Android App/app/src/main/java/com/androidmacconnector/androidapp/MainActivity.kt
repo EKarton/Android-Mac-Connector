@@ -1,4 +1,4 @@
-package com.androidmaccontinuity.androidapp
+package com.androidmacconnector.androidapp
 
 import android.app.NotificationChannel
 import android.app.NotificationManager
@@ -7,12 +7,11 @@ import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import android.widget.EditText
-import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import com.androidmaccontinuity.androidapp.sms.SmsQueryService
-import com.androidmaccontinuity.androidapp.sms.SmsReceiverService
-import com.androidmaccontinuity.androidapp.sms.SmsSenderService
+import com.androidmacconnector.androidapp.sms.SmsQueryService
+import com.androidmacconnector.androidapp.sms.SmsReceiverService
+import com.androidmacconnector.androidapp.sms.SmsSenderService
 import com.google.android.gms.common.GoogleApiAvailability
 import com.google.android.gms.tasks.OnCompleteListener
 import com.google.firebase.messaging.FirebaseMessaging

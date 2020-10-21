@@ -1,4 +1,4 @@
-package com.androidmaccontinuity.androidapp.sms
+package com.androidmacconnector.androidapp.sms
 
 import android.Manifest
 import android.telephony.SmsManager

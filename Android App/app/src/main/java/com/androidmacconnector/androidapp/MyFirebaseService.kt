@@ -1,4 +1,4 @@
-package com.androidmaccontinuity.androidapp
+package com.androidmacconnector.androidapp
 
 import android.app.NotificationChannel
 import android.app.NotificationManager
