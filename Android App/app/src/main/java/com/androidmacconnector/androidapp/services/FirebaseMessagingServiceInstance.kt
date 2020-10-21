@@ -41,7 +41,7 @@ class FirebaseMessagingServiceInstance : FirebaseMessagingService() {
         val createSmsQueryService = (webService != null && smsQueryService == null) &&
                 (checkPermissions(Manifest.permission.READ_SMS, Manifest.permission.READ_CONTACTS))
 
-        val createSmsSenderService = smsSenderService == null &&
+        val createSmsSenderService = (webService != null && smsSenderService == null) &&
                 checkPermissions(Manifest.permission.SEND_SMS)
 
         if (createWebService) {
@@ -52,8 +52,7 @@ class FirebaseMessagingServiceInstance : FirebaseMessagingService() {
             smsQueryService = SmsQueryService(this.contentResolver)
 
             val subscriber1 = UpdateSmsThreadsRequestFcmSubscriber(smsQueryService!!, webService!!)
-            val subscriber2 =
-                UpdateSmsForThreadRequestFcmSubscriber(smsQueryService!!, webService!!)
+            val subscriber2 = UpdateSmsForThreadRequestFcmSubscriber(smsQueryService!!, webService!!)
 
             subscriptionService?.addSubscriber(subscriber1)
             subscriptionService?.addSubscriber(subscriber2)
@@ -62,7 +61,7 @@ class FirebaseMessagingServiceInstance : FirebaseMessagingService() {
         if (createSmsSenderService) {
             smsSenderService = SmsSenderService()
 
-            val subscriber = SendSmsRequestFcmSubscriber(smsSenderService!!)
+            val subscriber = SendSmsRequestFcmSubscriber(smsSenderService!!, webService!!)
 
             subscriptionService?.addSubscriber(subscriber)
         }
@@ -70,10 +69,7 @@ class FirebaseMessagingServiceInstance : FirebaseMessagingService() {
 
     private fun checkPermissions(vararg permission: String): Boolean {
         return !permission.map {
-            ContextCompat.checkSelfPermission(
-                this,
-                it
-            ) == PackageManager.PERMISSION_GRANTED
+            ContextCompat.checkSelfPermission(this, it) == PackageManager.PERMISSION_GRANTED
         }.contains(false)
     }
 }

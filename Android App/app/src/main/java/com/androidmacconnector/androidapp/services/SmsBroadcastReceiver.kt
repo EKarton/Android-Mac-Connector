@@ -64,13 +64,8 @@ abstract class SmsBroadcastReceiver : BroadcastReceiver() {
             val sms = ReceivedSmsMessage(phoneNumber, body, timestamp)
 
             webService.notifyReceivedSmsMessage(sms, object : NotifyReceivedSmsMessageHandler() {
-                override fun onSuccess(response: JSONObject) {
-                    TODO("Not yet implemented")
-                }
-
-                override fun onError(exception: Exception?) {
-                    TODO("Not yet implemented")
-                }
+                override fun onSuccess(response: JSONObject) {}
+                override fun onError(exception: Exception?) {}
             })
         }
     }

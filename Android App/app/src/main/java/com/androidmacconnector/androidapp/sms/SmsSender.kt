@@ -3,8 +3,11 @@ package com.androidmacconnector.androidapp.sms
 import android.Manifest
 import android.telephony.SmsManager
 import android.util.Log
+import com.androidmacconnector.androidapp.data.AndroidMacConnectorService
 import com.androidmacconnector.androidapp.data.FcmSubscriber
+import com.androidmacconnector.androidapp.data.UpdateSmsSentStatusHandler
 import com.google.firebase.messaging.RemoteMessage
+import org.json.JSONObject
 
 /**
  * A class used to send sms messages
@@ -20,7 +23,7 @@ class SmsSenderService {
     }
 }
 
-class SendSmsRequestFcmSubscriber(private val service: SmsSenderService) : FcmSubscriber {
+class SendSmsRequestFcmSubscriber(private val service: SmsSenderService, private val webService: AndroidMacConnectorService) : FcmSubscriber {
     companion object {
         private const val LOG_TAG = "SendSmsSubscriber"
     }
@@ -42,6 +45,23 @@ class SendSmsRequestFcmSubscriber(private val service: SmsSenderService) : FcmSu
             return
         }
 
-        service.sendSmsMessage(remoteMessage.data["phone_number"]!!, remoteMessage.data["body"]!!)
+        if (remoteMessage.data["uuid"].isNullOrBlank()) {
+            Log.e(LOG_TAG, "Uuid is empty: ${remoteMessage.data["uuid"]}")
+            return
+        }
+
+        try {
+            service.sendSmsMessage(remoteMessage.data["phone_number"]!!, remoteMessage.data["body"]!!)
+
+            webService.updateSmsMessageSentStatus(remoteMessage.data["uuid"]!!, "sent", object : UpdateSmsSentStatusHandler() {
+                override fun onSuccess(response: JSONObject) {}
+                override fun onError(exception: Exception?) {}
+            })
+        } catch (e: Exception) {
+            webService.updateSmsMessageSentStatus(remoteMessage.data["uuid"]!!, "failed", object : UpdateSmsSentStatusHandler() {
+                override fun onSuccess(response: JSONObject) {}
+                override fun onError(exception: Exception?) {}
+            })
+        }
     }
 }

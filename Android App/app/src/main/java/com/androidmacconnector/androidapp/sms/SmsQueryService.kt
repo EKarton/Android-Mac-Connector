@@ -194,10 +194,7 @@ class SmsQueryService(private val contentResolver: ContentResolver) : GetSmsThre
     }
 }
 
-class UpdateSmsThreadsRequestFcmSubscriber(
-    private val smsQueryService: SmsQueryService,
-    private val webService: AndroidMacConnectorService
-) : FcmSubscriber {
+class UpdateSmsThreadsRequestFcmSubscriber(private val smsQueryService: SmsQueryService, private val webService: AndroidMacConnectorService) : FcmSubscriber {
     companion object {
         private const val LOG_TAG = "UpdateSmsThreads"
     }
@@ -217,10 +214,7 @@ class UpdateSmsThreadsRequestFcmSubscriber(
     }
 }
 
-class UpdateSmsForThreadRequestFcmSubscriber(
-    private val smsQueryService: SmsQueryService,
-    private val webService: AndroidMacConnectorService
-) : FcmSubscriber {
+class UpdateSmsForThreadRequestFcmSubscriber(private val smsQueryService: SmsQueryService, private val webService: AndroidMacConnectorService) : FcmSubscriber {
     companion object {
         private const val LOG_TAG = "UpdateSmsForThread"
     }
@@ -240,13 +234,10 @@ class UpdateSmsForThreadRequestFcmSubscriber(
         val threadId = remoteMessage.data["thread_id"]!!
         val messages = smsQueryService.getSmsMessagesFromThread(threadId)
 
-        webService.updateSmsMessagesForThread(
-            threadId,
-            messages,
-            object : UpdateSmsMessagesForThreadHandler() {
-                override fun onSuccess(response: JSONObject) {}
-                override fun onError(exception: Exception?) {}
-            })
+        webService.updateSmsMessagesForThread(threadId, messages, object : UpdateSmsMessagesForThreadHandler() {
+            override fun onSuccess(response: JSONObject) {}
+            override fun onError(exception: Exception?) {}
+        })
     }
 }
 

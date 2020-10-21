@@ -25,7 +25,11 @@ interface AndroidMacConnectorService {
         handler: UpdateSmsSentStatusHandler
     )
 
-    fun updateSmsThreads(threads: List<SmsThreadSummary>, handler: UpdateSmsThreadsHandler)
+    fun updateSmsThreads(
+        threads: List<SmsThreadSummary>,
+        handler: UpdateSmsThreadsHandler
+    )
+
     fun updateSmsMessagesForThread(
         threadId: String,
         messages: List<MySmsMessage>,
@@ -47,10 +51,7 @@ class AndroidMacConnectorServiceImpl(private val context: Context) : AndroidMacC
 
     private val requestQueue: RequestQueue = VolleyRequestQueue.getInstance(context.applicationContext).requestQueue
 
-    override fun notifyReceivedSmsMessage(
-        newSmsMessage: ReceivedSmsMessage,
-        handler: NotifyReceivedSmsMessageHandler
-    ) {
+    override fun notifyReceivedSmsMessage(newSmsMessage: ReceivedSmsMessage, handler: NotifyReceivedSmsMessageHandler) {
         val jsonBody = JSONObject()
         jsonBody.put("address", newSmsMessage.contactInfo)
         jsonBody.put("body", newSmsMessage.data)
@@ -58,15 +59,7 @@ class AndroidMacConnectorServiceImpl(private val context: Context) : AndroidMacC
 
         val apiEndpoint = java.lang.String.format(NOTIFY_RECEIVED_SMS_MESSAGE_PATH, "<device-id>")
 
-        val uri = URI(
-            getServerProtocol(),
-            null,
-            getServerHostname(),
-            getServerPort(),
-            apiEndpoint,
-            null,
-            null
-        )
+        val uri = URI(getServerProtocol(), null, getServerHostname(), getServerPort(), apiEndpoint, null, null)
 
         Log.d(LOG_TAG, "Making HTTP request to $uri")
 
@@ -80,30 +73,17 @@ class AndroidMacConnectorServiceImpl(private val context: Context) : AndroidMacC
         requestQueue.add(request)
     }
 
-    override fun updateSmsMessageSentStatus(
-        uuid: String,
-        newStatus: String,
-        handler: UpdateSmsSentStatusHandler
-    ) {
+    override fun updateSmsMessageSentStatus(uuid: String, newStatus: String, handler: UpdateSmsSentStatusHandler) {
         val jsonBody = JSONObject()
         jsonBody.put("status", newStatus)
 
         val apiEndpoint = java.lang.String.format(UPDATE_SMS_SENT_STATUS_PATH, "<device-id>", uuid)
 
-        val uri = URI(
-            getServerProtocol(),
-            null,
-            getServerHostname(),
-            getServerPort(),
-            apiEndpoint,
-            null,
-            null
-        )
+        val uri = URI(getServerProtocol(), null, getServerHostname(), getServerPort(), apiEndpoint, null, null)
 
         Log.d(LOG_TAG, "Making HTTP request to $uri")
 
-        val request =
-            JsonObjectRequest(Request.Method.PUT, uri.toString(), jsonBody, handler, handler)
+        val request = JsonObjectRequest(Request.Method.PUT, uri.toString(), jsonBody, handler, handler)
         request.retryPolicy = DefaultRetryPolicy(
             500000,
             DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
@@ -112,27 +92,15 @@ class AndroidMacConnectorServiceImpl(private val context: Context) : AndroidMacC
         requestQueue.add(request)
     }
 
-    override fun updateSmsThreads(
-        threads: List<SmsThreadSummary>,
-        handler: UpdateSmsThreadsHandler
-    ) {
+    override fun updateSmsThreads(threads: List<SmsThreadSummary>, handler: UpdateSmsThreadsHandler) {
         val jsonBody = JSONObject()
 
         val apiEndpoint = java.lang.String.format(UPDATE_SMS_THREADS_PATH, "<device-id>")
-        val uri = URI(
-            getServerProtocol(),
-            null,
-            getServerHostname(),
-            getServerPort(),
-            apiEndpoint,
-            null,
-            null
-        )
+        val uri = URI(getServerProtocol(), null, getServerHostname(), getServerPort(), apiEndpoint, null, null)
 
         Log.d(LOG_TAG, "Making HTTP request to $uri")
 
-        val request =
-            JsonObjectRequest(Request.Method.PUT, uri.toString(), jsonBody, handler, handler)
+        val request = JsonObjectRequest(Request.Method.PUT, uri.toString(), jsonBody, handler, handler)
         request.retryPolicy = DefaultRetryPolicy(
             500000,
             DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
@@ -141,29 +109,15 @@ class AndroidMacConnectorServiceImpl(private val context: Context) : AndroidMacC
         requestQueue.add(request)
     }
 
-    override fun updateSmsMessagesForThread(
-        threadId: String,
-        messages: List<MySmsMessage>,
-        handler: UpdateSmsMessagesForThreadHandler
-    ) {
+    override fun updateSmsMessagesForThread(threadId: String, messages: List<MySmsMessage>, handler: UpdateSmsMessagesForThreadHandler) {
         val jsonBody = JSONObject()
 
-        val apiEndpoint =
-            java.lang.String.format(UPDATE_SMS_MESSAGES_FOR_THREAD_PATH, "<device-id>", threadId)
-        val uri = URI(
-            getServerProtocol(),
-            null,
-            getServerHostname(),
-            getServerPort(),
-            apiEndpoint,
-            null,
-            null
-        )
+        val apiEndpoint = java.lang.String.format(UPDATE_SMS_MESSAGES_FOR_THREAD_PATH, "<device-id>", threadId)
+        val uri = URI(getServerProtocol(), null, getServerHostname(), getServerPort(), apiEndpoint, null, null)
 
         Log.d(LOG_TAG, "Making HTTP request to $uri")
 
-        val request =
-            JsonObjectRequest(Request.Method.PUT, uri.toString(), jsonBody, handler, handler)
+        val request = JsonObjectRequest(Request.Method.PUT, uri.toString(), jsonBody, handler, handler)
         request.retryPolicy = DefaultRetryPolicy(
             500000,
             DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
@@ -201,10 +155,6 @@ class VolleyRequestQueue(context: Context) {
         // applicationContext is key, it keeps you from leaking the
         // Activity or BroadcastReceiver if someone passes one in.
         Volley.newRequestQueue(context.applicationContext)
-    }
-
-    fun <T> addToRequestQueue(req: Request<T>) {
-        requestQueue.add(req)
     }
 }
 
