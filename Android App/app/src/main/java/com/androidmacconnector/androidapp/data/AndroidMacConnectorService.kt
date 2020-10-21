@@ -7,7 +7,6 @@ import com.android.volley.toolbox.JsonObjectRequest
 import com.android.volley.toolbox.Volley
 import com.androidmacconnector.androidapp.R
 import com.androidmacconnector.androidapp.sms.MySmsMessage
-import com.androidmacconnector.androidapp.services.ReceivedSmsMessage
 import com.androidmacconnector.androidapp.sms.SmsThreadSummary
 import org.json.JSONException
 import org.json.JSONObject
@@ -234,6 +233,12 @@ abstract class AndroidMacConnectorServiceBaseHandler : Response.Listener<JSONObj
     abstract fun onSuccess(response: JSONObject)
     abstract fun onError(exception: Exception?)
 }
+
+data class ReceivedSmsMessage(
+    val contactInfo: String,
+    val data: String,
+    val timestamp: Int
+)
 
 abstract class NotifyReceivedSmsMessageHandler : AndroidMacConnectorServiceBaseHandler() {
     override fun getLogTag(): String {

@@ -9,6 +9,7 @@ import android.telephony.SmsMessage
 import android.util.Log
 import com.androidmacconnector.androidapp.data.AndroidMacConnectorServiceImpl
 import com.androidmacconnector.androidapp.data.NotifyReceivedSmsMessageHandler
+import com.androidmacconnector.androidapp.data.ReceivedSmsMessage
 import org.json.JSONObject
 
 /**
@@ -75,8 +76,3 @@ abstract class SmsBroadcastReceiver : BroadcastReceiver() {
     }
 }
 
-data class ReceivedSmsMessage(
-    val contactInfo: String,
-    val data: String,
-    val timestamp: Int
-)
