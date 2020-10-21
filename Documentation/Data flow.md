@@ -19,6 +19,8 @@ With FCM, you cna send two types of messages asynchronously to Android devices:
 * Data messages: are messages that don't get alerted to the user
 
 Notification message format:
+
+```
 {
 	"message": {
 		"token": "<TOKEN>",
@@ -31,8 +33,11 @@ Notification message format:
 		}
 	}
 }
+```
 
 Data message format:
+
+```
 {
 	"message": {
 		"token": "<TOKEN>",
@@ -41,6 +46,7 @@ Data message format:
 		}
 	}
 }
+```
 
  * Note:
    * For each message sent out, make sure that they do not have any of these keys: "from", "notification", "message_type", or any key that starts with "google" or "gcm"
@@ -51,10 +57,13 @@ Data message format:
 ### 1. Receive sms text from the Android phone to the Mac device
 
 1. When the Android device receives an SMS text, it sends a request to the server (POST /api/v1/<device-id>/sms/messages/new)
+
+```
 {
 	"address": "<phone number>",
 	"body": "<body>"
 }
+```
 
 2. The server receives the request, adds a new entry to the database
 
@@ -69,12 +78,17 @@ Data message format:
 ### 2. Send sms text from my Mac to my Android phone
 
 1. The Mac device makes a request to the server (POST /api/v1/<device-id>/sms/messages):
+
+```
 {
 	"address": "<phone number>",
 	"body": "<sms body>",
 }
+```
 
 2. The server receives the request, generates a random UUID, and sends this payload to the FCM:
+
+```
 {
 	"message": {
 		"token": "<DEVICE TOKEN>",
@@ -90,21 +104,28 @@ Data message format:
 		}
 	}
 }
+```
 
 3. The server returns an OK response to the Mac device with this payload:
+
+```
 {
 	"status": "requested",
 	"message-uuid": "<UUID>"
 }
+```
 
 4. The Mac device repeatedly polls the server on this endpoint: GET /api/v1/<device-id>/sms/messages/<UUID>/status
 
 5. The Android device receives the FCM request, and sends the SMS message
 
 6. When the SMS message is sent successfully, it sends an HTTP request to the server (PUT /api/v1/<device-id>/sms/messages/<UUID>/status):
+
+```
 {
 	"status": "sent",
 }
+```
 
 7. The Mac device notices that the status changed from "requested" to "sent", and stops polling
 
@@ -115,6 +136,8 @@ When getting SMS conversations from the Android device to the Mac device:
 1. The Mac device makes an HTTP request to the server (GET /api/v1/<device-id>/sms/threads)
 
 2. The server receives the request, and sends this payload to FCM:
+
+```
 {
 	"message": {
 		"token": "<DEVICE TOKEN>",
@@ -123,10 +146,13 @@ When getting SMS conversations from the Android device to the Mac device:
 		}
 	}
 }
+```
 
 3. The server also obtains the last list of SMS threads from the database, and returns the data to the Mac device
 
 4. When the Android device receives the request, it obtains the SMS threads and makes an authenticated request to the server (PUT /api/v1/<device-id>/sms/threads)
+
+```
 {
 	"sms-threads": [
 		{
@@ -140,6 +166,7 @@ When getting SMS conversations from the Android device to the Mac device:
 	],
 	"last-updated": <TIMESTAMP>
 }
+```
 
 5. The server receives the request, updates the database with the new content, and returns an OK response
 
@@ -149,6 +176,8 @@ When getting SMS conversations from the Android device to the Mac device:
 1. The Mac device makes an HTTP request to the server (GET /api/v1/<device-id>/sms/threads/<thread-id>/messages)
 
 2. The server receives the request, and sends this payload to the FCM:
+
+```
 {
 	"message": {
 		"token": "<DEVICE TOKEN>",
@@ -160,6 +189,7 @@ When getting SMS conversations from the Android device to the Mac device:
 		}
 	}
 }
+```
 
 3. The server also obtains the last list of messages of that thread from the database, and returns the data to the Mac device
 
