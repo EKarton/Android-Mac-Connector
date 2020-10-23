@@ -56,7 +56,7 @@ Data message format:
 
 # Solutions to achieve desired tasks:
 
-### Receive sms text from the Android phone to the Mac device
+### Notify Mac device when an Android device receives a SMS text
 
 1. When the Android device receives an SMS text, it sends a request to the server (**POST** ```/api/v1/<device-id>/sms/messages/new```)
 
@@ -70,13 +70,9 @@ Data message format:
 
 2. The server receives the request, adds a new entry to the database
 
-3. The Mac device repeatedly polls (**GET** ```/api/v1/<device-id>/sms/messages/new```), gets the new updates
+3. The Mac device repeatedly polls (**GET** ```/api/v1/<device-id>/sms/messages/new```), and gets the new updates
 
-4. The Mac device makes a request to the server (**DELETE** ```/api/v1/<device-id>/sms/messages/new/<uuid>```)
-
-5. The server receives the request, and deletes the new message in the queue
-
-6. The Mac device makes a notification to the user
+4. The Mac device makes a notification to the user
 
 ### Send sms text from my Mac to my Android phone
 
