@@ -23,7 +23,9 @@ type UpdateSmsMessagesForThread2xxResponse struct {
 	Status string `json:"status"`
 }
 
-// Logic for getting SMS threads
+/**
+ * Returns the sms threads of a particular device
+ */
 func getSmsThreads(responseWriter http.ResponseWriter, request *http.Request) {
 	var variables = mux.Vars(request)
 	var deviceId = variables["deviceId"]
@@ -40,6 +42,9 @@ func getSmsThreads(responseWriter http.ResponseWriter, request *http.Request) {
 	json.NewEncoder(responseWriter).Encode(smsThreads)
 }
 
+/**
+ * Updates the sms threads stored on a particular device
+ */
 func updateSmsThreads(responseWriter http.ResponseWriter, request *http.Request) {
 	var variables = mux.Vars(request)
 	var deviceId = variables["deviceId"]
@@ -58,7 +63,9 @@ func updateSmsThreads(responseWriter http.ResponseWriter, request *http.Request)
 	json.NewEncoder(responseWriter).Encode(responseBody)
 }
 
-// Logic for getting SMS messages for a particular thread
+/**
+ * Returns the messages of a sms thread of a particular device
+ */
 func getSmsMessagesForThread(responseWriter http.ResponseWriter, request *http.Request) {
 	var variables = mux.Vars(request)
 	var deviceId = variables["deviceId"]
@@ -79,6 +86,9 @@ func getSmsMessagesForThread(responseWriter http.ResponseWriter, request *http.R
 	json.NewEncoder(responseWriter).Encode(responseBody)
 }
 
+/**
+ * Updates the messages of a sms thread of a particular device
+ */
 func updateSmsMessagesForThread(responseWriter http.ResponseWriter, request *http.Request) {
 	var variables = mux.Vars(request)
 	var deviceId = variables["deviceId"]
@@ -95,6 +105,9 @@ func updateSmsMessagesForThread(responseWriter http.ResponseWriter, request *htt
 	json.NewEncoder(responseWriter).Encode(UpdateSmsMessagesForThread2xxResponse{"success"})
 }
 
+/**
+ * Initializes the router to include paths and path handlers
+ */
 func InitializeRouter(router *mux.Router) {
 	// Add paths for when to get SMS threads
 	router.HandleFunc("", getSmsThreads).Methods("POST")

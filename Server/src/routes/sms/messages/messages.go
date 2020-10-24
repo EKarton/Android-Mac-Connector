@@ -137,6 +137,9 @@ func updateSendSmsJobStatus(responseWriter http.ResponseWriter, request *http.Re
 	json.NewEncoder(responseWriter).Encode(responseBody)
 }
 
+/**
+ * Initializes the router to include paths and path handlers
+ */
 func InitializeRouter(router *mux.Router) {
 	// Add paths for when new SMS message is received
 	router.HandleFunc("/new", notifyNewSmsMessageReceived).Methods("POST")
