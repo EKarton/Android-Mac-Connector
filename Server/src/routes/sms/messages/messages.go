@@ -31,10 +31,16 @@ type SendSmsMessage2xxResponse struct {
 }
 
 type SendSmsJob struct {
+	JobStatus string `json:"job_status"`
+}
+
+type UpdateSendSmsJobStatus2xxResponse struct {
 	Status string `json:"status"`
 }
 
-// Logic for when a new message has been received
+/**
+ * Handler for when the device wants to notify all subscribers that a new SMS message has been received
+ */
 func notifyNewSmsMessageReceived(responseWriter http.ResponseWriter, request *http.Request) {
 
 	// Get the contents from the request
@@ -51,8 +57,11 @@ func notifyNewSmsMessageReceived(responseWriter http.ResponseWriter, request *ht
 	json.NewEncoder(responseWriter).Encode(NewSmsMessageReceived2xxResponse{"success"})
 }
 
-// Logic for when sending SMS message
-func sendSms(responseWriter http.ResponseWriter, request *http.Request) {
+/**
+ * Handler for when a device wants to send an SMS message from another device
+ * It submits a job to the jobs queue, where its status can be found by polling the job queue
+ */
+func addSendSmsJob(responseWriter http.ResponseWriter, request *http.Request) {
 	var variables = mux.Vars(request)
 	var sendSmsMessageRequest SendSmsMessageRequest
 	json.NewDecoder(request.Body).Decode(&sendSmsMessageRequest)
@@ -72,6 +81,9 @@ func sendSms(responseWriter http.ResponseWriter, request *http.Request) {
 	json.NewEncoder(responseWriter).Encode(responseBody)
 }
 
+/**
+ * Returns the status of the SMS job
+ */
 func getSendSmsJobStatus(responseWriter http.ResponseWriter, request *http.Request) {
 	var variables = mux.Vars(request)
 	var deviceId = variables["deviceId"]
@@ -88,11 +100,37 @@ func getSendSmsJobStatus(responseWriter http.ResponseWriter, request *http.Reque
 	json.NewEncoder(responseWriter).Encode(job)
 }
 
-func InitializeRouter(router *mux.Router) {
-	// Add paths for when to send SMS message
-	router.HandleFunc("", sendSms).Methods("POST")
-	router.HandleFunc("/{uuid}/status", getSendSmsJobStatus).Methods("GET")
+/**
+ * Updates the status of a SMS job
+ */
+func updateSendSmsJobStatus(responseWriter http.ResponseWriter, request *http.Request) {
+	// Get request path variables
+	var variables = mux.Vars(request)
+	var deviceId = variables["deviceId"]
+	var jobUuid = variables["uuid"]
+	var newSendSmsJobStatus SendSmsJob
+	json.NewDecoder(request.Body).Decode(&newSendSmsJobStatus)
 
+	log.Println("Update send sms job", jobUuid, "from", deviceId, "with payload", newSendSmsJobStatus)
+
+	jobsdb.UpdateJobStatus(jobUuid, newSendSmsJobStatus)
+
+	// Set response headers
+	responseWriter.Header().Set("Content-Type", "application/json")
+
+	// Write response body
+	var responseBody = UpdateSendSmsJobStatus2xxResponse{
+		"success",
+	}
+	json.NewEncoder(responseWriter).Encode(responseBody)
+}
+
+func InitializeRouter(router *mux.Router) {
 	// Add paths for when new SMS message is received
 	router.HandleFunc("/new", notifyNewSmsMessageReceived).Methods("POST")
+
+	// Add paths for when to send SMS message
+	router.HandleFunc("", addSendSmsJob).Methods("POST")
+	router.HandleFunc("/{uuid}/status", getSendSmsJobStatus).Methods("GET")
+	router.HandleFunc("/{uuid}/status", updateSendSmsJobStatus).Methods("POST")
 }
