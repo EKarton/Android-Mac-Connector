@@ -19,5 +19,6 @@ func main() {
 	smsRoute.InitializeRouter(smsRouter)
 
 	// Start the server
+	log.Printf("Server started at port %v", 8080)
 	log.Fatal(http.ListenAndServe(":8080", router))
 }

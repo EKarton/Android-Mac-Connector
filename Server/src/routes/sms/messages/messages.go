@@ -7,6 +7,7 @@ import (
 
 	"github.com/gorilla/mux"
 
+	fcm "Android-Mac-Connector-Server/src/data/fcm"
 	jobsdb "Android-Mac-Connector-Server/src/db/jobs"
 )
 
@@ -21,8 +22,8 @@ type NewSmsMessageReceived2xxResponse struct {
 }
 
 type SendSmsMessageRequest struct {
-	Address string `json:"address"`
-	Body    string `json:"body"`
+	PhoneNumber string `json:"phone_number"`
+	Body        string `json:"body"`
 }
 
 type SendSmsMessage2xxResponse struct {
@@ -71,12 +72,23 @@ func addSendSmsJob(responseWriter http.ResponseWriter, request *http.Request) {
 	// Set response headers
 	responseWriter.Header().Set("Content-Type", "application/json")
 
+	// Keep track of the job
 	uuid := jobsdb.AddJob(SendSmsJob{"pending"})
+
+	// Perform SMS
+	token := "cFAS88fZTgmw37RtNze_kq:APA91bHTfUd2X4CQa1_S0dwRmp9WeIfDlgTsW4GnIwR1Hr1OkQ_wWFnUi_CFn6GiAs2_2RIoUnD-8JMrOtrUggn7ktwqa2vTD7prS8IfJKIKXjeIpWBnup2NZ8M7EAP9J5rxxu4YLHQx"
+	data := map[string]string{
+		"action":       "send_sms",
+		"uuid":         uuid,
+		"phone_number": sendSmsMessageRequest.PhoneNumber,
+		"body":         sendSmsMessageRequest.Body,
+	}
+	fcm.SendFcmMessage(token, data, nil)
 
 	// Write response body
 	var responseBody = SendSmsMessage2xxResponse{
-		"success",
-		uuid,
+		Status: "success",
+		JobId:  uuid,
 	}
 	json.NewEncoder(responseWriter).Encode(responseBody)
 }
@@ -120,7 +132,7 @@ func updateSendSmsJobStatus(responseWriter http.ResponseWriter, request *http.Re
 
 	// Write response body
 	var responseBody = UpdateSendSmsJobStatus2xxResponse{
-		"success",
+		Status: "success",
 	}
 	json.NewEncoder(responseWriter).Encode(responseBody)
 }
@@ -132,5 +144,5 @@ func InitializeRouter(router *mux.Router) {
 	// Add paths for when to send SMS message
 	router.HandleFunc("", addSendSmsJob).Methods("POST")
 	router.HandleFunc("/{uuid}/status", getSendSmsJobStatus).Methods("GET")
-	router.HandleFunc("/{uuid}/status", updateSendSmsJobStatus).Methods("POST")
+	router.HandleFunc("/{uuid}/status", updateSendSmsJobStatus).Methods("PUT")
 }
