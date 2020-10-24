@@ -8,7 +8,7 @@ import android.os.Build
 import android.telephony.SmsMessage
 import android.util.Log
 import com.androidmacconnector.androidapp.data.AndroidMacConnectorServiceImpl
-import com.androidmacconnector.androidapp.data.NotifyReceivedSmsMessageHandler
+import com.androidmacconnector.androidapp.data.NotifyNewSmsMessageReceivedHandler
 import com.androidmacconnector.androidapp.data.ReceivedSmsMessage
 import org.json.JSONObject
 
@@ -63,7 +63,7 @@ class SmsBroadcastReceiver : BroadcastReceiver() {
             val timestamp = (it.timestampMillis / 1000).toInt()
             val sms = ReceivedSmsMessage(phoneNumber, body, timestamp)
 
-            webService.notifyReceivedSmsMessage(sms, object : NotifyReceivedSmsMessageHandler() {
+            webService.notifyNewSmsMessageRecieved(sms, object : NotifyNewSmsMessageReceivedHandler() {
                 override fun onSuccess(response: JSONObject) {}
                 override fun onError(exception: Exception?) {}
             })

@@ -14,9 +14,9 @@ import java.net.URI
 
 
 interface AndroidMacConnectorService {
-    fun notifyReceivedSmsMessage(
+    fun notifyNewSmsMessageRecieved(
         newSmsMessage: ReceivedSmsMessage,
-        handler: NotifyReceivedSmsMessageHandler
+        handler: NotifyNewSmsMessageReceivedHandler
     )
 
     fun updateSmsMessageSentStatus(
@@ -51,20 +51,19 @@ class AndroidMacConnectorServiceImpl(private val context: Context) : AndroidMacC
 
     private val requestQueue: RequestQueue = VolleyRequestQueue.getInstance(context.applicationContext).requestQueue
 
-    override fun notifyReceivedSmsMessage(newSmsMessage: ReceivedSmsMessage, handler: NotifyReceivedSmsMessageHandler) {
+    override fun notifyNewSmsMessageRecieved(newSmsMessage: ReceivedSmsMessage, handler: NotifyNewSmsMessageReceivedHandler) {
         val jsonBody = JSONObject()
         jsonBody.put("address", newSmsMessage.contactInfo)
         jsonBody.put("body", newSmsMessage.data)
         jsonBody.put("timestamp", newSmsMessage.timestamp)
 
-        val apiEndpoint = java.lang.String.format(NOTIFY_RECEIVED_SMS_MESSAGE_PATH, "<device-id>")
+        val apiEndpoint = java.lang.String.format(NOTIFY_RECEIVED_SMS_MESSAGE_PATH, "android")
 
         val uri = URI(getServerProtocol(), null, getServerHostname(), getServerPort(), apiEndpoint, null, null)
 
         Log.d(LOG_TAG, "Making HTTP request to $uri")
 
-        val request =
-            JsonObjectRequest(Request.Method.POST, uri.toString(), jsonBody, handler, handler)
+        val request = JsonObjectRequest(Request.Method.POST, uri.toString(), jsonBody, handler, handler)
         request.retryPolicy = DefaultRetryPolicy(
             500000,
             DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
@@ -190,7 +189,7 @@ data class ReceivedSmsMessage(
     val timestamp: Int
 )
 
-abstract class NotifyReceivedSmsMessageHandler : AndroidMacConnectorServiceBaseHandler() {
+abstract class NotifyNewSmsMessageReceivedHandler : AndroidMacConnectorServiceBaseHandler() {
     override fun getLogTag(): String {
         return "NewSmsHandler"
     }

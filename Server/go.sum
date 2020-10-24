@@ -1,0 +1,4 @@
+github.com/google/uuid v1.1.2 h1:EVhdT+1Kseyi1/pUmXKaFxYsDNy9RQYkMWRH68J/W7Y=
+github.com/google/uuid v1.1.2/go.mod h1:TIyPZe4MgqvfeYDBFedMoGGpEw/LqOeaOT+nhxU+yHo=
+github.com/gorilla/mux v1.8.1-0.20200912192056-d07530f46e1e h1:8+CIGbDW29nl9niCoMrpF8+ACFz3rLRpIjuqnx4rNKg=
+github.com/gorilla/mux v1.8.1-0.20200912192056-d07530f46e1e/go.mod h1:DVbg23sWSpFRCP0SfiEN6jmj59UnW/n46BH5rLB71So=
