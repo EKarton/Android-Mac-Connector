@@ -4,21 +4,29 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
+	"strconv"
 
 	"github.com/gorilla/mux"
 
 	fcm "Android-Mac-Connector-Server/src/data/fcm"
 	jobsdb "Android-Mac-Connector-Server/src/db/jobs"
+	smsdb "Android-Mac-Connector-Server/src/db/sms"
+	newsmsqueue "Android-Mac-Connector-Server/src/db/sms/newsmsqueue"
 )
 
 type NewSmsMessageReceived struct {
 	Address   string `json:"address"`
 	Body      string `json:"body"`
-	Timestamp int32  `json:"timestamp"`
+	Timestamp int    `json:"timestamp"`
 }
 
 type NewSmsMessageReceived2xxResponse struct {
 	Status string `json:"status"`
+}
+
+type GetNewSmsMessagesReceivedErrorResponse struct {
+	Status string `json:"status"`
+	Reason string `json:"reason"`
 }
 
 type SendSmsMessageRequest struct {
@@ -51,11 +59,44 @@ func notifyNewSmsMessageReceived(responseWriter http.ResponseWriter, request *ht
 
 	log.Println("Received new sms message from", variables["deviceId"], "with payload", newSmsMessage)
 
-	// TODO: Do something with the payload (store in database, etc)
+	// Store new msg in db
+	var newSmsMsg = newsmsqueue.SmsMessageNotification{
+		ContactInfo: newSmsMessage.Address,
+		Data:        newSmsMessage.Body,
+		Timestamp:   newSmsMessage.Timestamp,
+	}
+	smsdb.AddNewSmsMessageNotification(newSmsMsg)
 
 	// Write response
 	responseWriter.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(responseWriter).Encode(NewSmsMessageReceived2xxResponse{"success"})
+}
+
+func getNewSmsMessagesReceived(responseWriter http.ResponseWriter, request *http.Request) {
+	// Get the contents from the request
+	variables := mux.Vars(request)
+	deviceId := variables["deviceId"]
+	startingUuid := request.URL.Query().Get("starting_uuid")
+	numNotifications, err := strconv.ParseInt(request.URL.Query().Get("fetch_count"), 10, 0)
+
+	if err != nil {
+		responseWriter.Header().Set("Content-Type", "application/json")
+		responseWriter.WriteHeader(400)
+		json.NewEncoder(responseWriter).Encode(GetNewSmsMessagesReceivedErrorResponse{
+			Status: "failure",
+			Reason: "FetchCountQueryParamParseFailure",
+		})
+		return
+	}
+
+	log.Println("Getting", numNotifications, "sms notifications from", deviceId, "starting from", startingUuid)
+
+	// Get the notifications starting from the Uuid
+	notifications := smsdb.GetNotificationsFromUuid(startingUuid, int(numNotifications))
+
+	// Write response
+	responseWriter.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(responseWriter).Encode(notifications)
 }
 
 /**
@@ -143,6 +184,7 @@ func updateSendSmsJobStatus(responseWriter http.ResponseWriter, request *http.Re
 func InitializeRouter(router *mux.Router) {
 	// Add paths for when new SMS message is received
 	router.HandleFunc("/new", notifyNewSmsMessageReceived).Methods("POST")
+	router.HandleFunc("/new", getNewSmsMessagesReceived).Methods("GET")
 
 	// Add paths for when to send SMS message
 	router.HandleFunc("", addSendSmsJob).Methods("POST")
