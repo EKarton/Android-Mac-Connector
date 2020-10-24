@@ -25,7 +25,7 @@ class SmsSenderService {
 
 class SendSmsRequestFcmSubscriber(private val service: SmsSenderService, private val webService: AndroidMacConnectorService) : FcmSubscriber {
     companion object {
-        private const val LOG_TAG = "SendSmsSubscriber"
+        private const val LOG_TAG = "SendSmsSub"
     }
 
     override fun getMessageAction(): String {

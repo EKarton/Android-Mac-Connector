@@ -74,7 +74,7 @@ class AndroidMacConnectorServiceImpl(private val context: Context) : AndroidMacC
 
     override fun updateSmsMessageSentStatus(uuid: String, newStatus: String, handler: UpdateSmsSentStatusHandler) {
         val jsonBody = JSONObject()
-        jsonBody.put("status", newStatus)
+        jsonBody.put("job_status", newStatus)
 
         val apiEndpoint = java.lang.String.format(UPDATE_SMS_SENT_STATUS_PATH, "<device-id>", uuid)
 

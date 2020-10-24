@@ -38,15 +38,12 @@ class FirebaseMessagingServiceInstance : FirebaseMessagingService() {
         val createWebService = webService == null &&
                 checkPermissions(Manifest.permission.INTERNET)
 
-        val createSmsQueryService = (webService != null && smsQueryService == null) &&
-                (checkPermissions(Manifest.permission.READ_SMS, Manifest.permission.READ_CONTACTS))
-
-        val createSmsSenderService = (webService != null && smsSenderService == null) &&
-                checkPermissions(Manifest.permission.SEND_SMS)
-
         if (createWebService) {
             webService = AndroidMacConnectorServiceImpl(this)
         }
+
+        val createSmsQueryService = (webService != null && smsQueryService == null) &&
+                (checkPermissions(Manifest.permission.READ_SMS, Manifest.permission.READ_CONTACTS))
 
         if (createSmsQueryService) {
             smsQueryService = SmsQueryService(this.contentResolver)
@@ -57,6 +54,9 @@ class FirebaseMessagingServiceInstance : FirebaseMessagingService() {
             subscriptionService?.addSubscriber(subscriber1)
             subscriptionService?.addSubscriber(subscriber2)
         }
+
+        val createSmsSenderService = (webService != null && smsSenderService == null) &&
+                checkPermissions(Manifest.permission.SEND_SMS)
 
         if (createSmsSenderService) {
             smsSenderService = SmsSenderService()
