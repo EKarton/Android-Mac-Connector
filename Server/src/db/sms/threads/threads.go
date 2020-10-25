@@ -1,6 +1,7 @@
-package messages
+package threads
 
 import (
+	"errors"
 	"time"
 )
 
@@ -47,12 +48,19 @@ func GetLastTimeSmsThreadsUpdated() int {
 	return lastTimeSmsThreadsUpdated
 }
 
-func GetSmsMessagesForThread(threadId string) []SmsMessage {
-	return threadIdToSmsMessages[threadId]
+func GetSmsMessagesForThread(threadId string) ([]SmsMessage, error) {
+	if messages, ok := threadIdToSmsMessages[threadId]; ok {
+		return messages, nil
+	}
+
+	return nil, errors.New("CannotFindThreadIdError")
 }
 
-func GetLastTimeSmsMessagesForThreadUpdated(threadId string) int {
-	return threadIdToLastTimeUpdated[threadId]
+func GetLastTimeSmsMessagesForThreadUpdated(threadId string) (int, error) {
+	if lastTime, ok := threadIdToLastTimeUpdated[threadId]; ok {
+		return lastTime, nil
+	}
+	return 0, errors.New("CannotFindThreadIdError")
 }
 
 func UpdateSmsMessagesForThread(threadId string, smsMessages []SmsMessage) {

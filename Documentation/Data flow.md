@@ -56,17 +56,47 @@ Data message format:
 
 # Solutions to achieve desired tasks:
 
+### Registration
+
+1. When the Android device wants to register to the service, it sends a request to the server (**POST** ```api/v1/device-registration```)
+
+    ``` 
+    {
+      "device_type": "<device type>",
+      ... (more data)
+    }
+    ```
+
+    Specifically, if the device is an Android device, send in the FCM device token:
+
+    ``` 
+    {
+      "device_type": "android",
+      "fcm_token": "<fcm token>"
+    }
+    ```
+
+    On the other hand, if the device is a MacOS / iOS device, send in the APN device token:
+
+    ``` 
+    {
+      "device_type": "android",
+      "apn_token": "<fcm token>"
+    }
+    ```
+
+
 ### Notify Mac device when an Android device receives a SMS text
 
 1. When the Android device receives an SMS text, it sends a request to the server (**POST** ```/api/v1/<device-id>/sms/messages/new```)
 
-  ``` 
-  {
-    "phone_number": "<phone number>",
-    "body": "<body>",
-    "timestamp": "<timestamp>"
-  }
-  ```
+    ``` 
+    {
+      "phone_number": "<phone number>",
+      "body": "<body>",
+      "timestamp": "<timestamp>"
+    }
+    ```
 
 2. The server receives the request, adds a new entry to the database
 
