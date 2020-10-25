@@ -1,14 +1,12 @@
-package newsmsqueue
+package notifications
 
 import (
 	"log"
-
-	"github.com/google/uuid"
 )
 
 type SmsNotificationQueueNode struct {
 	uuid       string
-	smsMessage SmsMessageNotification
+	smsMessage SmsMessage
 	previous   *SmsNotificationQueueNode
 	next       *SmsNotificationQueueNode
 }
@@ -21,15 +19,10 @@ type SmsNotificationQueue struct {
 	maxNumItems int
 }
 
-type SmsMessageNotification struct {
+type SmsMessage struct {
 	ContactInfo string
 	Data        string
 	Timestamp   int
-}
-
-func generateRandomUuid() string {
-	uuid, _ := uuid.NewRandom()
-	return uuid.String()
 }
 
 /**
@@ -51,7 +44,7 @@ func NewQueue(maxNumItems int) *SmsNotificationQueue {
  * Adds a new entry to the top of the queue
  * It evicts entries at the bottom of the queue if the queue is empty
  */
-func (queue *SmsNotificationQueue) Add(smsMessage SmsMessageNotification) string {
+func (queue *SmsNotificationQueue) Add(smsMessage SmsMessage) string {
 	uuid := generateRandomUuid()
 	node := SmsNotificationQueueNode{
 		uuid:       uuid,
@@ -163,6 +156,6 @@ func (node *SmsNotificationQueueNode) Previous() *SmsNotificationQueueNode {
 /**
  * Get the message of the SMS notification
  */
-func (node *SmsNotificationQueueNode) SmsMessage() SmsMessageNotification {
+func (node *SmsNotificationQueueNode) SmsMessage() SmsMessage {
 	return node.smsMessage
 }

@@ -10,8 +10,8 @@ import (
 
 	fcm "Android-Mac-Connector-Server/src/data/fcm"
 	jobsdb "Android-Mac-Connector-Server/src/db/jobs"
-	smsdb "Android-Mac-Connector-Server/src/db/sms"
-	newsmsqueue "Android-Mac-Connector-Server/src/db/sms/newsmsqueue"
+	"Android-Mac-Connector-Server/src/db/sms/notifications"
+	sms_notifications "Android-Mac-Connector-Server/src/db/sms/notifications"
 )
 
 type NewSmsMessageReceived struct {
@@ -60,12 +60,12 @@ func notifyNewSmsMessageReceived(responseWriter http.ResponseWriter, request *ht
 	log.Println("Received new sms message from", variables["deviceId"], "with payload", newSmsMessage)
 
 	// Store new msg in db
-	var newSmsMsg = newsmsqueue.SmsMessageNotification{
+	var newSmsMsg = notifications.SmsMessage{
 		ContactInfo: newSmsMessage.Address,
 		Data:        newSmsMessage.Body,
 		Timestamp:   newSmsMessage.Timestamp,
 	}
-	smsdb.AddNewSmsMessageNotification(newSmsMsg)
+	sms_notifications.AddNewSmsMessageNotification(newSmsMsg)
 
 	// Write response
 	responseWriter.Header().Set("Content-Type", "application/json")
@@ -101,13 +101,13 @@ func getNewSmsMessagesReceived(responseWriter http.ResponseWriter, request *http
 	}
 
 	// Get the notifications starting from the Uuid
-	notifications := smsdb.GetNotificationsFromUuid(startingUuid, int(numNotifications))
+	notifications := notifications.GetNotificationsFromUuid(startingUuid, int(numNotifications))
 
 	if isLongPolling && len(notifications) == 0 {
 		log.Println("Subscribing to new sms notifications from", deviceId)
 
-		subscriptionChannel := make(chan []smsdb.SmsMessageNotification)
-		subscriptionUuid := smsdb.SubscribeToNewNotifications(subscriptionChannel)
+		subscriptionChannel := make(chan []sms_notifications.SmsMessageNotification)
+		subscriptionUuid := sms_notifications.SubscribeToNewNotifications(subscriptionChannel)
 
 		select {
 		case notification := <-subscriptionChannel:
@@ -115,7 +115,7 @@ func getNewSmsMessagesReceived(responseWriter http.ResponseWriter, request *http
 
 			// Close the subscription
 			close(subscriptionChannel)
-			smsdb.UnsubscribeToNewNotifications(subscriptionUuid)
+			sms_notifications.UnsubscribeToNewNotifications(subscriptionUuid)
 
 			// Send the output to the user
 			responseWriter.Header().Set("Content-Type", "application/json")

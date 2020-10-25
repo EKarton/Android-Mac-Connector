@@ -7,7 +7,7 @@ import (
 
 	"github.com/gorilla/mux"
 
-	smsdb "Android-Mac-Connector-Server/src/db/sms"
+	smsdb "Android-Mac-Connector-Server/src/db/sms/messages"
 )
 
 type UpdateSmsThreads2xxResponse struct {

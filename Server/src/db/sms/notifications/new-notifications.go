@@ -1,7 +1,6 @@
-package sms
+package notifications
 
 import (
-	newSmsQueue "Android-Mac-Connector-Server/src/db/sms/newsmsqueue"
 	"log"
 	"math"
 
@@ -14,25 +13,23 @@ type Subscriber struct {
 
 type SmsMessageNotification struct {
 	Uuid string
-	newSmsQueue.SmsMessageNotification
+	SmsMessage
 }
 
-var queue = newSmsQueue.NewQueue(1000)
+var queue = NewQueue(1000)
 var uuidToSubscribers = make(map[string]*Subscriber)
 
-func AddNewSmsMessageNotification(smsMsgNotification newSmsQueue.SmsMessageNotification) {
+func AddNewSmsMessageNotification(smsMessage SmsMessage) {
 
 	// Add it to the queue
-	uuid := queue.Add(smsMsgNotification)
-
-	log.Println("I am here")
+	uuid := queue.Add(smsMessage)
 
 	// Notify the channels
 	for _, subscriber := range uuidToSubscribers {
 		var notifications [1]SmsMessageNotification
 		notifications[0] = SmsMessageNotification{
 			uuid,
-			smsMsgNotification,
+			smsMessage,
 		}
 
 		// We send notifications in parallel
@@ -43,13 +40,11 @@ func AddNewSmsMessageNotification(smsMsgNotification newSmsQueue.SmsMessageNotif
 }
 
 func GetNotificationsFromUuid(startingUuid string, numNotificationsToFetch int) []SmsMessageNotification {
-	var node *newSmsQueue.SmsNotificationQueueNode = nil
+	var node *SmsNotificationQueueNode = nil
 
 	if foundNode := queue.Get(startingUuid); foundNode != nil {
-		log.Println("A")
 		node = foundNode.Next()
 	} else if oldestNode := queue.GetOldest(); oldestNode != nil {
-		log.Println("B")
 		node = oldestNode
 	}
 
