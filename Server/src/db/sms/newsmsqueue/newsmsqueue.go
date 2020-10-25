@@ -83,6 +83,9 @@ func (queue *SmsNotificationQueue) Add(smsMessage SmsMessageNotification) string
 	return uuid
 }
 
+/**
+ * Removes a message from the queue
+ */
 func (queue *SmsNotificationQueue) Remove(uuid string) {
 	node := queue.uuidToNode[uuid]
 
@@ -110,6 +113,9 @@ func (queue *SmsNotificationQueue) Remove(uuid string) {
 	}
 }
 
+/**
+ * Returns the length of the queue
+ */
 func (queue *SmsNotificationQueue) Len() int {
 	return queue.curLength
 }
@@ -121,6 +127,9 @@ func (queue *SmsNotificationQueue) Get(uuid string) *SmsNotificationQueueNode {
 	return queue.uuidToNode[uuid]
 }
 
+/**
+ * Returns the oldest element in the queue
+ */
 func (queue *SmsNotificationQueue) GetOldest() *SmsNotificationQueueNode {
 	return queue.lastNode
 }
