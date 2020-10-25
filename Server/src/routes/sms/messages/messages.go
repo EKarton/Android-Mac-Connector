@@ -77,9 +77,20 @@ func getNewSmsMessagesReceived(responseWriter http.ResponseWriter, request *http
 	variables := mux.Vars(request)
 	deviceId := variables["deviceId"]
 	startingUuid := request.URL.Query().Get("starting_uuid")
-	numNotifications, err := strconv.ParseInt(request.URL.Query().Get("fetch_count"), 10, 0)
+	numNotifications, numNotificationsErr := strconv.ParseInt(request.URL.Query().Get("fetch_count"), 10, 0)
+	isLongPolling, isLongPollingErr := strconv.ParseBool(request.URL.Query().Get("long_polling"))
 
-	if err != nil {
+	if isLongPollingErr != nil {
+		responseWriter.Header().Set("Content-Type", "application/json")
+		responseWriter.WriteHeader(400)
+		json.NewEncoder(responseWriter).Encode(GetNewSmsMessagesReceivedErrorResponse{
+			Status: "failure",
+			Reason: "LongPollingQueryParamParseFailure",
+		})
+		return
+	}
+
+	if numNotificationsErr != nil {
 		responseWriter.Header().Set("Content-Type", "application/json")
 		responseWriter.WriteHeader(400)
 		json.NewEncoder(responseWriter).Encode(GetNewSmsMessagesReceivedErrorResponse{
@@ -89,14 +100,36 @@ func getNewSmsMessagesReceived(responseWriter http.ResponseWriter, request *http
 		return
 	}
 
-	log.Println("Getting", numNotifications, "sms notifications from", deviceId, "starting from", startingUuid)
-
 	// Get the notifications starting from the Uuid
 	notifications := smsdb.GetNotificationsFromUuid(startingUuid, int(numNotifications))
 
-	// Write response
-	responseWriter.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(responseWriter).Encode(notifications)
+	if isLongPolling && len(notifications) == 0 {
+		log.Println("Subscribing to new sms notifications from", deviceId)
+
+		subscriptionChannel := make(chan []smsdb.SmsMessageNotification)
+		subscriptionUuid := smsdb.SubscribeToNewNotifications(subscriptionChannel)
+
+		select {
+		case notification := <-subscriptionChannel:
+			log.Println("Received notification", notification)
+
+			// Close the subscription
+			close(subscriptionChannel)
+			smsdb.UnsubscribeToNewNotifications(subscriptionUuid)
+
+			// Send the output to the user
+			responseWriter.Header().Set("Content-Type", "application/json")
+			json.NewEncoder(responseWriter).Encode(notification)
+\		}
+
+	} else {
+
+		log.Println("Getting", numNotifications, "sms notifications from", deviceId, "starting from", startingUuid)
+
+		// Write response
+		responseWriter.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(responseWriter).Encode(notifications)
+	}
 }
 
 /**

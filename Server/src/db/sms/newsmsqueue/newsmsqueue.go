@@ -1,6 +1,8 @@
 package newsmsqueue
 
 import (
+	"log"
+
 	"github.com/google/uuid"
 )
 
@@ -124,6 +126,7 @@ func (queue *SmsNotificationQueue) Len() int {
  * Retrieves the SMS message node for a given Uuid
  */
 func (queue *SmsNotificationQueue) Get(uuid string) *SmsNotificationQueueNode {
+	log.Println(queue.uuidToNode)
 	return queue.uuidToNode[uuid]
 }
 

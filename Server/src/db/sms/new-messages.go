@@ -2,8 +2,15 @@ package sms
 
 import (
 	newSmsQueue "Android-Mac-Connector-Server/src/db/sms/newsmsqueue"
+	"log"
 	"math"
+
+	"github.com/google/uuid"
 )
+
+type Subscriber struct {
+	channel chan []SmsMessageNotification
+}
 
 type SmsMessageNotification struct {
 	Uuid string
@@ -11,16 +18,39 @@ type SmsMessageNotification struct {
 }
 
 var queue = newSmsQueue.NewQueue(1000)
+var uuidToSubscribers = make(map[string]*Subscriber)
 
 func AddNewSmsMessageNotification(smsMsgNotification newSmsQueue.SmsMessageNotification) {
-	queue.Add(smsMsgNotification)
+
+	// Add it to the queue
+	uuid := queue.Add(smsMsgNotification)
+
+	log.Println("I am here")
+
+	// Notify the channels
+	for _, subscriber := range uuidToSubscribers {
+		var notifications [1]SmsMessageNotification
+		notifications[0] = SmsMessageNotification{
+			uuid,
+			smsMsgNotification,
+		}
+
+		// We send notifications in parallel
+		go func(channel chan []SmsMessageNotification) {
+			channel <- notifications[:]
+		}(subscriber.channel)
+	}
 }
 
 func GetNotificationsFromUuid(startingUuid string, numNotificationsToFetch int) []SmsMessageNotification {
-	node := queue.Get(startingUuid)
+	var node *newSmsQueue.SmsNotificationQueueNode = nil
 
-	if node == nil {
-		node = queue.GetOldest()
+	if foundNode := queue.Get(startingUuid); foundNode != nil {
+		log.Println("A")
+		node = foundNode.Next()
+	} else if oldestNode := queue.GetOldest(); oldestNode != nil {
+		log.Println("B")
+		node = oldestNode
 	}
 
 	numToFetch := int(math.Min(float64(numNotificationsToFetch), float64(queue.Len())))
@@ -33,4 +63,27 @@ func GetNotificationsFromUuid(startingUuid string, numNotificationsToFetch int) 
 	}
 
 	return lst
+}
+
+func SubscribeToNewNotifications(channel chan []SmsMessageNotification) string {
+	newUuid := generateRandomUuid()
+	subscriber := Subscriber{
+		channel,
+	}
+	uuidToSubscribers[newUuid] = &subscriber
+	return newUuid
+}
+
+func UnsubscribeToNewNotifications(subscriberUuid string) {
+	delete(uuidToSubscribers, subscriberUuid)
+}
+
+func generateRandomUuid() string {
+	newUuid := ""
+	if newUuidResult, err := uuid.NewRandom(); err != nil {
+		log.Fatalln("Unable to get UUID for subscriber")
+	} else {
+		newUuid = newUuidResult.String()
+	}
+	return newUuid
 }
