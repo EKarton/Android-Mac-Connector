@@ -51,6 +51,15 @@ func notifyNewSmsMessageReceived(responseWriter http.ResponseWriter, request *ht
 	json.NewEncoder(responseWriter).Encode(NewSmsMessageReceived2xxResponse{"success"})
 }
 
+/**
+ * Handles when a request wants to see which new messages were received by the device
+ * It requires these query params present:
+ *  1. starting_uuid (int): the starting UUID of a message. If not found, it will return the oldest SMS message
+ *  2. fetch_count (int): the max number of notifications to fetch in one request
+ *  3. long_polling (bool):
+ *     - If true, and there are no new notifications, then it will hold the request until a new notification arrives from the device
+ *     - Else, it returns an empty array
+ */
 func getNewSmsMessagesReceived(responseWriter http.ResponseWriter, request *http.Request) {
 	// Get the contents from the request
 	variables := mux.Vars(request)
@@ -79,6 +88,8 @@ func getNewSmsMessagesReceived(responseWriter http.ResponseWriter, request *http
 		return
 	}
 
+	log.Println("Getting at most", numNotifications, "sms notifications from", deviceId, "starting from", startingUuid)
+
 	// Get the notifications starting from the Uuid
 	notifications := sms_notifications.GetNotificationsFromUuid(startingUuid, int(numNotifications))
 
@@ -102,9 +113,6 @@ func getNewSmsMessagesReceived(responseWriter http.ResponseWriter, request *http
 		}
 
 	} else {
-
-		log.Println("Getting", numNotifications, "sms notifications from", deviceId, "starting from", startingUuid)
-
 		// Write response
 		responseWriter.Header().Set("Content-Type", "application/json")
 		json.NewEncoder(responseWriter).Encode(notifications)
