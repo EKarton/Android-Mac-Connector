@@ -120,7 +120,7 @@ func getNewSmsMessagesReceived(responseWriter http.ResponseWriter, request *http
 			// Send the output to the user
 			responseWriter.Header().Set("Content-Type", "application/json")
 			json.NewEncoder(responseWriter).Encode(notification)
-\		}
+		}
 
 	} else {
 
