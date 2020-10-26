@@ -1,5 +1,6 @@
-package com.androidmacconnector.androidapp.services
+package com.androidmacconnector.androidapp.sms
 
+import android.Manifest
 import android.annotation.TargetApi
 import android.content.BroadcastReceiver
 import android.content.Context
@@ -7,9 +8,6 @@ import android.content.Intent
 import android.os.Build
 import android.telephony.SmsMessage
 import android.util.Log
-import com.androidmacconnector.androidapp.data.AndroidMacConnectorServiceImpl
-import com.androidmacconnector.androidapp.data.NotifyNewSmsMessageReceivedHandler
-import com.androidmacconnector.androidapp.data.ReceivedSmsMessage
 import org.json.JSONObject
 
 /**
@@ -18,6 +16,10 @@ import org.json.JSONObject
 class SmsBroadcastReceiver : BroadcastReceiver() {
     companion object {
         private const val LOG_TAG = "SmsBroadcastReceiver"
+
+        fun getRequiredPermissions(): List<String> {
+            return arrayListOf(Manifest.permission.RECEIVE_SMS)
+        }
     }
 
     @TargetApi(Build.VERSION_CODES.M)
@@ -54,7 +56,7 @@ class SmsBroadcastReceiver : BroadcastReceiver() {
     }
 
     private fun onReceiveSmsMessages(context: Context, smsMessages: List<SmsMessage>) {
-        val webService = AndroidMacConnectorServiceImpl(context)
+        val webService = SmsWebService(context)
 
         // Get the contact info for each sms message
         smsMessages.forEach {

@@ -3,15 +3,12 @@ package com.androidmacconnector.androidapp
 import android.Manifest
 import android.app.NotificationChannel
 import android.app.NotificationManager
-import android.content.IntentFilter
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import android.widget.EditText
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import com.androidmacconnector.androidapp.data.*
-import com.androidmacconnector.androidapp.services.SmsBroadcastReceiver
 import com.androidmacconnector.androidapp.sms.*
 import com.google.android.gms.common.GoogleApiAvailability
 import com.google.android.gms.tasks.OnCompleteListener
@@ -34,10 +31,6 @@ class MainActivity : AppCompatActivity() {
 
         val smsQueryService = SmsQueryService(this.contentResolver)
         val smsSenderService = SmsSenderService()
-
-        val requiredPermissions = smsQueryService.getRequiredPermissions() +
-                smsSenderService.getRequiredPermissions() +
-                arrayListOf(Manifest.permission.RECEIVE_SMS)
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             // Create channel to show notifications.
@@ -69,21 +62,6 @@ class MainActivity : AppCompatActivity() {
             textbox.setText(textbox.text.toString() + "\n\n" + token)
             Toast.makeText(baseContext, token, Toast.LENGTH_SHORT).show()
         })
-
-        Dexter.withContext(this)
-            .withPermissions(requiredPermissions)
-            .withListener(object : MultiplePermissionsListener {
-                override fun onPermissionsChecked(report: MultiplePermissionsReport) {
-                    Log.d(TAG, "Permissions granted")
-                }
-
-                override fun onPermissionRationaleShouldBeShown(permissions: List<PermissionRequest?>?, token: PermissionToken?) {
-                    Log.d(TAG, "Permissions not granted")
-                    token?.continuePermissionRequest();
-                }
-            })
-            .onSameThread()
-            .check()
     }
 
     override fun onResume() {

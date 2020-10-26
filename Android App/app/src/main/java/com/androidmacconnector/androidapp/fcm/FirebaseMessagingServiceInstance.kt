@@ -1,4 +1,4 @@
-package com.androidmacconnector.androidapp.services
+package com.androidmacconnector.androidapp.fcm
 
 import android.Manifest
 import android.content.pm.PackageManager
@@ -6,7 +6,6 @@ import android.util.Log
 import androidx.core.content.ContextCompat
 import com.androidmacconnector.androidapp.sms.SmsService
 import com.androidmacconnector.androidapp.sms.SmsWebService
-import com.androidmacconnector.androidapp.data.FcmSubscriptionServiceImpl
 import com.androidmacconnector.androidapp.sms.*
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage

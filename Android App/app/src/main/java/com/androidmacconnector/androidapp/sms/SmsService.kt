@@ -1,16 +1,14 @@
-package com.androidmacconnector.androidapp.data
+package com.androidmacconnector.androidapp.sms
 
 import android.content.Context
+import android.net.Uri
 import android.util.Log
-import com.android.volley.*
-import com.android.volley.toolbox.JsonObjectRequest
-import com.android.volley.toolbox.Volley
-import com.androidmacconnector.androidapp.R
-import com.androidmacconnector.androidapp.sms.MySmsMessage
-import com.androidmacconnector.androidapp.sms.SmsThreadSummary
+import com.android.volley.Request
+import com.android.volley.VolleyError
+import com.androidmacconnector.androidapp.utils.WebService
+import com.androidmacconnector.androidapp.utils.WebServiceResponseHandler
 import org.json.JSONException
 import org.json.JSONObject
-import java.net.URI
 
 
 interface SmsService {
@@ -37,7 +35,7 @@ interface SmsService {
     )
 }
 
-class SmsWebService(private val context: Context) : SmsService {
+class SmsWebService(context: Context) : WebService(context), SmsService {
 
     companion object {
         private const val LOG_TAG = "WebService"
@@ -49,116 +47,70 @@ class SmsWebService(private val context: Context) : SmsService {
         private const val UPDATE_SMS_MESSAGES_FOR_THREAD_PATH = "/api/v1/%s/sms/threads/%s/messages"
     }
 
-    private val requestQueue: RequestQueue = VolleyRequestQueue.getInstance(context.applicationContext).requestQueue
-
     override fun notifyNewSmsMessageRecieved(newSmsMessage: ReceivedSmsMessage, handler: NotifyNewSmsMessageReceivedHandler) {
         val jsonBody = JSONObject()
         jsonBody.put("address", newSmsMessage.contactInfo)
         jsonBody.put("body", newSmsMessage.data)
         jsonBody.put("timestamp", newSmsMessage.timestamp)
 
-        val apiEndpoint = java.lang.String.format(NOTIFY_RECEIVED_SMS_MESSAGE_PATH, "android")
-
-        val uri = URI(getServerProtocol(), null, getServerHostname(), getServerPort(), apiEndpoint, null, null)
+        val apiPath = java.lang.String.format(NOTIFY_RECEIVED_SMS_MESSAGE_PATH, "android")
+        val uri = Uri.Builder()
+            .scheme(getServerProtocol())
+            .encodedAuthority(getServerAuthority())
+            .appendEncodedPath(apiPath)
+            .build()
 
         Log.d(LOG_TAG, "Making HTTP request to $uri")
 
-        val request = JsonObjectRequest(Request.Method.POST, uri.toString(), jsonBody, handler, handler)
-        request.retryPolicy = DefaultRetryPolicy(
-            500000,
-            DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
-            DefaultRetryPolicy.DEFAULT_BACKOFF_MULT
-        )
-        requestQueue.add(request)
+        makeRequest(Request.Method.POST, uri.toString(), jsonBody, null, handler)
     }
 
     override fun updateSmsMessageSentStatus(uuid: String, newStatus: String, handler: UpdateSmsSentStatusHandler) {
         val jsonBody = JSONObject()
         jsonBody.put("job_status", newStatus)
 
-        val apiEndpoint = java.lang.String.format(UPDATE_SMS_SENT_STATUS_PATH, "<device-id>", uuid)
-
-        val uri = URI(getServerProtocol(), null, getServerHostname(), getServerPort(), apiEndpoint, null, null)
+        val apiPath = java.lang.String.format(UPDATE_SMS_SENT_STATUS_PATH, "<device-id>", uuid)
+        val uri = Uri.Builder()
+            .scheme(getServerProtocol())
+            .encodedAuthority(getServerAuthority())
+            .appendEncodedPath(apiPath)
+            .build()
 
         Log.d(LOG_TAG, "Making HTTP request to $uri")
 
-        val request = JsonObjectRequest(Request.Method.PUT, uri.toString(), jsonBody, handler, handler)
-        request.retryPolicy = DefaultRetryPolicy(
-            500000,
-            DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
-            DefaultRetryPolicy.DEFAULT_BACKOFF_MULT
-        )
-        requestQueue.add(request)
+        makeRequest(Request.Method.PUT, uri.toString(), jsonBody, null, handler)
     }
 
     override fun updateSmsThreads(threads: List<SmsThreadSummary>, handler: UpdateSmsThreadsHandler) {
         val jsonBody = JSONObject()
 
-        val apiEndpoint = java.lang.String.format(UPDATE_SMS_THREADS_PATH, "<device-id>")
-        val uri = URI(getServerProtocol(), null, getServerHostname(), getServerPort(), apiEndpoint, null, null)
+        val apiPath = java.lang.String.format(UPDATE_SMS_THREADS_PATH, "<device-id>")
+        val uri = Uri.Builder()
+            .scheme(getServerProtocol())
+            .encodedAuthority(getServerAuthority())
+            .appendEncodedPath(apiPath)
+            .build()
 
         Log.d(LOG_TAG, "Making HTTP request to $uri")
 
-        val request = JsonObjectRequest(Request.Method.PUT, uri.toString(), jsonBody, handler, handler)
-        request.retryPolicy = DefaultRetryPolicy(
-            500000,
-            DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
-            DefaultRetryPolicy.DEFAULT_BACKOFF_MULT
-        )
-        requestQueue.add(request)
+        makeRequest(Request.Method.PUT, uri.toString(), jsonBody, null, handler)
     }
 
     override fun updateSmsMessagesForThread(threadId: String, messages: List<MySmsMessage>, handler: UpdateSmsMessagesForThreadHandler) {
         val jsonBody = JSONObject()
 
-        val apiEndpoint = java.lang.String.format(UPDATE_SMS_MESSAGES_FOR_THREAD_PATH, "<device-id>", threadId)
-        val uri = URI(getServerProtocol(), null, getServerHostname(), getServerPort(), apiEndpoint, null, null)
+        val apiPath = java.lang.String.format(UPDATE_SMS_MESSAGES_FOR_THREAD_PATH, "<device-id>", threadId)
+        val uri = Uri.Builder()
+            .scheme(getServerProtocol())
+            .encodedAuthority(getServerAuthority())
+            .appendEncodedPath(apiPath)
+            .build()
 
-        Log.d(LOG_TAG, "Making HTTP request to $uri")
-
-        val request = JsonObjectRequest(Request.Method.PUT, uri.toString(), jsonBody, handler, handler)
-        request.retryPolicy = DefaultRetryPolicy(
-            500000,
-            DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
-            DefaultRetryPolicy.DEFAULT_BACKOFF_MULT
-        )
-        requestQueue.add(request)
-    }
-
-    private fun getServerProtocol(): String {
-        return context.getString(R.string.protocol)
-    }
-
-    private fun getServerHostname(): String {
-        return context.getString(R.string.hostname)
-    }
-
-    private fun getServerPort(): Int {
-        return context.getString(R.string.port).toInt()
+        makeRequest(Request.Method.PUT, uri.toString(), jsonBody, null, handler)
     }
 }
 
-class VolleyRequestQueue(context: Context) {
-    companion object {
-        @Volatile
-        private var INSTANCE: VolleyRequestQueue? = null
-        fun getInstance(context: Context) =
-            INSTANCE ?: synchronized(this) {
-                INSTANCE ?: VolleyRequestQueue(context).also {
-                    INSTANCE = it
-                }
-            }
-    }
-
-    val requestQueue: RequestQueue by lazy {
-        // applicationContext is key, it keeps you from leaking the
-        // Activity or BroadcastReceiver if someone passes one in.
-        Volley.newRequestQueue(context.applicationContext)
-    }
-}
-
-abstract class AndroidMacConnectorServiceBaseHandler : Response.Listener<JSONObject?>,
-    Response.ErrorListener {
+abstract class AndroidMacConnectorServiceBaseHandler : WebServiceResponseHandler {
     abstract fun getLogTag(): String
 
     override fun onErrorResponse(error: VolleyError) {

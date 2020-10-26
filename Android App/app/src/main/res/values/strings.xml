@@ -2,4 +2,8 @@
     <string name="app_name">AndroidMacConnector</string>
     <string name="default_notification_channel_id">fcm_default_channel</string>
     <string name="default_notification_channel_name">fcm_default_channel</string>
+    <string name="app_data_file_key">com.androidmacconnector.androidapp.AppData</string>
+    <string name="access_token">firebase_auth_access_token</string>
+    <string name="access_token_expiration_time">access_token_expiration_time</string>
+    <string name="android_device_id">android_device_id</string>
 </resources>

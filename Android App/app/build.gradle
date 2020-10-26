@@ -46,12 +46,15 @@ dependencies {
     // Import BoM for Firebase Platform
     implementation platform('com.google.firebase:firebase-bom:25.12.0')
 
-    // Dependencies for FCM and analytics
+    // Dependencies for Firebase cloud messaging and analytics
     implementation 'com.google.firebase:firebase-messaging-ktx'
     implementation 'com.google.firebase:firebase-analytics-ktx'
 
     // Dependencies for making HTTP requests
     implementation 'com.android.volley:volley:1.1.1'
+
+    // Dependencies for Firebase auth
+    implementation 'com.firebaseui:firebase-ui-auth:6.2.0'
 
     testImplementation 'junit:junit:4.+'
     androidTestImplementation 'androidx.test.ext:junit:1.1.1'

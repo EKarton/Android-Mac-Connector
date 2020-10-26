@@ -3,9 +3,7 @@ package com.androidmacconnector.androidapp.sms
 import android.Manifest
 import android.telephony.SmsManager
 import android.util.Log
-import com.androidmacconnector.androidapp.data.AndroidMacConnectorService
-import com.androidmacconnector.androidapp.data.FcmSubscriber
-import com.androidmacconnector.androidapp.data.UpdateSmsSentStatusHandler
+import com.androidmacconnector.androidapp.fcm.FcmSubscriber
 import com.google.firebase.messaging.RemoteMessage
 import org.json.JSONObject
 
@@ -13,8 +11,10 @@ import org.json.JSONObject
  * A class used to send sms messages
  */
 class SmsSenderService {
-    fun getRequiredPermissions(): List<String> {
-        return arrayListOf(Manifest.permission.SEND_SMS)
+    companion object {
+        fun getRequiredPermissions(): List<String> {
+            return arrayListOf(Manifest.permission.SEND_SMS)
+        }
     }
 
     fun sendSmsMessage(phoneNumber: String, message: String) {
@@ -23,7 +23,7 @@ class SmsSenderService {
     }
 }
 
-class SendSmsRequestFcmSubscriber(private val service: SmsSenderService, private val webService: AndroidMacConnectorService) : FcmSubscriber {
+class SendSmsRequestFcmSubscriber(private val service: SmsSenderService, private val webService: SmsService) : FcmSubscriber {
     companion object {
         private const val LOG_TAG = "SendSmsSub"
     }

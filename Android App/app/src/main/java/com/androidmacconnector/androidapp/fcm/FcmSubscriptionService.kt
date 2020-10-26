@@ -1,4 +1,4 @@
-package com.androidmacconnector.androidapp.data
+package com.androidmacconnector.androidapp.fcm
 
 import android.util.Log
 import com.google.firebase.messaging.RemoteMessage

@@ -6,10 +6,7 @@ import android.net.Uri
 import android.provider.ContactsContract
 import android.provider.Telephony
 import android.util.Log
-import com.androidmacconnector.androidapp.data.AndroidMacConnectorService
-import com.androidmacconnector.androidapp.data.FcmSubscriber
-import com.androidmacconnector.androidapp.data.UpdateSmsMessagesForThreadHandler
-import com.androidmacconnector.androidapp.data.UpdateSmsThreadsHandler
+import com.androidmacconnector.androidapp.fcm.FcmSubscriber
 import com.google.firebase.messaging.RemoteMessage
 import org.json.JSONObject
 
@@ -24,11 +21,11 @@ interface GetSmsMessagesFromThreadService {
 /**
  * A class used to handle all types of SMS-related tasks
  */
-class SmsQueryService(private val contentResolver: ContentResolver) : GetSmsThreadsService,
-    GetSmsMessagesFromThreadService {
-
-    fun getRequiredPermissions(): List<String> {
-        return arrayListOf(Manifest.permission.READ_SMS, Manifest.permission.READ_CONTACTS)
+class SmsQueryService(private val contentResolver: ContentResolver) : GetSmsThreadsService, GetSmsMessagesFromThreadService {
+    companion object {
+        fun getRequiredPermissions(): List<String> {
+            return arrayListOf(Manifest.permission.READ_SMS, Manifest.permission.READ_CONTACTS)
+        }
     }
 
     /**
@@ -194,7 +191,7 @@ class SmsQueryService(private val contentResolver: ContentResolver) : GetSmsThre
     }
 }
 
-class UpdateSmsThreadsRequestFcmSubscriber(private val smsQueryService: SmsQueryService, private val webService: AndroidMacConnectorService) : FcmSubscriber {
+class UpdateSmsThreadsRequestFcmSubscriber(private val smsQueryService: SmsQueryService, private val webService: SmsService) : FcmSubscriber {
     companion object {
         private const val LOG_TAG = "UpdateSmsThreads"
     }
@@ -214,7 +211,7 @@ class UpdateSmsThreadsRequestFcmSubscriber(private val smsQueryService: SmsQuery
     }
 }
 
-class UpdateSmsForThreadRequestFcmSubscriber(private val smsQueryService: SmsQueryService, private val webService: AndroidMacConnectorService) : FcmSubscriber {
+class UpdateSmsForThreadRequestFcmSubscriber(private val smsQueryService: SmsQueryService, private val webService: SmsService) : FcmSubscriber {
     companion object {
         private const val LOG_TAG = "UpdateSmsForThread"
     }
