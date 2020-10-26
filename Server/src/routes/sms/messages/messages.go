@@ -8,7 +8,7 @@ import (
 	"github.com/gorilla/mux"
 
 	fcm "Android-Mac-Connector-Server/src/data/fcm"
-	jobsdb "Android-Mac-Connector-Server/src/db/jobs"
+	jobstore "Android-Mac-Connector-Server/src/store/jobs"
 )
 
 type SendSmsMessageRequest struct {
@@ -44,7 +44,7 @@ func addSendSmsJob(responseWriter http.ResponseWriter, request *http.Request) {
 	responseWriter.Header().Set("Content-Type", "application/json")
 
 	// Keep track of the job
-	uuid := jobsdb.AddJob(SendSmsJob{"pending"})
+	uuid := jobstore.AddJob("pending")
 
 	// Perform SMS
 	token := "cFAS88fZTgmw37RtNze_kq:APA91bHTfUd2X4CQa1_S0dwRmp9WeIfDlgTsW4GnIwR1Hr1OkQ_wWFnUi_CFn6GiAs2_2RIoUnD-8JMrOtrUggn7ktwqa2vTD7prS8IfJKIKXjeIpWBnup2NZ8M7EAP9J5rxxu4YLHQx"
@@ -76,7 +76,7 @@ func getSendSmsJobStatus(responseWriter http.ResponseWriter, request *http.Reque
 
 	log.Println("Received get sms job status for", deviceId, "with payload", sendSmsMessageRequest)
 
-	var job = jobsdb.GetJobStatus(jobUuid)
+	var jobStatus = jobstore.GetJobStatus(jobUuid)
 
 	// Write response
 	responseWriter.Header().Set("Content-Type", "application/json")
@@ -96,7 +96,7 @@ func updateSendSmsJobStatus(responseWriter http.ResponseWriter, request *http.Re
 
 	log.Println("Update send sms job", jobUuid, "from", deviceId, "with payload", newSendSmsJobStatus)
 
-	jobsdb.UpdateJobStatus(jobUuid, newSendSmsJobStatus)
+	jobstore.UpdateJobStatus(jobUuid, newSendSmsJobStatus)
 
 	// Set response headers
 	responseWriter.Header().Set("Content-Type", "application/json")

@@ -8,7 +8,7 @@ import (
 	"github.com/gorilla/mux"
 
 	fcm "Android-Mac-Connector-Server/src/data/fcm"
-	sms_threads "Android-Mac-Connector-Server/src/db/sms/threads"
+	sms_threads "Android-Mac-Connector-Server/src/store/sms/threads"
 )
 
 type GetSmsThreads2xxResponse struct {

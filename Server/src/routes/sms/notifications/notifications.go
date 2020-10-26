@@ -8,7 +8,7 @@ import (
 
 	"github.com/gorilla/mux"
 
-	sms_notifications "Android-Mac-Connector-Server/src/db/sms/notifications"
+	sms_notifications "Android-Mac-Connector-Server/src/storesms/notifications"
 )
 
 type NewSmsMessageReceived struct {
