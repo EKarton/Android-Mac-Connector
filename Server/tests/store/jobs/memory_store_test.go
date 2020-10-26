@@ -11,6 +11,11 @@ func TestCreateInMemoryStore(t *testing.T) {
 	if store == nil {
 		t.Error("Store is nil")
 	}
+
+	var interfaceStore jobsStore.JobStatusStore = store
+	if interfaceStore == nil {
+		t.Error("interfaceStore is nil")
+	}
 }
 
 func TestAddJob_ShouldReturnDifferentJobIds_WhenCalledTwice(t *testing.T) {

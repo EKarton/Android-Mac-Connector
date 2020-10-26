@@ -12,6 +12,11 @@ func TestCreateInMemoryStore(t *testing.T) {
 	if store == nil {
 		t.Error("Store is nil")
 	}
+
+	var interfaceStore usersStore.UsersStore = store
+	if interfaceStore == nil {
+		t.Error("interfaceStore is nil")
+	}
 }
 
 func TestAddUser_ShouldNotThrowError_WhenUniqueUserIdIsGiven(t *testing.T) {

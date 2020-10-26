@@ -12,6 +12,11 @@ func TestCreateInMemoryStore(t *testing.T) {
 	if store == nil {
 		t.Error("Store is nil")
 	}
+
+	var interfaceStore devicesStore.DevicesStore = store
+	if interfaceStore == nil {
+		t.Error("interfaceStore is nil")
+	}
 }
 
 func TestAddDeviceAndGetDevice(t *testing.T) {
