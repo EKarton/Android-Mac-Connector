@@ -1,7 +1,8 @@
 package jobs
 
 import (
-	"log"
+	"errors"
+
 	uuid "github.com/google/uuid"
 )
 
@@ -10,8 +11,8 @@ type InMemoryJobsStore struct {
 }
 
 func CreateInMemoryStore() *InMemoryJobsStore {
-	store := InMemoryJobsStore {
-		jobIdToJobStatus: make(map[string]string)
+	store := InMemoryJobsStore{
+		jobIdToJobStatus: make(map[string]string),
 	}
 
 	return &store
@@ -31,16 +32,27 @@ func (store *InMemoryJobsStore) AddJob(status string) (string, error) {
 	return jobId, nil
 }
 func (store *InMemoryJobsStore) DeleteJob(jobId string) error {
-	delete(store.jobIdToJobStatus, jobId)
-	return nil
+	if _, ok := store.jobIdToJobStatus[jobId]; ok {
+		delete(store.jobIdToJobStatus, jobId)
+		return nil
+	}
+
+	return errors.New("Job ID " + jobId + " does not exist in InMemoryJobsStore")
 }
 
 func (store *InMemoryJobsStore) UpdateJobStatus(jobId string, newStatus string) error {
-	store.jobIdToJobStatus[jobId] = newStatus
-	return nil
+	if _, ok := store.jobIdToJobStatus[jobId]; ok {
+		store.jobIdToJobStatus[jobId] = newStatus
+		return nil
+	}
+	return errors.New("Job ID " + jobId + " does not exist in InMemoryJobsStore")
 }
 
-func (store *InMemoryJobsStore) GetJobStatus(jobId string) GetJobStatus(jobId string) error {
-	jobStatus := store.jobIdToJobStatus[jobId] 
-	return jobStatus, nil
+func (store *InMemoryJobsStore) GetJobStatus(jobId string) (string, error) {
+	if _, ok := store.jobIdToJobStatus[jobId]; ok {
+		jobStatus := store.jobIdToJobStatus[jobId]
+		return jobStatus, nil
+	}
+
+	return "", errors.New("Job ID " + jobId + " does not exist in InMemoryJobsStore")
 }
