@@ -4,8 +4,8 @@ import android.Manifest
 import android.content.pm.PackageManager
 import android.util.Log
 import androidx.core.content.ContextCompat
-import com.androidmacconnector.androidapp.data.AndroidMacConnectorService
-import com.androidmacconnector.androidapp.data.AndroidMacConnectorServiceImpl
+import com.androidmacconnector.androidapp.sms.SmsService
+import com.androidmacconnector.androidapp.sms.SmsWebService
 import com.androidmacconnector.androidapp.data.FcmSubscriptionServiceImpl
 import com.androidmacconnector.androidapp.sms.*
 import com.google.firebase.messaging.FirebaseMessagingService
@@ -17,7 +17,7 @@ class FirebaseMessagingServiceInstance : FirebaseMessagingService() {
     }
 
     private var subscriptionService: FcmSubscriptionServiceImpl? = null
-    private var webService: AndroidMacConnectorService? = null
+    private var webService: SmsService? = null
     private var smsQueryService: SmsQueryService? = null
     private var smsSenderService: SmsSenderService? = null
 
@@ -39,7 +39,7 @@ class FirebaseMessagingServiceInstance : FirebaseMessagingService() {
                 checkPermissions(Manifest.permission.INTERNET)
 
         if (createWebService) {
-            webService = AndroidMacConnectorServiceImpl(this)
+            webService = SmsWebService(this)
         }
 
         val createSmsQueryService = (webService != null && smsQueryService == null) &&

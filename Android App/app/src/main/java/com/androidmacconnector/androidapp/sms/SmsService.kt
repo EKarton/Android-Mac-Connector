@@ -13,7 +13,7 @@ import org.json.JSONObject
 import java.net.URI
 
 
-interface AndroidMacConnectorService {
+interface SmsService {
     fun notifyNewSmsMessageRecieved(
         newSmsMessage: ReceivedSmsMessage,
         handler: NotifyNewSmsMessageReceivedHandler
@@ -37,7 +37,7 @@ interface AndroidMacConnectorService {
     )
 }
 
-class AndroidMacConnectorServiceImpl(private val context: Context) : AndroidMacConnectorService {
+class SmsWebService(private val context: Context) : SmsService {
 
     companion object {
         private const val LOG_TAG = "WebService"

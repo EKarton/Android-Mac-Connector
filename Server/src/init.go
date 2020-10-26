@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"time"
 
+	devicesRoute "Android-Mac-Connector-Server/src/routes/devices"
 	smsRoute "Android-Mac-Connector-Server/src/routes/sms"
 
 	"github.com/gorilla/mux"
@@ -18,6 +19,9 @@ func main() {
 	// Add subrouters
 	var smsRouter = router.PathPrefix("/api/v1/{deviceId}/sms").Subrouter()
 	smsRoute.InitializeRouter(smsRouter)
+
+	var devicesRouter = router.PathPrefix("/api/v1/devices").Subrouter()
+	devicesRoute.InitializeRouter(devicesRouter)
 
 	server := &http.Server{
 		Addr:              ":8080",
