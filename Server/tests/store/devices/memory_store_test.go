@@ -114,8 +114,8 @@ func TestUpdateDeviceCapabilities_ShouldUpdateCapabilities_GivenValidDevice(t *t
 
 	capabilities, _ := store.GetDeviceCapabilities(deviceId)
 
-	if reflect.DeepEqual(capabilities, []string{"read_sms"}) {
-		t.Errorf("Capabilities %s should be read_sms", capabilities)
+	if !reflect.DeepEqual(capabilities, []string{"read_sms"}) {
+		t.Errorf("Capabilities %s should be [read_sms]", capabilities)
 	}
 }
 
@@ -166,6 +166,30 @@ func TestUpdatePushNotificationToken_ShouldReturnError_GivenInvalidDeviceId(t *t
 	err := store.UpdatePushNotificationToken("1234", "ha")
 
 	if err == nil {
+		t.Error("Error should be returned")
+	}
+}
+
+func TestGetPushNotificationToken_ShouldReturnToken_GivenValidDeviceId(t *testing.T) {
+	store := devicesStore.CreateInMemoryStore()
+	deviceId, _ := store.RegisterDevice("user1", "android", "1234", make([]string, 0))
+	store.UpdatePushNotificationToken(deviceId, "ha")
+	token, err := store.GetPushNotificationToken(deviceId)
+
+	if err != nil {
 		t.Error("Error should not be returned")
+	}
+
+	if token != "ha" {
+		t.Errorf("Token %s should be 'ha'", token)
+	}
+}
+
+func TestGetPushNotificationToken_ShouldReturnError_GivenInvalidDeviceId(t *testing.T) {
+	store := devicesStore.CreateInMemoryStore()
+	_, err := store.GetPushNotificationToken("device id")
+
+	if err == nil {
+		t.Error("Error should be returned")
 	}
 }

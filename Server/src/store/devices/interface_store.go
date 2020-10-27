@@ -15,4 +15,5 @@ type DevicesStore interface {
 	UpdateDeviceCapabilities(deviceId string, capabilities []string) error
 	GetDeviceCapabilities(deviceId string) ([]string, error)
 	UpdatePushNotificationToken(deviceId string, newToken string) error
+	GetPushNotificationToken(deviceId string) (string, error)
 }

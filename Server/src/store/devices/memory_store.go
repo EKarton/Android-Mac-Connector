@@ -2,19 +2,20 @@ package devices
 
 import (
 	"errors"
+	"fmt"
 
 	uuid "github.com/google/uuid"
 )
 
 type InMemoryDevicesStore struct {
 	userIdToDeviceIds map[string][]string
-	deviceIdToDevice  map[string]Device
+	deviceIdToDevice  map[string]*Device
 }
 
 func CreateInMemoryStore() *InMemoryDevicesStore {
 	store := InMemoryDevicesStore{
 		userIdToDeviceIds: make(map[string][]string),
-		deviceIdToDevice:  make(map[string]Device),
+		deviceIdToDevice:  make(map[string]*Device),
 	}
 
 	return &store
@@ -54,13 +55,14 @@ func (store *InMemoryDevicesStore) RegisterDevice(userId string, deviceType stri
 	}
 
 	newDevice := Device{
-		UserId:       userId,
-		DeviceType:   deviceType,
-		HardwareId:   hardwareId,
-		Capabilities: capabilities,
+		UserId:                userId,
+		DeviceType:            deviceType,
+		HardwareId:            hardwareId,
+		Capabilities:          capabilities,
+		PushNotificationToken: "",
 	}
 
-	store.deviceIdToDevice[deviceId] = newDevice
+	store.deviceIdToDevice[deviceId] = &newDevice
 	store.userIdToDeviceIds[userId] = append(store.userIdToDeviceIds[userId], deviceId)
 
 	return deviceId, nil
@@ -96,5 +98,19 @@ func (store *InMemoryDevicesStore) UpdatePushNotificationToken(deviceId string, 
 
 	device.PushNotificationToken = newToken
 
+	fmt.Println(device, newToken, device.PushNotificationToken)
+
 	return nil
+}
+
+func (store *InMemoryDevicesStore) GetPushNotificationToken(deviceId string) (string, error) {
+	device, isExist := store.deviceIdToDevice[deviceId]
+
+	if !isExist {
+		return "", errors.New("Device id " + deviceId + " does not exist")
+	}
+
+	fmt.Println(device, device.PushNotificationToken)
+
+	return device.PushNotificationToken, nil
 }

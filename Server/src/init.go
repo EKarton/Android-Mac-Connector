@@ -5,24 +5,30 @@ import (
 	"net/http"
 	"time"
 
-	devicesRoute "Android-Mac-Connector-Server/src/routes/devices"
-	smsRoute "Android-Mac-Connector-Server/src/routes/sms"
+	devices "Android-Mac-Connector-Server/src/routes/devices"
+	sms "Android-Mac-Connector-Server/src/routes/sms"
+	"Android-Mac-Connector-Server/src/store"
 
 	"github.com/gorilla/mux"
 )
 
 func main() {
 
+	// Create our data store
+	dataStore := store.CreateInMemoryDatastore()
+
 	// Create our router
-	var router = mux.NewRouter()
+	router := mux.NewRouter()
 
 	// Add subrouters
-	var smsRouter = router.PathPrefix("/api/v1/{deviceId}/sms").Subrouter()
-	smsRoute.InitializeRouter(smsRouter)
+	smsRouter := router.PathPrefix("/api/v1/{deviceId}/sms").Subrouter()
+	devicesRouter := router.PathPrefix("/api/v1/devices").Subrouter()
 
-	var devicesRouter = router.PathPrefix("/api/v1/devices").Subrouter()
-	devicesRoute.InitializeRouter(devicesRouter)
+	// Add paths to each subrouter
+	sms.InitializeRouter(dataStore, smsRouter)
+	devices.InitializeRouter(dataStore, devicesRouter)
 
+	// Create and start our server
 	server := &http.Server{
 		Addr:              ":8080",
 		Handler:           router,
@@ -31,8 +37,6 @@ func main() {
 		WriteTimeout:      5 * time.Second,
 		IdleTimeout:       90 * time.Second,
 	}
-
-	// Start the server
 	log.Printf("Starting server at port %v", 8080)
 	log.Fatal(server.ListenAndServe())
 }

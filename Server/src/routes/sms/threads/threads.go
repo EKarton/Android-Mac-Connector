@@ -5,10 +5,9 @@ import (
 
 	"github.com/gorilla/mux"
 
+	"Android-Mac-Connector-Server/src/store"
 	"Android-Mac-Connector-Server/src/store/sms/messages"
 )
-
-var smsMessagesStore messages.SmsMessagesStore = messages.CreateInMemoryStore()
 
 type GetSmsThreads2xxResponse struct {
 	SmsThreads  []messages.SmsThread `json:"sms_threads"`
@@ -35,125 +34,133 @@ type UpdateSmsMessagesForThread2xxResponse struct {
 /**
  * Returns the sms threads of a particular device
  */
-func getSmsThreads(responseWriter http.ResponseWriter, request *http.Request) {
-	// var variables = mux.Vars(request)
-	// var deviceId = variables["deviceId"]
+func getSmsThreads(dataStore *store.Datastore) http.HandlerFunc {
+	return func(responseWriter http.ResponseWriter, request *http.Request) {
+		// var variables = mux.Vars(request)
+		// var deviceId = variables["deviceId"]
 
-	// log.Println("Received get sms threads for", deviceId)
+		// log.Println("Received get sms threads for", deviceId)
 
-	// // Ask the Android device to update the sms thread
-	// token := "cFAS88fZTgmw37RtNze_kq:APA91bHTfUd2X4CQa1_S0dwRmp9WeIfDlgTsW4GnIwR1Hr1OkQ_wWFnUi_CFn6GiAs2_2RIoUnD-8JMrOtrUggn7ktwqa2vTD7prS8IfJKIKXjeIpWBnup2NZ8M7EAP9J5rxxu4YLHQx"
-	// data := map[string]string{
-	// 	"action": "update_sms_threads",
-	// }
-	// fcm.SendFcmMessage(token, data, nil)
+		// // Ask the Android device to update the sms thread
+		// token := "cFAS88fZTgmw37RtNze_kq:APA91bHTfUd2X4CQa1_S0dwRmp9WeIfDlgTsW4GnIwR1Hr1OkQ_wWFnUi_CFn6GiAs2_2RIoUnD-8JMrOtrUggn7ktwqa2vTD7prS8IfJKIKXjeIpWBnup2NZ8M7EAP9J5rxxu4YLHQx"
+		// data := map[string]string{
+		// 	"action": "update_sms_threads",
+		// }
+		// fcm.SendFcmMessage(token, data, nil)
 
-	// // Get the existing sms threads
-	// smsThreads, err := smsMessagesStore.GetSmsThreads(deviceId)
-	// if err != nil {
-	// 	responseWriter.WriteHeader(http.StatusInternalServerError)
-	// }
+		// // Get the existing sms threads
+		// smsThreads, err := smsMessagesStore.GetSmsThreads(deviceId)
+		// if err != nil {
+		// 	responseWriter.WriteHeader(http.StatusInternalServerError)
+		// }
 
-	// // Write response header
-	// responseWriter.Header().Set("Content-Type", "application/json")
+		// // Write response header
+		// responseWriter.Header().Set("Content-Type", "application/json")
 
-	// // Write response body
-	// responseBody := GetSmsThreads2xxResponse{smsThreads, 0}
-	// json.NewEncoder(responseWriter).Encode(responseBody)
+		// // Write response body
+		// responseBody := GetSmsThreads2xxResponse{smsThreads, 0}
+		// json.NewEncoder(responseWriter).Encode(responseBody)
+	}
 }
 
 /**
  * Updates the sms threads stored on a particular device
  */
-func updateSmsThreads(responseWriter http.ResponseWriter, request *http.Request) {
-	// var variables = mux.Vars(request)
-	// var deviceId = variables["deviceId"]
-	// var smsThreads []messaging.SmsThreads
-	// json.NewDecoder(request.Body).Decode(&smsThreads)
+func updateSmsThreads(dataStore *store.Datastore) http.HandlerFunc {
+	return func(responseWriter http.ResponseWriter, request *http.Request) {
+		// var variables = mux.Vars(request)
+		// var deviceId = variables["deviceId"]
+		// var smsThreads []messaging.SmsThreads
+		// json.NewDecoder(request.Body).Decode(&smsThreads)
 
-	// log.Println("Received update sms threads for", deviceId, "with payload", smsThreads)
+		// log.Println("Received update sms threads for", deviceId, "with payload", smsThreads)
 
-	// sms_threads.UpdateSmsThreads(smsThreads)
+		// sms_threads.UpdateSmsThreads(smsThreads)
 
-	// // Write response header
-	// responseWriter.Header().Set("Content-Type", "application/json")
+		// // Write response header
+		// responseWriter.Header().Set("Content-Type", "application/json")
 
-	// // Write response body
-	// var responseBody = UpdateSmsThreads2xxResponse{"success"}
-	// json.NewEncoder(responseWriter).Encode(responseBody)
+		// // Write response body
+		// var responseBody = UpdateSmsThreads2xxResponse{"success"}
+		// json.NewEncoder(responseWriter).Encode(responseBody)
+	}
 }
 
 /**
  * Returns the messages of a sms thread of a particular device
  */
-func getSmsMessagesForThread(responseWriter http.ResponseWriter, request *http.Request) {
-	// var variables = mux.Vars(request)
-	// var deviceId = variables["deviceId"]
-	// var threadId = variables["threadId"]
+func getSmsMessagesForThread(dataStore *store.Datastore) http.HandlerFunc {
+	return func(responseWriter http.ResponseWriter, request *http.Request) {
+		// var variables = mux.Vars(request)
+		// var deviceId = variables["deviceId"]
+		// var threadId = variables["threadId"]
 
-	// log.Println("Get sms msgs for thread", threadId, "from", deviceId)
+		// log.Println("Get sms msgs for thread", threadId, "from", deviceId)
 
-	// smsMessages, err := sms_threads.GetSmsMessagesForThread(threadId)
-	// if err != nil {
-	// 	responseWriter.Header().Set("Content-Type", "application/json")
-	// 	json.NewEncoder(responseWriter).Encode(GetSmsMessagesForThread4xxResponse{
-	// 		Error: err.Error(),
-	// 	})
-	// 	return
-	// }
+		// smsMessages, err := sms_threads.GetSmsMessagesForThread(threadId)
+		// if err != nil {
+		// 	responseWriter.Header().Set("Content-Type", "application/json")
+		// 	json.NewEncoder(responseWriter).Encode(GetSmsMessagesForThread4xxResponse{
+		// 		Error: err.Error(),
+		// 	})
+		// 	return
+		// }
 
-	// lastTimeUpdated, err := sms_threads.GetLastTimeSmsMessagesForThreadUpdated(threadId)
+		// lastTimeUpdated, err := sms_threads.GetLastTimeSmsMessagesForThreadUpdated(threadId)
 
-	// if err != nil {
-	// 	responseWriter.Header().Set("Content-Type", "application/json")
-	// 	json.NewEncoder(responseWriter).Encode(GetSmsMessagesForThread4xxResponse{
-	// 		Error: err.Error(),
-	// 	})
-	// 	return
-	// }
+		// if err != nil {
+		// 	responseWriter.Header().Set("Content-Type", "application/json")
+		// 	json.NewEncoder(responseWriter).Encode(GetSmsMessagesForThread4xxResponse{
+		// 		Error: err.Error(),
+		// 	})
+		// 	return
+		// }
 
-	// // Write response header
-	// responseWriter.Header().Set("Content-Type", "application/json")
+		// // Write response header
+		// responseWriter.Header().Set("Content-Type", "application/json")
 
-	// // Write response body
-	// responseBody := GetSmsMessagesForThread2xxResponse{
-	// 	SmsMessages: smsMessages,
-	// 	LastUpdated: lastTimeUpdated,
-	// }
-	// json.NewEncoder(responseWriter).Encode(responseBody)
+		// // Write response body
+		// responseBody := GetSmsMessagesForThread2xxResponse{
+		// 	SmsMessages: smsMessages,
+		// 	LastUpdated: lastTimeUpdated,
+		// }
+		// json.NewEncoder(responseWriter).Encode(responseBody)
+	}
 }
 
 /**
  * Updates the messages of a sms thread of a particular device
  */
-func updateSmsMessagesForThread(responseWriter http.ResponseWriter, request *http.Request) {
-	// var variables = mux.Vars(request)
-	// var deviceId = variables["deviceId"]
-	// var threadId = variables["threadId"]
-	// var smsMessages []messages.SmsMessage
-	// json.NewDecoder(request.Body).Decode(&smsMessages)
+func updateSmsMessagesForThread(dataStore *store.Datastore) http.HandlerFunc {
+	return func(responseWriter http.ResponseWriter, request *http.Request) {
+		// var variables = mux.Vars(request)
+		// var deviceId = variables["deviceId"]
+		// var threadId = variables["threadId"]
+		// var smsMessages []messages.SmsMessage
+		// json.NewDecoder(request.Body).Decode(&smsMessages)
 
-	// log.Println("Update sms msgs for thread", threadId, "from", deviceId, "with payload", smsMessages)
+		// log.Println("Update sms msgs for thread", threadId, "from", deviceId, "with payload", smsMessages)
 
-	// smsMessagesStore.(threadId, smsMessages)
+		// smsMessagesStore.(threadId, smsMessages)
 
-	// // Write response header
-	// responseWriter.Header().Set("Content-Type", "application/json")
+		// // Write response header
+		// responseWriter.Header().Set("Content-Type", "application/json")
 
-	// // Write response body
-	// responseBody := UpdateSmsMessagesForThread2xxResponse{"success"}
-	// json.NewEncoder(responseWriter).Encode(responseBody)
+		// // Write response body
+		// responseBody := UpdateSmsMessagesForThread2xxResponse{"success"}
+		// json.NewEncoder(responseWriter).Encode(responseBody)
+	}
 }
 
 /**
  * Initializes the router to include paths and path handlers
  */
-func InitializeRouter(router *mux.Router) {
+func InitializeRouter(dataStore *store.Datastore, router *mux.Router) {
 	// Add paths for when to get SMS threads
-	router.HandleFunc("", getSmsThreads).Methods("POST")
-	router.HandleFunc("", updateSmsThreads).Methods("PUT")
+	router.HandleFunc("", getSmsThreads(dataStore)).Methods("POST")
+	router.HandleFunc("", updateSmsThreads(dataStore)).Methods("PUT")
 
 	// Add paths for when to get SMS messages of a particular thread
-	router.HandleFunc("/{threadId}/messages", getSmsMessagesForThread).Methods("GET")
-	router.HandleFunc("/{threadId}/messages", updateSmsMessagesForThread).Methods("PUT")
+	router.HandleFunc("/{threadId}/messages", getSmsMessagesForThread(dataStore)).Methods("GET")
+	router.HandleFunc("/{threadId}/messages", updateSmsMessagesForThread(dataStore)).Methods("PUT")
 }

@@ -8,10 +8,8 @@ import (
 	"github.com/gorilla/mux"
 
 	fcm "Android-Mac-Connector-Server/src/data/fcm"
-	"Android-Mac-Connector-Server/src/store/jobs"
+	"Android-Mac-Connector-Server/src/store"
 )
-
-var jobStatusStore jobs.JobStatusStore = jobs.CreateInMemoryStore()
 
 type SendSmsMessageRequest struct {
 	PhoneNumber string `json:"phone_number"`
@@ -35,100 +33,113 @@ type UpdateSendSmsJobStatus2xxResponse struct {
  * Handler for when a device wants to send an SMS message from another device
  * It submits a job to the jobs queue, where its status can be found by polling the job queue
  */
-func addSendSmsJob(responseWriter http.ResponseWriter, request *http.Request) {
-	var variables = mux.Vars(request)
-	var sendSmsMessageRequest SendSmsMessageRequest
-	json.NewDecoder(request.Body).Decode(&sendSmsMessageRequest)
+func addSendSmsJob(dataStore *store.Datastore) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		variables := mux.Vars(r)
+		deviceId := variables["deviceId"]
+		jsonBody := SendSmsMessageRequest{}
+		json.NewDecoder(r.Body).Decode(&jsonBody)
 
-	log.Println("Received send sms request for", variables["deviceId"], "with payload", sendSmsMessageRequest)
+		log.Println("Received send sms request for", deviceId, "with payload", jsonBody)
 
-	// Set response headers
-	responseWriter.Header().Set("Content-Type", "application/json")
+		// Set response headers
+		w.Header().Set("Content-Type", "application/json")
 
-	// Keep track of the job
-	uuid, err := jobStatusStore.AddJob("pending")
+		// Keep track of the job
+		uuid, err := dataStore.JobStatusStore.AddJob("pending")
 
-	if err != nil {
-		responseWriter.WriteHeader(http.StatusInternalServerError)
-		return
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+
+		// Get the Push notification token
+		token, err := dataStore.DevicesStores.GetPushNotificationToken(deviceId)
+
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+
+		// Send the sms
+		data := map[string]string{
+			"action":       "send_sms",
+			"uuid":         uuid,
+			"phone_number": jsonBody.PhoneNumber,
+			"body":         jsonBody.Body,
+		}
+		fcm.SendFcmMessage(token, data, nil)
+
+		// Write response body
+		responseBody := SendSmsMessage2xxResponse{
+			Status: "success",
+			JobId:  uuid,
+		}
+		json.NewEncoder(w).Encode(responseBody)
 	}
-
-	// Perform SMS
-	token := "cFAS88fZTgmw37RtNze_kq:APA91bHTfUd2X4CQa1_S0dwRmp9WeIfDlgTsW4GnIwR1Hr1OkQ_wWFnUi_CFn6GiAs2_2RIoUnD-8JMrOtrUggn7ktwqa2vTD7prS8IfJKIKXjeIpWBnup2NZ8M7EAP9J5rxxu4YLHQx"
-	data := map[string]string{
-		"action":       "send_sms",
-		"uuid":         uuid,
-		"phone_number": sendSmsMessageRequest.PhoneNumber,
-		"body":         sendSmsMessageRequest.Body,
-	}
-	fcm.SendFcmMessage(token, data, nil)
-
-	// Write response body
-	var responseBody = SendSmsMessage2xxResponse{
-		Status: "success",
-		JobId:  uuid,
-	}
-	json.NewEncoder(responseWriter).Encode(responseBody)
 }
 
 /**
  * Returns the status of the SMS job
  */
-func getSendSmsJobStatus(responseWriter http.ResponseWriter, request *http.Request) {
-	var variables = mux.Vars(request)
-	var deviceId = variables["deviceId"]
-	var jobUuid = variables["uuid"]
-	var sendSmsMessageRequest SendSmsMessageRequest
-	json.NewDecoder(request.Body).Decode(&sendSmsMessageRequest)
+func getSendSmsJobStatus(dataStore *store.Datastore) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		variables := mux.Vars(r)
+		deviceId := variables["deviceId"]
+		jobUuid := variables["uuid"]
+		sendSmsMessageRequest := SendSmsMessageRequest{}
+		json.NewDecoder(r.Body).Decode(&sendSmsMessageRequest)
 
-	log.Println("Received get sms job status for", deviceId, "with payload", sendSmsMessageRequest)
+		log.Println("Received get sms job status for", deviceId, "with payload", sendSmsMessageRequest)
 
-	jobStatus, err := jobStatusStore.GetJobStatus(jobUuid)
+		jobStatus, err := dataStore.JobStatusStore.GetJobStatus(jobUuid)
 
-	if err != nil {
-		responseWriter.WriteHeader(http.StatusInternalServerError)
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+		}
+
+		// Write response
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(jobStatus)
 	}
-
-	// Write response
-	responseWriter.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(responseWriter).Encode(jobStatus)
 }
 
 /**
  * Updates the status of a SMS job
  */
-func updateSendSmsJobStatus(responseWriter http.ResponseWriter, request *http.Request) {
-	// Get request path variables
-	var variables = mux.Vars(request)
-	var deviceId = variables["deviceId"]
-	var jobUuid = variables["uuid"]
-	var jsonBody SendSmsJob
+func updateSendSmsJobStatus(dataStore *store.Datastore) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		// Get request path variables
+		var variables = mux.Vars(r)
+		var deviceId = variables["deviceId"]
+		var jobUuid = variables["uuid"]
+		var jsonBody SendSmsJob
 
-	json.NewDecoder(request.Body).Decode(&jsonBody)
+		json.NewDecoder(r.Body).Decode(&jsonBody)
 
-	log.Println("Update send sms job", jobUuid, "from", deviceId, "with payload", jsonBody.JobStatus)
+		log.Println("Update send sms job", jobUuid, "from", deviceId, "with payload", jsonBody.JobStatus)
 
-	err := jobStatusStore.UpdateJobStatus(jobUuid, jsonBody.JobStatus)
-	if err != nil {
-		responseWriter.WriteHeader(http.StatusInternalServerError)
+		err := dataStore.JobStatusStore.UpdateJobStatus(jobUuid, jsonBody.JobStatus)
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+		}
+
+		// Set response headers
+		w.Header().Set("Content-Type", "application/json")
+
+		// Write response body
+		var responseBody = UpdateSendSmsJobStatus2xxResponse{
+			Status: "success",
+		}
+		json.NewEncoder(w).Encode(responseBody)
 	}
-
-	// Set response headers
-	responseWriter.Header().Set("Content-Type", "application/json")
-
-	// Write response body
-	var responseBody = UpdateSendSmsJobStatus2xxResponse{
-		Status: "success",
-	}
-	json.NewEncoder(responseWriter).Encode(responseBody)
 }
 
 /**
- * Initializes the router to include paths and path handlers
+ * Initializes the router for when the device wants to send SMS message
  */
-func InitializeRouter(router *mux.Router) {
-	// Add paths for when to send SMS message
-	router.HandleFunc("", addSendSmsJob).Methods("POST")
-	router.HandleFunc("/{uuid}/status", getSendSmsJobStatus).Methods("GET")
-	router.HandleFunc("/{uuid}/status", updateSendSmsJobStatus).Methods("PUT")
+func InitializeRouter(dataStore *store.Datastore, router *mux.Router) {
+	router.HandleFunc("", addSendSmsJob(dataStore)).Methods("POST")
+	router.HandleFunc("/{uuid}/status", getSendSmsJobStatus(dataStore)).Methods("GET")
+	router.HandleFunc("/{uuid}/status", updateSendSmsJobStatus(dataStore)).Methods("PUT")
 }
