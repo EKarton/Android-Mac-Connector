@@ -44,9 +44,9 @@ type UpdateAndroidPushNotificationTokenRequest struct {
 func isDeviceRegistered(responseWriter http.ResponseWriter, request *http.Request) {
 	userId := request.Header.Get("user_id")
 	deviceType := request.URL.Query().Get("device_type")
-	androidDeviceId := request.URL.Query().Get("android_device_id")
+	hardwareId := request.URL.Query().Get("hardware_id")
 
-	isExist, err := devicesStore.DoesDeviceExist(userId, deviceType, androidDeviceId)
+	isExist, err := devicesStore.DoesDeviceExist(userId, deviceType, hardwareId)
 
 	if err != nil {
 		responseWriter.WriteHeader(http.StatusInternalServerError)

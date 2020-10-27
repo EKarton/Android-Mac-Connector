@@ -33,6 +33,7 @@ func (store *InMemoryDevicesStore) DoesDeviceExist(userId string, deviceType str
 	}
 	return false, nil
 }
+
 func (store *InMemoryDevicesStore) RegisterDevice(userId string, deviceType string, hardwareId string, capabilities []string) (string, error) {
 	isExist, err := store.DoesDeviceExist(userId, deviceType, hardwareId)
 
@@ -64,6 +65,7 @@ func (store *InMemoryDevicesStore) RegisterDevice(userId string, deviceType stri
 
 	return deviceId, nil
 }
+
 func (store *InMemoryDevicesStore) UpdateDeviceCapabilities(deviceId string, capabilities []string) error {
 	device, isExist := store.deviceIdToDevice[deviceId]
 
@@ -74,6 +76,7 @@ func (store *InMemoryDevicesStore) UpdateDeviceCapabilities(deviceId string, cap
 	device.Capabilities = capabilities
 	return nil
 }
+
 func (store *InMemoryDevicesStore) GetDeviceCapabilities(deviceId string) ([]string, error) {
 	device, isExist := store.deviceIdToDevice[deviceId]
 

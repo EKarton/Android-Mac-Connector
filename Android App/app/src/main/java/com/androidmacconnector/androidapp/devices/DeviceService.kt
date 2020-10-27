@@ -33,7 +33,7 @@ class DeviceWebService(context: Context): WebService(context), DeviceService {
             .encodedAuthority(getServerAuthority())
             .encodedPath(IS_DEVICE_REGISTERED_PATH)
             .appendQueryParameter("device_type", "android")
-            .appendQueryParameter("android_device_id", androidDeviceId)
+            .appendQueryParameter("hardware_id", androidDeviceId)
             .build()
 
         val headers = mapOf("Authorization" to format("Bearer %s", authToken))

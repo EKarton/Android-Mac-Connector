@@ -31,6 +31,7 @@ func (store *InMemoryJobsStore) AddJob(status string) (string, error) {
 	store.jobIdToJobStatus[jobId] = status
 	return jobId, nil
 }
+
 func (store *InMemoryJobsStore) DeleteJob(jobId string) error {
 	if _, ok := store.jobIdToJobStatus[jobId]; ok {
 		delete(store.jobIdToJobStatus, jobId)
