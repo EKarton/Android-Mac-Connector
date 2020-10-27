@@ -11,7 +11,7 @@ type Device struct {
 
 type DevicesStore interface {
 	DoesDeviceExist(userId string, deviceType string, hardwareId string) (bool, error)
-	RegisterDevice(userId string, deviceType string, hardwareId string) (string, error)
+	RegisterDevice(userId string, deviceType string, hardwareId string, capabilities []string) (string, error)
 	UpdateDeviceCapabilities(deviceId string, capabilities []string) error
 	GetDeviceCapabilities(deviceId string) ([]string, error)
 	UpdatePushNotificationToken(deviceId string, newToken string) error

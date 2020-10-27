@@ -33,7 +33,7 @@ func (store *InMemoryDevicesStore) DoesDeviceExist(userId string, deviceType str
 	}
 	return false, nil
 }
-func (store *InMemoryDevicesStore) RegisterDevice(userId string, deviceType string, hardwareId string) (string, error) {
+func (store *InMemoryDevicesStore) RegisterDevice(userId string, deviceType string, hardwareId string, capabilities []string) (string, error) {
 	isExist, err := store.DoesDeviceExist(userId, deviceType, hardwareId)
 
 	if isExist {
@@ -56,7 +56,7 @@ func (store *InMemoryDevicesStore) RegisterDevice(userId string, deviceType stri
 		UserId:       userId,
 		DeviceType:   deviceType,
 		HardwareId:   hardwareId,
-		Capabilities: make([]string, 0),
+		Capabilities: capabilities,
 	}
 
 	store.deviceIdToDevice[deviceId] = newDevice

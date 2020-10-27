@@ -16,6 +16,12 @@ type IsDeviceRegistered2xxResponse struct {
 	IsRegistered bool `json:"is_registered"`
 }
 
+type RegisterDeviceRequest struct {
+	DeviceType       string `json:"device_type"`
+	HardwareDeviceId string `json:"hardware_id"`
+	Capabilities     string `json:"capabilities"`
+}
+
 type RegisterDevice2xxResponse struct {
 	DeviceId string `json:"device_id"`
 }
@@ -32,6 +38,9 @@ type UpdateAndroidPushNotificationTokenRequest struct {
 	Token string `json:"fcm_token"`
 }
 
+/*
+ * Checks if a device is registered or not, based on the user id, the device type, and the hardware number
+ */
 func isDeviceRegistered(responseWriter http.ResponseWriter, request *http.Request) {
 	userId := request.Header.Get("user_id")
 	deviceType := request.URL.Query().Get("device_type")
@@ -49,12 +58,16 @@ func isDeviceRegistered(responseWriter http.ResponseWriter, request *http.Reques
 	})
 }
 
+/**
+ * Registers a device given the user id, device type, and the hardware id
+ */
 func registerDevice(responseWriter http.ResponseWriter, request *http.Request) {
 	userId := request.Header.Get("user_id")
-	deviceType := request.URL.Query().Get("device_type")
-	hardwareId := request.URL.Query().Get("hardware_id")
 
-	deviceId, err := devicesStore.RegisterDevice(userId, deviceType, hardwareId)
+	var jsonBody RegisterDeviceRequest
+	json.NewDecoder(request.Body).Decode(&jsonBody)
+
+	deviceId, err := devicesStore.RegisterDevice(userId, jsonBody.DeviceType, jsonBody.HardwareDeviceId, jsonBody.Capabilities)
 
 	if err != nil {
 		responseWriter.WriteHeader(http.StatusInternalServerError)

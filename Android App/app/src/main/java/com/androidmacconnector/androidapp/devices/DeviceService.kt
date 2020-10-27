@@ -45,7 +45,7 @@ class DeviceWebService(context: Context): WebService(context), DeviceService {
 
         val jsonBody = JSONObject()
         jsonBody.put("device_type", "android")
-        jsonBody.put("android_device_id", androidDeviceId)
+        jsonBody.put("hardware_id", androidDeviceId)
         jsonBody.put("capabilities", capabilities)
 
         val uri = Uri.Builder()

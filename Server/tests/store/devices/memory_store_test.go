@@ -21,7 +21,7 @@ func TestCreateInMemoryStore(t *testing.T) {
 
 func TestDoesDeviceExist_ShouldReturnTrue_GivenDeviceIsRegistered(t *testing.T) {
 	store := devicesStore.CreateInMemoryStore()
-	store.RegisterDevice("userId", "android", "1234")
+	store.RegisterDevice("userId", "android", "1234", make([]string, 0))
 	isExist, err := store.DoesDeviceExist("userId", "android", "1234")
 
 	if err != nil {
@@ -35,7 +35,7 @@ func TestDoesDeviceExist_ShouldReturnTrue_GivenDeviceIsRegistered(t *testing.T) 
 
 func TestDoesDeviceExist_ShouldReturnFalse_GivenHardwareIdDoesNotMatch(t *testing.T) {
 	store := devicesStore.CreateInMemoryStore()
-	store.RegisterDevice("userId", "android", "1234")
+	store.RegisterDevice("userId", "android", "1234", make([]string, 0))
 	isExist, err := store.DoesDeviceExist("userId", "android", "12345")
 
 	if err != nil {
@@ -49,7 +49,7 @@ func TestDoesDeviceExist_ShouldReturnFalse_GivenHardwareIdDoesNotMatch(t *testin
 
 func TestDoesDeviceExist_ShouldReturnFalse_GivenUserIdDoesNotMatch(t *testing.T) {
 	store := devicesStore.CreateInMemoryStore()
-	store.RegisterDevice("userId", "android", "1234")
+	store.RegisterDevice("userId", "android", "1234", make([]string, 0))
 	isExist, err := store.DoesDeviceExist("userId2", "android", "1234")
 
 	if err != nil {
@@ -63,7 +63,7 @@ func TestDoesDeviceExist_ShouldReturnFalse_GivenUserIdDoesNotMatch(t *testing.T)
 
 func TestDoesDeviceExist_ShouldReturnFalse_GivenDeviceTypeDoesNotMatch(t *testing.T) {
 	store := devicesStore.CreateInMemoryStore()
-	store.RegisterDevice("userId", "android", "1234")
+	store.RegisterDevice("userId", "android", "1234", make([]string, 0))
 	isExist, err := store.DoesDeviceExist("userId", "mac", "1234")
 
 	if err != nil {
@@ -77,8 +77,8 @@ func TestDoesDeviceExist_ShouldReturnFalse_GivenDeviceTypeDoesNotMatch(t *testin
 
 func TestRegisterDevice_ShouldReturnNewDeviceId_GivenDeviceIsNotRegisteredYet(t *testing.T) {
 	store := devicesStore.CreateInMemoryStore()
-	deviceId1, err1 := store.RegisterDevice("userId1", "android", "1234")
-	deviceId2, err2 := store.RegisterDevice("userId2", "android", "1234")
+	deviceId1, err1 := store.RegisterDevice("userId1", "android", "1234", make([]string, 0))
+	deviceId2, err2 := store.RegisterDevice("userId2", "android", "1234", make([]string, 0))
 
 	if err1 != nil {
 		t.Errorf("Error %s should not be returned", err1.Error())
@@ -95,8 +95,8 @@ func TestRegisterDevice_ShouldReturnNewDeviceId_GivenDeviceIsNotRegisteredYet(t 
 
 func TestRegisterDevice_ShouldReturnError_GivenDeviceIsAlreadyRegistered(t *testing.T) {
 	store := devicesStore.CreateInMemoryStore()
-	store.RegisterDevice("userId1", "android", "1234")
-	_, err := store.RegisterDevice("userId1", "android", "1234")
+	store.RegisterDevice("userId1", "android", "1234", make([]string, 0))
+	_, err := store.RegisterDevice("userId1", "android", "1234", make([]string, 0))
 
 	if err == nil {
 		t.Error("Error should be returned")
@@ -105,7 +105,7 @@ func TestRegisterDevice_ShouldReturnError_GivenDeviceIsAlreadyRegistered(t *test
 
 func TestUpdateDeviceCapabilities_ShouldUpdateCapabilities_GivenValidDevice(t *testing.T) {
 	store := devicesStore.CreateInMemoryStore()
-	deviceId, _ := store.RegisterDevice("userId1", "android", "1234")
+	deviceId, _ := store.RegisterDevice("userId1", "android", "1234", make([]string, 0))
 	err := store.UpdateDeviceCapabilities(deviceId, []string{"read_sms"})
 
 	if err != nil {
@@ -130,7 +130,7 @@ func TestUpdateDeviceCapabilities_ShouldReturnError_GivenInvalidDeviceId(t *test
 
 func TestGetDeviceCapabilities_ShouldReturnEmptyCapabilities_GivenValidDeviceId(t *testing.T) {
 	store := devicesStore.CreateInMemoryStore()
-	deviceId, _ := store.RegisterDevice("user1", "android", "1234")
+	deviceId, _ := store.RegisterDevice("user1", "android", "1234", make([]string, 0))
 	capabilities, err := store.GetDeviceCapabilities(deviceId)
 
 	if err != nil {
@@ -153,7 +153,7 @@ func TestGetDeviceCapabilities_ShouldReturnError_GivenInvalidDeviceId(t *testing
 
 func TestUpdatePushNotificationToken_ShouldReturnNoError_GivenValidDeviceId(t *testing.T) {
 	store := devicesStore.CreateInMemoryStore()
-	deviceId, _ := store.RegisterDevice("user1", "android", "1234")
+	deviceId, _ := store.RegisterDevice("user1", "android", "1234", make([]string, 0))
 	err := store.UpdatePushNotificationToken(deviceId, "token")
 
 	if err != nil {
