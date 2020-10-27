@@ -8,8 +8,10 @@ import (
 	"github.com/gorilla/mux"
 
 	fcm "Android-Mac-Connector-Server/src/data/fcm"
-	jobstore "Android-Mac-Connector-Server/src/store/jobs"
+	"Android-Mac-Connector-Server/src/store/jobs"
 )
+
+var jobStatusStore jobs.JobStatusStore = jobs.CreateInMemoryStore()
 
 type SendSmsMessageRequest struct {
 	PhoneNumber string `json:"phone_number"`
@@ -44,7 +46,12 @@ func addSendSmsJob(responseWriter http.ResponseWriter, request *http.Request) {
 	responseWriter.Header().Set("Content-Type", "application/json")
 
 	// Keep track of the job
-	uuid := jobstore.AddJob("pending")
+	uuid, err := jobStatusStore.AddJob("pending")
+
+	if err != nil {
+		responseWriter.WriteHeader(http.StatusInternalServerError)
+		return
+	}
 
 	// Perform SMS
 	token := "cFAS88fZTgmw37RtNze_kq:APA91bHTfUd2X4CQa1_S0dwRmp9WeIfDlgTsW4GnIwR1Hr1OkQ_wWFnUi_CFn6GiAs2_2RIoUnD-8JMrOtrUggn7ktwqa2vTD7prS8IfJKIKXjeIpWBnup2NZ8M7EAP9J5rxxu4YLHQx"
@@ -76,11 +83,15 @@ func getSendSmsJobStatus(responseWriter http.ResponseWriter, request *http.Reque
 
 	log.Println("Received get sms job status for", deviceId, "with payload", sendSmsMessageRequest)
 
-	var jobStatus = jobstore.GetJobStatus(jobUuid)
+	jobStatus, err := jobStatusStore.GetJobStatus(jobUuid)
+
+	if err != nil {
+		responseWriter.WriteHeader(http.StatusInternalServerError)
+	}
 
 	// Write response
 	responseWriter.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(responseWriter).Encode(job)
+	json.NewEncoder(responseWriter).Encode(jobStatus)
 }
 
 /**
@@ -91,12 +102,16 @@ func updateSendSmsJobStatus(responseWriter http.ResponseWriter, request *http.Re
 	var variables = mux.Vars(request)
 	var deviceId = variables["deviceId"]
 	var jobUuid = variables["uuid"]
-	var newSendSmsJobStatus SendSmsJob
-	json.NewDecoder(request.Body).Decode(&newSendSmsJobStatus)
+	var jsonBody SendSmsJob
 
-	log.Println("Update send sms job", jobUuid, "from", deviceId, "with payload", newSendSmsJobStatus)
+	json.NewDecoder(request.Body).Decode(&jsonBody)
 
-	jobstore.UpdateJobStatus(jobUuid, newSendSmsJobStatus)
+	log.Println("Update send sms job", jobUuid, "from", deviceId, "with payload", jsonBody.JobStatus)
+
+	err := jobStatusStore.UpdateJobStatus(jobUuid, jsonBody.JobStatus)
+	if err != nil {
+		responseWriter.WriteHeader(http.StatusInternalServerError)
+	}
 
 	// Set response headers
 	responseWriter.Header().Set("Content-Type", "application/json")

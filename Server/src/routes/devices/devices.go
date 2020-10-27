@@ -17,9 +17,9 @@ type IsDeviceRegistered2xxResponse struct {
 }
 
 type RegisterDeviceRequest struct {
-	DeviceType       string `json:"device_type"`
-	HardwareDeviceId string `json:"hardware_id"`
-	Capabilities     string `json:"capabilities"`
+	DeviceType       string   `json:"device_type"`
+	HardwareDeviceId string   `json:"hardware_id"`
+	Capabilities     []string `json:"capabilities"`
 }
 
 type RegisterDevice2xxResponse struct {

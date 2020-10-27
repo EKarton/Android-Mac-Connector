@@ -8,7 +8,7 @@ func CreateInMemoryStore() *InMemoryNotificationsStore {
 	return &store
 }
 
-func (store *InMemoryNotificationsStore) AddSmsNotification() error {
+func (store *InMemoryNotificationsStore) AddSmsNotification(notification SmsNotification) error {
 	return nil
 }
 
@@ -21,9 +21,9 @@ func (store *InMemoryNotificationsStore) GetPreviousSmsNotificationsFromUuid(num
 }
 
 func (store *InMemoryNotificationsStore) GetOldestSmsNotification() (SmsNotification, error) {
-	return nil, nil
+	return SmsNotification{}, nil
 }
 
 func (store *InMemoryNotificationsStore) GetLatestSmsNotification() (SmsNotification, error) {
-	return nil, nil
+	return SmsNotification{}, nil
 }

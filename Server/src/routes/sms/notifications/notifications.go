@@ -1,15 +1,14 @@
 package notifications
 
 import (
-	"encoding/json"
-	"log"
 	"net/http"
-	"strconv"
 
 	"github.com/gorilla/mux"
 
-	sms_notifications "Android-Mac-Connector-Server/src/storesms/notifications"
+	"Android-Mac-Connector-Server/src/store/sms/notifications"
 )
+
+var smsNotificationsStore notifications.SmsNotificationsStore = notifications.CreateInMemoryStore()
 
 type NewSmsMessageReceived struct {
 	Address   string `json:"address"`
@@ -31,24 +30,27 @@ type GetNewSmsMessagesReceivedErrorResponse struct {
  */
 func notifyNewSmsMessageReceived(responseWriter http.ResponseWriter, request *http.Request) {
 
-	// Get the contents from the request
-	var variables = mux.Vars(request)
-	var newSmsMessage NewSmsMessageReceived
-	json.NewDecoder(request.Body).Decode(&newSmsMessage)
+	// // Get the contents from the request
+	// var variables = mux.Vars(request)
+	// var newSmsMessage NewSmsMessageReceived
+	// json.NewDecoder(request.Body).Decode(&newSmsMessage)
 
-	log.Println("Received new sms message from", variables["deviceId"], "with payload", newSmsMessage)
+	// log.Println("Received new sms message from", variables["deviceId"], "with payload", newSmsMessage)
 
-	// Store new msg in db
-	var newSmsMsg = sms_notifications.SmsMessage{
-		ContactInfo: newSmsMessage.Address,
-		Data:        newSmsMessage.Body,
-		Timestamp:   newSmsMessage.Timestamp,
-	}
-	sms_notifications.AddNewSmsMessageNotification(newSmsMsg)
+	// // Store new msg in db
+	// var newSmsMsg = notifications.SmsNotification{
+	// 	ContactInfo: newSmsMessage.Address,
+	// 	Data:        newSmsMessage.Body,
+	// 	Timestamp:   newSmsMessage.Timestamp,
+	// }
 
-	// Write response
-	responseWriter.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(responseWriter).Encode(NewSmsMessageReceived2xxResponse{"success"})
+	// if err := smsNotificationsStore.AddSmsNotification(newSmsMsg); err != nil {
+	// 	responseWriter.WriteHeader(http.StatusInternalServerError)
+	// }
+
+	// // Write response
+	// responseWriter.Header().Set("Content-Type", "application/json")
+	// json.NewEncoder(responseWriter).Encode(NewSmsMessageReceived2xxResponse{"success"})
 }
 
 /**
@@ -61,62 +63,65 @@ func notifyNewSmsMessageReceived(responseWriter http.ResponseWriter, request *ht
  *     - Else, it returns an empty array
  */
 func getNewSmsMessagesReceived(responseWriter http.ResponseWriter, request *http.Request) {
-	// Get the contents from the request
-	variables := mux.Vars(request)
-	deviceId := variables["deviceId"]
-	startingUuid := request.URL.Query().Get("starting_uuid")
-	numNotifications, numNotificationsErr := strconv.ParseInt(request.URL.Query().Get("fetch_count"), 10, 0)
-	isLongPolling, isLongPollingErr := strconv.ParseBool(request.URL.Query().Get("long_polling"))
+	// // Get the contents from the request
+	// variables := mux.Vars(request)
+	// deviceId := variables["deviceId"]
+	// startingUuid := request.URL.Query().Get("starting_uuid")
+	// numNotifications, numNotificationsErr := strconv.ParseInt(request.URL.Query().Get("fetch_count"), 10, 0)
+	// isLongPolling, isLongPollingErr := strconv.ParseBool(request.URL.Query().Get("long_polling"))
 
-	if isLongPollingErr != nil {
-		responseWriter.Header().Set("Content-Type", "application/json")
-		responseWriter.WriteHeader(400)
-		json.NewEncoder(responseWriter).Encode(GetNewSmsMessagesReceivedErrorResponse{
-			Status: "failure",
-			Reason: "LongPollingQueryParamParseFailure",
-		})
-		return
-	}
+	// if isLongPollingErr != nil {
+	// 	responseWriter.Header().Set("Content-Type", "application/json")
+	// 	responseWriter.WriteHeader(400)
+	// 	json.NewEncoder(responseWriter).Encode(GetNewSmsMessagesReceivedErrorResponse{
+	// 		Status: "failure",
+	// 		Reason: "LongPollingQueryParamParseFailure",
+	// 	})
+	// 	return
+	// }
 
-	if numNotificationsErr != nil {
-		responseWriter.Header().Set("Content-Type", "application/json")
-		responseWriter.WriteHeader(400)
-		json.NewEncoder(responseWriter).Encode(GetNewSmsMessagesReceivedErrorResponse{
-			Status: "failure",
-			Reason: "FetchCountQueryParamParseFailure",
-		})
-		return
-	}
+	// if numNotificationsErr != nil {
+	// 	responseWriter.Header().Set("Content-Type", "application/json")
+	// 	responseWriter.WriteHeader(400)
+	// 	json.NewEncoder(responseWriter).Encode(GetNewSmsMessagesReceivedErrorResponse{
+	// 		Status: "failure",
+	// 		Reason: "FetchCountQueryParamParseFailure",
+	// 	})
+	// 	return
+	// }
 
-	log.Println("Getting at most", numNotifications, "sms notifications from", deviceId, "starting from", startingUuid)
+	// log.Println("Getting at most", numNotifications, "sms notifications from", deviceId, "starting from", startingUuid)
 
 	// Get the notifications starting from the Uuid
-	notifications := sms_notifications.GetNotificationsFromUuid(startingUuid, int(numNotifications))
+	// newNotifications, err := smsNotificationsStore.GetNewSmsNotificationsFromUuid(int(numNotifications), startingUuid)
+	// if err != nil {
+	// 	responseWriter.WriteHeader(http.StatusInternalServerError)
+	// }
 
-	if isLongPolling && len(notifications) == 0 {
-		log.Println("Subscribing to new sms notifications from", deviceId)
+	// if isLongPolling && len(newNotifications) == 0 {
+	// 	log.Println("Subscribing to new sms notifications from", deviceId)
 
-		subscriptionChannel := make(chan []sms_notifications.SmsMessageNotification)
-		subscriptionUuid := sms_notifications.SubscribeToNewNotifications(subscriptionChannel)
+	// 	subscriptionChannel := make(chan []notifications.SmsNotification)
+	// 	subscriptionUuid := notifications.SubscribeToNewNotifications(subscriptionChannel)
 
-		select {
-		case notification := <-subscriptionChannel:
-			log.Println("Received notification", notification)
+	// 	select {
+	// 	case notification := <-subscriptionChannel:
+	// 		log.Println("Received notification", notification)
 
-			// Close the subscription
-			close(subscriptionChannel)
-			sms_notifications.UnsubscribeToNewNotifications(subscriptionUuid)
+	// 		// Close the subscription
+	// 		close(subscriptionChannel)
+	// 		notifications.UnsubscribeToNewNotifications(subscriptionUuid)
 
-			// Send the output to the user
-			responseWriter.Header().Set("Content-Type", "application/json")
-			json.NewEncoder(responseWriter).Encode(notification)
-		}
+	// 		// Send the output to the user
+	// 		responseWriter.Header().Set("Content-Type", "application/json")
+	// 		json.NewEncoder(responseWriter).Encode(notification)
+	// 	}
 
-	} else {
-		// Write response
-		responseWriter.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(responseWriter).Encode(notifications)
-	}
+	// } else {
+	// 	// Write response
+	// 	responseWriter.Header().Set("Content-Type", "application/json")
+	// 	json.NewEncoder(responseWriter).Encode(notifications)
+	// }
 }
 
 /**

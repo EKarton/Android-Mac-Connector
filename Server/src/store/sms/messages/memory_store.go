@@ -11,12 +11,8 @@ func (store *InMemoryMessagesStore) AddSmsThead(deviceId string, smsThread SmsTh
 	return nil
 }
 
-func (store *InMemoryMessagesStore) GetSmsThreads(deviceId string) ([]string, error) {
-	return nil
-}
-
-func (store *InMemoryMessagesStore) GetSmsThread(threadId string) (SmsThread, error) {
-	return nil
+func (store *InMemoryMessagesStore) GetSmsThreads(deviceId string) ([]SmsThread, error) {
+	return make([]SmsThread, 0), nil
 }
 
 func (store *InMemoryMessagesStore) DeleteSmsThread(threadId string) error {
@@ -28,7 +24,7 @@ func (store *InMemoryMessagesStore) AddSmsMessage(smsThread string, smsMessage S
 }
 
 func (store *InMemoryMessagesStore) GetSmsMessage(smsMessageId string) (SmsMessage, error) {
-	return nil, nil
+	return SmsMessage{}, nil
 }
 
 func (store *InMemoryMessagesStore) GetNewestSmsMessagesFromUuid(numSmsMessages int, startingSmsMessageId string) ([]SmsMessage, error) {

@@ -7,6 +7,7 @@ type SmsThread struct {
 	LastMessageBodySent string
 	LastTimeMessageSent int
 	NumUnreadMessages   int
+	LastUpdated         int
 }
 
 type SmsMessage struct {
@@ -20,8 +21,7 @@ type SmsMessage struct {
 
 type SmsMessagesStore interface {
 	AddSmsThead(deviceId string, smsThread SmsThread) error
-	GetSmsThreads(deviceId string) ([]string, error)
-	GetSmsThread(threadId string) (SmsThread, error)
+	GetSmsThreads(deviceId string) ([]SmsThread, error)
 	DeleteSmsThread(threadId string) error
 	AddSmsMessage(smsThread string, smsMessage SmsMessage) (string, error)
 	GetSmsMessage(smsMessageId string) (SmsMessage, error)
