@@ -19,67 +19,153 @@ func TestCreateInMemoryStore(t *testing.T) {
 	}
 }
 
-func TestAddDeviceAndGetDevice(t *testing.T) {
+func TestDoesDeviceExist_ShouldReturnTrue_GivenDeviceIsRegistered(t *testing.T) {
 	store := devicesStore.CreateInMemoryStore()
+	store.RegisterDevice("userId", "android", "1234")
+	isExist, err := store.DoesDeviceExist("userId", "android", "1234")
 
-	deviceId1, err1 := store.AddDevice(devicesStore.Device{
-		Capabilities: []string{
-			"read_sms",
-			"send_sms",
-		},
-	})
-
-	_, err2 := store.AddDevice(devicesStore.Device{
-		Capabilities: []string{
-			"read_sms2",
-			"send_sms2",
-		},
-	})
-
-	device, err3 := store.GetDevice(deviceId1)
-
-	if err1 != nil {
-		t.Errorf(err1.Error())
-	} else if err2 != nil {
-		t.Errorf(err2.Error())
-	} else if err3 != nil {
-		t.Errorf(err3.Error())
+	if err != nil {
+		t.Errorf("Error %s should not be returned", err.Error())
 	}
 
-	expectedDevice := devicesStore.Device{
-		Capabilities: []string{
-			"read_sms",
-			"send_sms",
-		},
-	}
-
-	if !reflect.DeepEqual(device, expectedDevice) {
-		t.Error("Actual device ", device, "do not match", expectedDevice)
+	if !isExist {
+		t.Error("isExist should be true")
 	}
 }
 
-func TestDeleteDevice(t *testing.T) {
+func TestDoesDeviceExist_ShouldReturnFalse_GivenHardwareIdDoesNotMatch(t *testing.T) {
 	store := devicesStore.CreateInMemoryStore()
-	deviceId, addErr := store.AddDevice(devicesStore.Device{
-		Capabilities: []string{
-			"read_sms2",
-			"send_sms2",
-		},
-	})
+	store.RegisterDevice("userId", "android", "1234")
+	isExist, err := store.DoesDeviceExist("userId", "android", "12345")
 
-	if addErr != nil {
-		t.Error("AddDevice() should not return error")
+	if err != nil {
+		t.Errorf("Error %s should not be returned", err.Error())
 	}
 
-	deleteErr := store.DeleteDevice(deviceId)
+	if isExist {
+		t.Error("isExist should be false")
+	}
+}
 
-	if deleteErr != nil {
-		t.Error("DeleteDevice() should not return error")
+func TestDoesDeviceExist_ShouldReturnFalse_GivenUserIdDoesNotMatch(t *testing.T) {
+	store := devicesStore.CreateInMemoryStore()
+	store.RegisterDevice("userId", "android", "1234")
+	isExist, err := store.DoesDeviceExist("userId2", "android", "1234")
+
+	if err != nil {
+		t.Errorf("Error %s should not be returned", err.Error())
 	}
 
-	_, getErr := store.GetDevice(deviceId)
+	if isExist {
+		t.Error("isExist should be false")
+	}
+}
 
-	if getErr != nil {
-		t.Error("GetDevice() should return error")
+func TestDoesDeviceExist_ShouldReturnFalse_GivenDeviceTypeDoesNotMatch(t *testing.T) {
+	store := devicesStore.CreateInMemoryStore()
+	store.RegisterDevice("userId", "android", "1234")
+	isExist, err := store.DoesDeviceExist("userId", "mac", "1234")
+
+	if err != nil {
+		t.Errorf("Error %s should not be returned", err.Error())
+	}
+
+	if isExist {
+		t.Error("isExist should be false")
+	}
+}
+
+func TestRegisterDevice_ShouldReturnNewDeviceId_GivenDeviceIsNotRegisteredYet(t *testing.T) {
+	store := devicesStore.CreateInMemoryStore()
+	deviceId1, err1 := store.RegisterDevice("userId1", "android", "1234")
+	deviceId2, err2 := store.RegisterDevice("userId2", "android", "1234")
+
+	if err1 != nil {
+		t.Errorf("Error %s should not be returned", err1.Error())
+	}
+
+	if err2 != nil {
+		t.Errorf("Error %s should not be returned", err2.Error())
+	}
+
+	if deviceId1 == deviceId2 {
+		t.Errorf("Device IDs %s %s should be different", deviceId1, deviceId2)
+	}
+}
+
+func TestRegisterDevice_ShouldReturnError_GivenDeviceIsAlreadyRegistered(t *testing.T) {
+	store := devicesStore.CreateInMemoryStore()
+	store.RegisterDevice("userId1", "android", "1234")
+	_, err := store.RegisterDevice("userId1", "android", "1234")
+
+	if err == nil {
+		t.Error("Error should be returned")
+	}
+}
+
+func TestUpdateDeviceCapabilities_ShouldUpdateCapabilities_GivenValidDevice(t *testing.T) {
+	store := devicesStore.CreateInMemoryStore()
+	deviceId, _ := store.RegisterDevice("userId1", "android", "1234")
+	err := store.UpdateDeviceCapabilities(deviceId, []string{"read_sms"})
+
+	if err != nil {
+		t.Errorf("Error %s should not be returned", err.Error())
+	}
+
+	capabilities, _ := store.GetDeviceCapabilities(deviceId)
+
+	if reflect.DeepEqual(capabilities, []string{"read_sms"}) {
+		t.Errorf("Capabilities %s should be read_sms", capabilities)
+	}
+}
+
+func TestUpdateDeviceCapabilities_ShouldReturnError_GivenInvalidDeviceId(t *testing.T) {
+	store := devicesStore.CreateInMemoryStore()
+	err := store.UpdateDeviceCapabilities("1234", []string{"read_sms"})
+
+	if err == nil {
+		t.Error("Error should not be returned")
+	}
+}
+
+func TestGetDeviceCapabilities_ShouldReturnEmptyCapabilities_GivenValidDeviceId(t *testing.T) {
+	store := devicesStore.CreateInMemoryStore()
+	deviceId, _ := store.RegisterDevice("user1", "android", "1234")
+	capabilities, err := store.GetDeviceCapabilities(deviceId)
+
+	if err != nil {
+		t.Errorf("Error %s should not be thrown", err.Error())
+	}
+
+	if len(capabilities) > 0 {
+		t.Errorf("Capabilities should be [], not %s", capabilities)
+	}
+}
+
+func TestGetDeviceCapabilities_ShouldReturnError_GivenInvalidDeviceId(t *testing.T) {
+	store := devicesStore.CreateInMemoryStore()
+	_, err := store.GetDeviceCapabilities("1234")
+
+	if err == nil {
+		t.Error("Error should not be returned")
+	}
+}
+
+func TestUpdatePushNotificationToken_ShouldReturnNoError_GivenValidDeviceId(t *testing.T) {
+	store := devicesStore.CreateInMemoryStore()
+	deviceId, _ := store.RegisterDevice("user1", "android", "1234")
+	err := store.UpdatePushNotificationToken(deviceId, "token")
+
+	if err != nil {
+		t.Errorf("Error %s should not be thrown", err.Error())
+	}
+}
+
+func TestUpdatePushNotificationToken_ShouldReturnError_GivenInvalidDeviceId(t *testing.T) {
+	store := devicesStore.CreateInMemoryStore()
+	err := store.UpdatePushNotificationToken("1234", "ha")
+
+	if err == nil {
+		t.Error("Error should not be returned")
 	}
 }

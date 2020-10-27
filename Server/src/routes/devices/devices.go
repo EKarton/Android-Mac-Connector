@@ -2,13 +2,15 @@ package devices
 
 import (
 	"encoding/json"
-	"log"
 	"net/http"
 
 	"github.com/gorilla/mux"
 
 	middlewares "Android-Mac-Connector-Server/src/middlewares"
+	deviceStore "Android-Mac-Connector-Server/src/store/devices"
 )
+
+var devicesStore deviceStore.DevicesStore = deviceStore.CreateInMemoryStore()
 
 type IsDeviceRegistered2xxResponse struct {
 	IsRegistered bool `json:"is_registered"`
@@ -18,35 +20,93 @@ type RegisterDevice2xxResponse struct {
 	DeviceId string `json:"device_id"`
 }
 
+type GetDeviceCapabilities2xxResponse struct {
+	Capabilities []string `json:"capabilities"`
+}
+
+type UpdateDeviceCapabilitiesRequest struct {
+	Capabilities []string `json:"capabilities"`
+}
+
+type UpdateAndroidPushNotificationTokenRequest struct {
+	Token string `json:"fcm_token"`
+}
+
 func isDeviceRegistered(responseWriter http.ResponseWriter, request *http.Request) {
-	// TODO: Implement api
-	log.Println(request)
+	userId := request.Header.Get("user_id")
+	deviceType := request.URL.Query().Get("device_type")
+	androidDeviceId := request.URL.Query().Get("android_device_id")
+
+	isExist, err := devicesStore.DoesDeviceExist(userId, deviceType, androidDeviceId)
+
+	if err != nil {
+		responseWriter.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
 	json.NewEncoder(responseWriter).Encode(IsDeviceRegistered2xxResponse{
-		IsRegistered: false,
+		IsRegistered: isExist,
 	})
 }
 
 func registerDevice(responseWriter http.ResponseWriter, request *http.Request) {
-	// TODO: Implement api
-	log.Println(request)
+	userId := request.Header.Get("user_id")
+	deviceType := request.URL.Query().Get("device_type")
+	hardwareId := request.URL.Query().Get("hardware_id")
+
+	deviceId, err := devicesStore.RegisterDevice(userId, deviceType, hardwareId)
+
+	if err != nil {
+		responseWriter.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
 	json.NewEncoder(responseWriter).Encode(RegisterDevice2xxResponse{
-		DeviceId: "1234",
+		DeviceId: deviceId,
 	})
 }
 
 func updateDeviceCapabilities(responseWriter http.ResponseWriter, request *http.Request) {
-	// TODO: Implement api
-	log.Println(request)
+	variables := mux.Vars(request)
+	deviceId := variables["deviceId"]
+
+	var jsonBody UpdateDeviceCapabilitiesRequest
+	json.NewDecoder(request.Body).Decode(&jsonBody)
+
+	if err := devicesStore.UpdateDeviceCapabilities(deviceId, jsonBody.Capabilities); err != nil {
+		responseWriter.WriteHeader(http.StatusInternalServerError)
+		return
+	}
 }
 
 func getDeviceCapabilities(responseWriter http.ResponseWriter, request *http.Request) {
-	// TODO: Implement api
-	log.Println(request)
+	variables := mux.Vars(request)
+	deviceId := variables["deviceId"]
+
+	capabilities, err := devicesStore.GetDeviceCapabilities(deviceId)
+
+	if err != nil {
+		responseWriter.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	responseWriter.Header().Set("Content-Type", "application/json")
+
+	responseBody := GetDeviceCapabilities2xxResponse{Capabilities: capabilities}
+	json.NewEncoder(responseWriter).Encode(responseBody)
 }
 
 func updatePushNotificationToken(responseWriter http.ResponseWriter, request *http.Request) {
-	// TODO: Implement api
-	log.Println(request)
+	variables := mux.Vars(request)
+	deviceId := variables["deviceId"]
+
+	var jsonBody UpdateAndroidPushNotificationTokenRequest
+	json.NewDecoder(request.Body).Decode(&jsonBody)
+
+	if err := devicesStore.UpdatePushNotificationToken(deviceId, jsonBody.Token); err != nil {
+		responseWriter.WriteHeader(http.StatusInternalServerError)
+		return
+	}
 }
 
 func InitializeRouter(router *mux.Router) {

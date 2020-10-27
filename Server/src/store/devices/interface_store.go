@@ -1,11 +1,18 @@
 package devices
 
 type Device struct {
-	Capabilities []string
+	UserId                string
+	DeviceId              string
+	DeviceType            string
+	HardwareId            string
+	PushNotificationToken string
+	Capabilities          []string
 }
 
 type DevicesStore interface {
-	GetDevice(deviceId string) (Device, error)
-	AddDevice(device Device) (string, error)
-	DeleteDevice(deviceId string) error
+	DoesDeviceExist(userId string, deviceType string, hardwareId string) (bool, error)
+	RegisterDevice(userId string, deviceType string, hardwareId string) (string, error)
+	UpdateDeviceCapabilities(deviceId string, capabilities []string) error
+	GetDeviceCapabilities(deviceId string) ([]string, error)
+	UpdatePushNotificationToken(deviceId string, newToken string) error
 }

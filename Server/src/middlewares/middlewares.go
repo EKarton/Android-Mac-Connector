@@ -41,7 +41,7 @@ func VerifyCredentials(next http.Handler) http.Handler {
 			return
 		}
 
-		r.Header.Add("uuid", uid)
+		r.Header.Add("user_id", uid)
 
 		// Go to the next middleware
 		next.ServeHTTP(w, r)
