@@ -31,10 +31,9 @@ type GetNewSmsMessagesReceivedErrorResponse struct {
  */
 func notifyNewSmsMessageReceived(dataStore *store.Datastore) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-
-		// Get the contents from the request
 		variables := mux.Vars(r)
 		deviceId := variables["deviceId"]
+
 		var newSmsMessage NewSmsMessageReceived
 		json.NewDecoder(r.Body).Decode(&newSmsMessage)
 
@@ -45,7 +44,8 @@ func notifyNewSmsMessageReceived(dataStore *store.Datastore) http.HandlerFunc {
 			Timestamp:   newSmsMessage.Timestamp,
 		}
 
-		if err := dataStore.SmsNotifications.AddSmsNotification(deviceId, newSmsMsg); err != nil {
+		_, err := dataStore.SmsNotifications.AddSmsNotification(deviceId, newSmsMsg)
+		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 		}
 	}
@@ -88,7 +88,7 @@ func getNewSmsMessagesReceived(dataStore *store.Datastore) http.HandlerFunc {
 		}
 
 		// Get the notifications starting from the Uuid
-		newNotifications, err := dataStore.SmsNotifications.GetNewSmsNotificationsFromUuid(int(numNotifications), startingUuid)
+		newNotifications, err := dataStore.SmsNotifications.GetNewSmsNotificationsFromUuid(deviceId, int(numNotifications), startingUuid)
 		if err != nil {
 			responseWriter.WriteHeader(http.StatusInternalServerError)
 			return
