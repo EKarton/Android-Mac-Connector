@@ -45,7 +45,7 @@ func notifyNewSmsMessageReceived(dataStore *store.Datastore) http.HandlerFunc {
 			Timestamp:   newSmsMessage.Timestamp,
 		}
 
-		if err := dataStore.SmsNotificationsStore.AddSmsNotification(deviceId, newSmsMsg); err != nil {
+		if err := dataStore.SmsNotifications.AddSmsNotification(deviceId, newSmsMsg); err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 		}
 	}
