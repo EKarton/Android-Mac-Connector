@@ -9,19 +9,23 @@ import (
 )
 
 type Datastore struct {
-	DevicesStores         devices.DevicesStore
-	JobStatusStore        jobs.JobStatusStore
-	ResourcePoliciesStore resourcepolicies.ResourcePoliciesStore
-	SmsMessagesStore      messages.SmsMessagesStore
-	SmsNotificationsStore notifications.SmsNotificationsStore
+	DevicesStores              devices.DevicesStore
+	JobStatusStore             jobs.JobStatusStore
+	ResourcePoliciesStore      resourcepolicies.ResourcePoliciesStore
+	SmsMessagesStore           messages.SmsMessagesStore
+	SmsNotifications           notifications.SmsNotificationsStore
+	SmsNotificationSubscribers *notifications.SmsNotificationSubscribersStore
 }
 
 func CreateInMemoryDatastore() *Datastore {
+	smsNotificationsStore := notifications.CreateInMemoryStore()
+
 	return &Datastore{
-		DevicesStores:         devices.CreateInMemoryStore(),
-		JobStatusStore:        jobs.CreateInMemoryStore(),
-		ResourcePoliciesStore: resourcepolicies.CreateInMemoryStore(),
-		SmsMessagesStore:      messages.CreateInMemoryStore(),
-		SmsNotificationsStore: notifications.CreateInMemoryStore(),
+		DevicesStores:              devices.CreateInMemoryStore(),
+		JobStatusStore:             jobs.CreateInMemoryStore(),
+		ResourcePoliciesStore:      resourcepolicies.CreateInMemoryStore(),
+		SmsMessagesStore:           messages.CreateInMemoryStore(),
+		SmsNotifications:           smsNotificationsStore,
+		SmsNotificationSubscribers: notifications.CreateNotificationSubscribersStore(smsNotificationsStore),
 	}
 }

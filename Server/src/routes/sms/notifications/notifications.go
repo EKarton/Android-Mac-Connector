@@ -1,11 +1,15 @@
 package notifications
 
 import (
+	"encoding/json"
+	"log"
 	"net/http"
+	"strconv"
 
 	"github.com/gorilla/mux"
 
 	"Android-Mac-Connector-Server/src/store"
+	"Android-Mac-Connector-Server/src/store/sms/notifications"
 )
 
 type NewSmsMessageReceived struct {
@@ -19,7 +23,6 @@ type NewSmsMessageReceived2xxResponse struct {
 }
 
 type GetNewSmsMessagesReceivedErrorResponse struct {
-	Status string `json:"status"`
 	Reason string `json:"reason"`
 }
 
@@ -27,29 +30,24 @@ type GetNewSmsMessagesReceivedErrorResponse struct {
  * Handler for when the device wants to notify all subscribers that a new SMS message has been received
  */
 func notifyNewSmsMessageReceived(dataStore *store.Datastore) http.HandlerFunc {
-	return func(responseWriter http.ResponseWriter, request *http.Request) {
+	return func(w http.ResponseWriter, r *http.Request) {
 
-		// // Get the contents from the request
-		// var variables = mux.Vars(request)
-		// var newSmsMessage NewSmsMessageReceived
-		// json.NewDecoder(request.Body).Decode(&newSmsMessage)
+		// Get the contents from the request
+		variables := mux.Vars(r)
+		deviceId := variables["deviceId"]
+		var newSmsMessage NewSmsMessageReceived
+		json.NewDecoder(r.Body).Decode(&newSmsMessage)
 
-		// log.Println("Received new sms message from", variables["deviceId"], "with payload", newSmsMessage)
+		// Store new msg in db
+		var newSmsMsg = notifications.SmsNotification{
+			ContactInfo: newSmsMessage.Address,
+			Data:        newSmsMessage.Body,
+			Timestamp:   newSmsMessage.Timestamp,
+		}
 
-		// // Store new msg in db
-		// var newSmsMsg = notifications.SmsNotification{
-		// 	ContactInfo: newSmsMessage.Address,
-		// 	Data:        newSmsMessage.Body,
-		// 	Timestamp:   newSmsMessage.Timestamp,
-		// }
-
-		// if err := smsNotificationsStore.AddSmsNotification(newSmsMsg); err != nil {
-		// 	responseWriter.WriteHeader(http.StatusInternalServerError)
-		// }
-
-		// // Write response
-		// responseWriter.Header().Set("Content-Type", "application/json")
-		// json.NewEncoder(responseWriter).Encode(NewSmsMessageReceived2xxResponse{"success"})
+		if err := dataStore.SmsNotificationsStore.AddSmsNotification(deviceId, newSmsMsg); err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+		}
 	}
 }
 
@@ -64,65 +62,60 @@ func notifyNewSmsMessageReceived(dataStore *store.Datastore) http.HandlerFunc {
  */
 func getNewSmsMessagesReceived(dataStore *store.Datastore) http.HandlerFunc {
 	return func(responseWriter http.ResponseWriter, request *http.Request) {
-		// // Get the contents from the request
-		// variables := mux.Vars(request)
-		// deviceId := variables["deviceId"]
-		// startingUuid := request.URL.Query().Get("starting_uuid")
-		// numNotifications, numNotificationsErr := strconv.ParseInt(request.URL.Query().Get("fetch_count"), 10, 0)
-		// isLongPolling, isLongPollingErr := strconv.ParseBool(request.URL.Query().Get("long_polling"))
+		// Get the contents from the request
+		variables := mux.Vars(request)
+		deviceId := variables["deviceId"]
+		startingUuid := request.URL.Query().Get("starting_uuid")
+		numNotifications, numNotificationsErr := strconv.ParseInt(request.URL.Query().Get("fetch_count"), 10, 0)
+		isLongPolling, isLongPollingErr := strconv.ParseBool(request.URL.Query().Get("long_polling"))
 
-		// if isLongPollingErr != nil {
-		// 	responseWriter.Header().Set("Content-Type", "application/json")
-		// 	responseWriter.WriteHeader(400)
-		// 	json.NewEncoder(responseWriter).Encode(GetNewSmsMessagesReceivedErrorResponse{
-		// 		Status: "failure",
-		// 		Reason: "LongPollingQueryParamParseFailure",
-		// 	})
-		// 	return
-		// }
+		if isLongPollingErr != nil {
+			responseWriter.Header().Set("Content-Type", "application/json")
+			responseWriter.WriteHeader(400)
+			json.NewEncoder(responseWriter).Encode(GetNewSmsMessagesReceivedErrorResponse{
+				Reason: "LongPollingQueryParamParseFailure",
+			})
+			return
+		}
 
-		// if numNotificationsErr != nil {
-		// 	responseWriter.Header().Set("Content-Type", "application/json")
-		// 	responseWriter.WriteHeader(400)
-		// 	json.NewEncoder(responseWriter).Encode(GetNewSmsMessagesReceivedErrorResponse{
-		// 		Status: "failure",
-		// 		Reason: "FetchCountQueryParamParseFailure",
-		// 	})
-		// 	return
-		// }
-
-		// log.Println("Getting at most", numNotifications, "sms notifications from", deviceId, "starting from", startingUuid)
+		if numNotificationsErr != nil {
+			responseWriter.Header().Set("Content-Type", "application/json")
+			responseWriter.WriteHeader(400)
+			json.NewEncoder(responseWriter).Encode(GetNewSmsMessagesReceivedErrorResponse{
+				Reason: "FetchCountQueryParamParseFailure",
+			})
+			return
+		}
 
 		// Get the notifications starting from the Uuid
-		// newNotifications, err := smsNotificationsStore.GetNewSmsNotificationsFromUuid(int(numNotifications), startingUuid)
-		// if err != nil {
-		// 	responseWriter.WriteHeader(http.StatusInternalServerError)
-		// }
+		newNotifications, err := dataStore.SmsNotifications.GetNewSmsNotificationsFromUuid(int(numNotifications), startingUuid)
+		if err != nil {
+			responseWriter.WriteHeader(http.StatusInternalServerError)
+			return
+		}
 
-		// if isLongPolling && len(newNotifications) == 0 {
-		// 	log.Println("Subscribing to new sms notifications from", deviceId)
+		if isLongPolling && len(newNotifications) == 0 {
+			log.Println("Subscribing to new sms notifications from", deviceId)
 
-		// 	subscriptionChannel := make(chan []notifications.SmsNotification)
-		// 	subscriptionUuid := notifications.SubscribeToNewNotifications(subscriptionChannel)
+			subscriber, err := dataStore.SmsNotificationSubscribers.CreateSubscriber(deviceId)
 
-		// 	select {
-		// 	case notification := <-subscriptionChannel:
-		// 		log.Println("Received notification", notification)
+			if err != nil {
+				responseWriter.WriteHeader(http.StatusInternalServerError)
+				return
+			}
 
-		// 		// Close the subscription
-		// 		close(subscriptionChannel)
-		// 		notifications.UnsubscribeToNewNotifications(subscriptionUuid)
+			newNotification := <-subscriber.Channel
+			dataStore.SmsNotificationSubscribers.RemoveSubscriber(subscriber)
 
-		// 		// Send the output to the user
-		// 		responseWriter.Header().Set("Content-Type", "application/json")
-		// 		json.NewEncoder(responseWriter).Encode(notification)
-		// 	}
+			// Send the output to the user
+			responseWriter.Header().Set("Content-Type", "application/json")
+			json.NewEncoder(responseWriter).Encode(newNotification)
 
-		// } else {
-		// 	// Write response
-		// 	responseWriter.Header().Set("Content-Type", "application/json")
-		// 	json.NewEncoder(responseWriter).Encode(notifications)
-		// }
+		} else {
+			// Write response
+			responseWriter.Header().Set("Content-Type", "application/json")
+			json.NewEncoder(responseWriter).Encode(newNotifications)
+		}
 	}
 }
 

@@ -8,9 +8,9 @@ type SmsNotification struct {
 }
 
 type SmsNotificationsStore interface {
-	AddSmsNotification(notification SmsNotification) error
+	AddSmsNotification(deviceId string, notification SmsNotification) error
 	GetNewSmsNotificationsFromUuid(numNotifications int, startingUuid string) ([]SmsNotification, error)
 	GetPreviousSmsNotificationsFromUuid(numNotifications int, startingUuid string) ([]SmsNotification, error)
-	GetOldestSmsNotification() (SmsNotification, error)
-	GetLatestSmsNotification() (SmsNotification, error)
+	GetOldestSmsNotification(deviceId string) (SmsNotification, error)
+	GetLatestSmsNotification(deviceId string) (SmsNotification, error)
 }
