@@ -1,24 +1,41 @@
 package main
 
 import (
+	"Android-Mac-Connector-Server/src/middlewares"
+	"Android-Mac-Connector-Server/src/routes/devices"
+	"Android-Mac-Connector-Server/src/routes/sms"
+	"Android-Mac-Connector-Server/src/store"
 	"log"
 	"net/http"
 	"time"
-
-	devices "Android-Mac-Connector-Server/src/routes/devices"
-	sms "Android-Mac-Connector-Server/src/routes/sms"
-	"Android-Mac-Connector-Server/src/store"
 
 	"github.com/gorilla/mux"
 )
 
 func main() {
 
+	// // Initialize default app
+	// app, err := firebase.NewApp(context.Background(), nil)
+	// if err != nil {
+	// 	log.Fatalf("error initializing app: %v\n", err)
+	// }
+
+	// // Access auth service from the default app
+	// client, err := app.Auth(context.Background())
+	// if err != nil {
+	// 	log.Fatalf("error getting Auth client: %v\n", err)
+	// }
+
+	// _, err = client.VerifyIDTokenAndCheckRevoked(context.Background(), "wasdf")
+	// fmt.Println(err)
+
 	// Create our data store
 	dataStore := store.CreateInMemoryDatastore()
 
 	// Create our router
 	router := mux.NewRouter()
+
+	router.Use(middlewares.HandleErrors)
 
 	// Add subrouters
 	smsRouter := router.PathPrefix("/api/v1/{deviceId}/sms").Subrouter()

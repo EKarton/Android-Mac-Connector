@@ -29,11 +29,11 @@ type GetDeviceCapabilities2xxResponse struct {
 }
 
 type UpdateDeviceCapabilitiesRequest struct {
-	Capabilities []string `json:"capabilities"`
+	Capabilities []string `json:"new_capabilities"`
 }
 
 type UpdateAndroidPushNotificationTokenRequest struct {
-	Token string `json:"fcm_token"`
+	Token string `json:"new_token"`
 }
 
 /*
@@ -48,8 +48,7 @@ func isDeviceRegistered(datastore *store.Datastore) http.HandlerFunc {
 		isExist, err := datastore.DevicesStores.DoesDeviceExist(userId, deviceType, hardwareId)
 
 		if err != nil {
-			w.WriteHeader(http.StatusInternalServerError)
-			return
+			panic(err)
 		}
 
 		json.NewEncoder(w).Encode(IsDeviceRegistered2xxResponse{
@@ -71,8 +70,7 @@ func registerDevice(datastore *store.Datastore) http.HandlerFunc {
 		deviceId, err := datastore.DevicesStores.RegisterDevice(userId, jsonBody.DeviceType, jsonBody.HardwareDeviceId, jsonBody.Capabilities)
 
 		if err != nil {
-			w.WriteHeader(http.StatusInternalServerError)
-			return
+			panic(err)
 		}
 
 		json.NewEncoder(w).Encode(RegisterDevice2xxResponse{
@@ -90,8 +88,7 @@ func updateDeviceCapabilities(datastore *store.Datastore) http.HandlerFunc {
 		json.NewDecoder(r.Body).Decode(&jsonBody)
 
 		if err := datastore.DevicesStores.UpdateDeviceCapabilities(deviceId, jsonBody.Capabilities); err != nil {
-			w.WriteHeader(http.StatusInternalServerError)
-			return
+			panic(err)
 		}
 	}
 }
@@ -104,8 +101,7 @@ func getDeviceCapabilities(datastore *store.Datastore) http.HandlerFunc {
 		capabilities, err := datastore.DevicesStores.GetDeviceCapabilities(deviceId)
 
 		if err != nil {
-			w.WriteHeader(http.StatusInternalServerError)
-			return
+			panic(err)
 		}
 
 		w.Header().Set("Content-Type", "application/json")
@@ -124,8 +120,7 @@ func updatePushNotificationToken(datastore *store.Datastore) http.HandlerFunc {
 		json.NewDecoder(r.Body).Decode(&jsonBody)
 
 		if err := datastore.DevicesStores.UpdatePushNotificationToken(deviceId, jsonBody.Token); err != nil {
-			w.WriteHeader(http.StatusInternalServerError)
-			return
+			panic(err)
 		}
 	}
 }

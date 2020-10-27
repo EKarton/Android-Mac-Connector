@@ -2,17 +2,19 @@ package fcm
 
 import (
 	"context"
-	"log"
 
-	firebase "firebase.google.com/go"
 	"firebase.google.com/go/auth"
 	"firebase.google.com/go/messaging"
+
+	firestore "cloud.google.com/go/firestore"
+	firebase "firebase.google.com/go"
 	firebaseMessaging "firebase.google.com/go/messaging"
 )
 
 var cachedApp *firebase.App
 var cachedFcmClient *messaging.Client
 var cachedAuthClient *auth.Client
+var cachedFirestoreClient *firestore.Client
 
 func getApp() *firebase.App {
 	if cachedApp == nil {
@@ -41,6 +43,7 @@ func getMessagingClient() *messaging.Client {
 
 func getAuthClient() *auth.Client {
 	if cachedAuthClient == nil {
+
 		if client, err := getApp().Auth(context.Background()); err != nil {
 			panic("Error initializing Firebase Authentication client: %v\n" + err.Error())
 
@@ -49,6 +52,18 @@ func getAuthClient() *auth.Client {
 		}
 	}
 	return cachedAuthClient
+}
+
+func GetFirestoreClient() *firestore.Client {
+	if cachedFirestoreClient == nil {
+		if client, err := getApp().Firestore(context.Background()); err != nil {
+			panic("Error initializing Firebase Authentication client: %v\n" + err.Error())
+
+		} else {
+			cachedFirestoreClient = client
+		}
+	}
+	return cachedFirestoreClient
 }
 
 func SendFcmMessage(deviceToken string, data map[string]string, notification *messaging.Notification) error {
@@ -64,9 +79,6 @@ func SendFcmMessage(deviceToken string, data map[string]string, notification *me
 
 func VerifyAccessToken(accessToken string) (bool, string, error) {
 	token, err := getAuthClient().VerifyIDTokenAndCheckRevoked(context.Background(), accessToken)
-
-	log.Println("Got data", token.UID)
-	log.Println("Got error", err)
 
 	if err != nil {
 		return false, "", err

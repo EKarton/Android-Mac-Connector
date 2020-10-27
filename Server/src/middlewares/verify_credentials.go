@@ -3,6 +3,7 @@ package middlewares
 import (
 	fcm "Android-Mac-Connector-Server/src/data/fcm"
 	"net/http"
+	"os"
 )
 
 /**
@@ -11,6 +12,14 @@ import (
  */
 func VerifyCredentials(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+
+		// If the environment variable has specified to skip validating credentials
+		if os.Getenv("VERIFY_CREDENTIALS") == "false" {
+			r.Header.Add("user_id", "1234")
+			next.ServeHTTP(w, r)
+			return
+		}
+
 		authHeaderValue := r.Header.Get("Authorization")
 
 		if authHeaderValue == "" {

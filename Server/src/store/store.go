@@ -1,6 +1,7 @@
 package store
 
 import (
+	"Android-Mac-Connector-Server/src/data/fcm"
 	"Android-Mac-Connector-Server/src/store/devices"
 	"Android-Mac-Connector-Server/src/store/jobs"
 	"Android-Mac-Connector-Server/src/store/resourcepolicies"
@@ -21,7 +22,7 @@ func CreateInMemoryDatastore() *Datastore {
 	var smsNotificationsStore notifications.SmsNotificationsStore = notifications.CreateInMemoryStore(1000)
 
 	return &Datastore{
-		DevicesStores:              devices.CreateInMemoryStore(),
+		DevicesStores:              devices.CreateFirestoreDevicesStore(fcm.GetFirestoreClient()),
 		JobStatusStore:             jobs.CreateInMemoryStore(),
 		ResourcePoliciesStore:      resourcepolicies.CreateInMemoryStore(),
 		SmsMessagesStore:           messages.CreateInMemoryStore(),
