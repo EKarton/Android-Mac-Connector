@@ -2,7 +2,6 @@ package middlewares
 
 import (
 	"encoding/json"
-	logger "log"
 	"net/http"
 )
 
@@ -21,8 +20,6 @@ func HandleErrors(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		defer func() {
 			if errorCaught := recover(); errorCaught != nil {
-				logger.Println(errorCaught.(HttpError))
-
 				if httpError, isHttpError := errorCaught.(HttpError); isHttpError {
 
 					// Specify the response code

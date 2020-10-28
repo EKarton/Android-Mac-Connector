@@ -4,9 +4,11 @@ import android.content.Context
 import android.net.Uri
 import android.util.Log
 import com.android.volley.Request
+import com.android.volley.Response
 import com.android.volley.VolleyError
 import com.androidmacconnector.androidapp.utils.WebService
 import com.androidmacconnector.androidapp.utils.WebServiceResponseHandler
+import org.json.JSONArray
 import org.json.JSONException
 import org.json.JSONObject
 import java.lang.String.format
@@ -15,6 +17,7 @@ interface DeviceService {
     fun isDeviceRegistered(authToken: String, androidDeviceId: String, handler: IsDeviceRegisteredHandler)
     fun registerDevice(authToken: String, androidDeviceId: String, capabilities: List<String>, handler: RegisterDeviceHandler)
     fun updateDeviceCapabilities(authToken: String, deviceId: String, capabilities: List<String>, handler: UpdateDeviceCapabilitiesHandler)
+    fun updatePushNotificationToken(authToken: String, deviceId: String, newToken: String, handler: UpdatePushNotificationTokenHandler)
 }
 
 class DeviceWebService(context: Context): WebService(context), DeviceService {
@@ -23,6 +26,7 @@ class DeviceWebService(context: Context): WebService(context), DeviceService {
         private const val IS_DEVICE_REGISTERED_PATH = "/api/v1/devices/registered"
         private const val REGISTER_DEVICE_PATH = "/api/v1/devices/register"
         private const val UPDATE_DEVICE_CAPABILITIES_PATH = "/api/v1/devices/%s/capabilities"
+        private const val UPDATE_PUSH_NOTIFICATION_TOKEN_PATH = "/api/v1/devices/%s/token"
     }
 
     override fun isDeviceRegistered(authToken: String, androidDeviceId: String, handler: IsDeviceRegisteredHandler) {
@@ -43,10 +47,13 @@ class DeviceWebService(context: Context): WebService(context), DeviceService {
     override fun registerDevice(authToken: String, androidDeviceId: String, capabilities: List<String>, handler: RegisterDeviceHandler) {
         Log.d(LOG_TAG, "Registering device")
 
+        val capabilitiesJsonArray = JSONArray()
+        capabilities.forEach { capabilitiesJsonArray.put(it) }
+
         val jsonBody = JSONObject()
         jsonBody.put("device_type", "android")
         jsonBody.put("hardware_id", androidDeviceId)
-        jsonBody.put("capabilities", capabilities)
+        jsonBody.put("capabilities", capabilitiesJsonArray)
 
         val uri = Uri.Builder()
             .scheme(getServerProtocol())
@@ -61,10 +68,31 @@ class DeviceWebService(context: Context): WebService(context), DeviceService {
     override fun updateDeviceCapabilities(authToken: String, deviceId: String, capabilities: List<String>, handler: UpdateDeviceCapabilitiesHandler) {
         Log.d(LOG_TAG, "Registering device")
 
+        val capabilitiesJsonArray = JSONArray()
+        capabilities.forEach { capabilitiesJsonArray.put(it) }
+
         val jsonBody = JSONObject()
-        jsonBody.put("capabilities", capabilities)
+        jsonBody.put("capabilities", capabilitiesJsonArray)
 
         val apiPath = UPDATE_DEVICE_CAPABILITIES_PATH.format(deviceId)
+
+        val uri = Uri.Builder()
+            .scheme(getServerProtocol())
+            .encodedAuthority(getServerAuthority())
+            .encodedPath(apiPath)
+            .build()
+
+        val headers = mapOf("Authorization" to format("Bearer %s", authToken))
+        makeRequest(Request.Method.PUT, uri.toString(), jsonBody, headers, handler)
+    }
+
+    override fun updatePushNotificationToken(authToken: String, deviceId: String, newToken: String, handler: UpdatePushNotificationTokenHandler) {
+        Log.d(LOG_TAG, "Updating device token")
+
+        val jsonBody = JSONObject()
+        jsonBody.put("new_token", newToken)
+
+        val apiPath = UPDATE_PUSH_NOTIFICATION_TOKEN_PATH.format(deviceId)
 
         val uri = Uri.Builder()
             .scheme(getServerProtocol())
@@ -141,5 +169,24 @@ abstract class UpdateDeviceCapabilitiesHandler : WebServiceResponseHandler {
     }
 
     abstract fun onSuccess(response: JSONObject?)
+    abstract fun onError(exception: Exception)
+}
+
+abstract class UpdatePushNotificationTokenHandler : WebServiceResponseHandler {
+    companion object {
+        private const val LOG_TAG = "UpdateFcmTokenHandler"
+    }
+
+    override fun onErrorResponse(error: VolleyError) {
+        Log.d(LOG_TAG, "Received ERROR Response: " + error.message)
+        onError(error)
+    }
+
+    override fun onResponse(response: JSONObject?) {
+        Log.d(LOG_TAG, "Received HTTP Response: $response")
+        onSuccess()
+    }
+
+    abstract fun onSuccess()
     abstract fun onError(exception: Exception)
 }

@@ -12,6 +12,7 @@ import com.androidmacconnector.androidapp.sms.SmsBroadcastReceiver
 import com.androidmacconnector.androidapp.sms.SmsQueryService
 import com.androidmacconnector.androidapp.sms.SmsSenderService
 import com.androidmacconnector.androidapp.utils.getOrCreateUniqueDeviceId
+import com.androidmacconnector.androidapp.utils.saveDeviceId
 import com.google.firebase.auth.FirebaseAuth
 import com.karumi.dexter.Dexter
 import com.karumi.dexter.MultiplePermissionsReport
@@ -82,6 +83,7 @@ class DeviceRegistrationActivity : AppCompatActivity() {
         }
 
         // Get the access token
+        val context = this
         val user = FirebaseAuth.getInstance().currentUser
         user?.getIdToken(false)?.addOnCompleteListener { task ->
             if (task.isSuccessful && task.result?.token != null) {
@@ -91,6 +93,7 @@ class DeviceRegistrationActivity : AppCompatActivity() {
                 // Register the device
                 deviceService.registerDevice(accessToken, deviceId, capabilities, object : RegisterDeviceHandler() {
                     override fun onSuccess(deviceId: String) {
+                        saveDeviceId(context, deviceId)
                         goToMainActivity()
                     }
 

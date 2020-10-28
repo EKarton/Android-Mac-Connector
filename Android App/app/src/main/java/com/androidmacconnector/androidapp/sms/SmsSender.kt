@@ -1,9 +1,11 @@
 package com.androidmacconnector.androidapp.sms
 
 import android.Manifest
+import android.content.Context
 import android.telephony.SmsManager
 import android.util.Log
 import com.androidmacconnector.androidapp.fcm.FcmSubscriber
+import com.androidmacconnector.androidapp.utils.getDeviceId
 import com.google.firebase.messaging.RemoteMessage
 import org.json.JSONObject
 
@@ -23,7 +25,7 @@ class SmsSenderService {
     }
 }
 
-class SendSmsRequestFcmSubscriber(private val service: SmsSenderService, private val webService: SmsService) : FcmSubscriber {
+class SendSmsRequestFcmSubscriber(private val context: Context, private val service: SmsSenderService, private val webService: SmsService) : FcmSubscriber {
     companion object {
         private const val LOG_TAG = "SendSmsSub"
     }
@@ -50,17 +52,23 @@ class SendSmsRequestFcmSubscriber(private val service: SmsSenderService, private
             return
         }
 
+        val deviceId = getDeviceId(context)
+
         try {
             service.sendSmsMessage(remoteMessage.data["phone_number"]!!, remoteMessage.data["body"]!!)
 
-            webService.updateSmsMessageSentStatus(remoteMessage.data["uuid"]!!, "sent", object : UpdateSmsSentStatusHandler() {
-                override fun onSuccess(response: JSONObject) {}
-                override fun onError(exception: Exception?) {}
+            webService.updateSmsMessageSentStatus(deviceId, remoteMessage.data["uuid"]!!, "sent", object : UpdateSmsSentStatusHandler() {
+                override fun onSuccess() {}
+                override fun onError(exception: Exception) {
+                    throw exception
+                }
             })
         } catch (e: Exception) {
-            webService.updateSmsMessageSentStatus(remoteMessage.data["uuid"]!!, "failed", object : UpdateSmsSentStatusHandler() {
-                override fun onSuccess(response: JSONObject) {}
-                override fun onError(exception: Exception?) {}
+            webService.updateSmsMessageSentStatus(deviceId, remoteMessage.data["uuid"]!!, "failed", object : UpdateSmsSentStatusHandler() {
+                override fun onSuccess() {}
+                override fun onError(exception: Exception) {
+                    throw exception
+                }
             })
         }
     }

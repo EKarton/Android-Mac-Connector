@@ -24,7 +24,7 @@ open class WebService(private val context: Context) {
         headers: Map<String, String>?,
         handler: WebServiceResponseHandler
     ) {
-        Log.d(LOG_TAG, "Making HTTP request to $url")
+        Log.d(LOG_TAG, "Making HTTP request to $url with payload $jsonBody and header $headers")
 
         val request = object: JsonObjectRequest(method, url, jsonBody, handler, handler) {
             override fun getHeaders(): Map<String, String> {

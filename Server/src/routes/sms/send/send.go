@@ -17,7 +17,7 @@ type SendSmsMessageRequest struct {
 }
 
 type SendSmsMessage2xxResponse struct {
-	JobId string `json:"jobId"`
+	JobId string `json:"job_id"`
 }
 
 type SendSmsJob struct {
@@ -32,10 +32,20 @@ type UpdateSendSmsJobStatus2xxResponse struct {
 	Status string `json:"status"`
 }
 
-/**
- * Handler for when a device wants to send an SMS message from another device
- * It submits a job to the jobs queue, where its status can be found by polling the job queue
- */
+// Handles when a device wants to send an SMS message from another device
+// It submits a job to the jobs queue, where its status can be found by polling the job queue
+//
+// The request must contain a JSON body in this form:
+// {
+// 	"phone_number": "<a phone number>",
+// 	"body": "<a text body>"
+// }
+//
+// The response will return a JSON body in this form:
+// {
+// 	"job_id": "<a job id>"
+// }
+//
 func addSendSmsJob(dataStore *store.Datastore) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		variables := mux.Vars(r)
@@ -52,16 +62,14 @@ func addSendSmsJob(dataStore *store.Datastore) http.HandlerFunc {
 		uuid, err := dataStore.JobStatusStore.AddJob("pending")
 
 		if err != nil {
-			w.WriteHeader(http.StatusInternalServerError)
-			return
+			panic(err)
 		}
 
 		// Get the Push notification token
 		token, err := dataStore.DevicesStores.GetPushNotificationToken(deviceId)
 
 		if err != nil {
-			w.WriteHeader(http.StatusInternalServerError)
-			return
+			panic(err)
 		}
 
 		// Send the sms
@@ -71,7 +79,9 @@ func addSendSmsJob(dataStore *store.Datastore) http.HandlerFunc {
 			"phone_number": jsonBody.PhoneNumber,
 			"body":         jsonBody.Body,
 		}
-		fcm.SendFcmMessage(token, data, nil)
+		if err := fcm.SendFcmMessage(token, data, nil); err != nil {
+			panic(err)
+		}
 
 		// Write response body
 		responseBody := SendSmsMessage2xxResponse{
@@ -81,9 +91,13 @@ func addSendSmsJob(dataStore *store.Datastore) http.HandlerFunc {
 	}
 }
 
-/**
- * Returns the status of the SMS job
- */
+// Returns the status of an SMS job
+//
+// If successful, it outputs the data in json form:
+// {
+// 	"job_status": "<job status>"
+// }
+//
 func getSendSmsJobStatus(dataStore *store.Datastore) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		variables := mux.Vars(r)
@@ -97,8 +111,7 @@ func getSendSmsJobStatus(dataStore *store.Datastore) http.HandlerFunc {
 		jobStatus, err := dataStore.JobStatusStore.GetJobStatus(jobUuid)
 
 		if err != nil {
-			w.WriteHeader(http.StatusInternalServerError)
-			return
+			panic(err)
 		}
 
 		// Write response
@@ -110,32 +123,33 @@ func getSendSmsJobStatus(dataStore *store.Datastore) http.HandlerFunc {
 	}
 }
 
-/**
- * Updates the status of a SMS job
- */
+// Updates the status of an SMS job
+//
+// The request must contain a json body in this form:
+// {
+// 	"job_status": "<job status>"
+// }
+//
 func updateSendSmsJobStatus(dataStore *store.Datastore) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		// Get request path variables
-		var variables = mux.Vars(r)
-		var deviceId = variables["deviceId"]
-		var jobUuid = variables["uuid"]
-		var jsonBody SendSmsJob
+		variables := mux.Vars(r)
+		deviceId := variables["deviceId"]
+		jobUuid := variables["uuid"]
 
+		var jsonBody SendSmsJob
 		json.NewDecoder(r.Body).Decode(&jsonBody)
 
 		log.Println("Update send sms job", jobUuid, "from", deviceId, "with payload", jsonBody.JobStatus)
 
 		err := dataStore.JobStatusStore.UpdateJobStatus(jobUuid, jsonBody.JobStatus)
 		if err != nil {
-			w.WriteHeader(http.StatusInternalServerError)
-			return
+			panic(err)
 		}
 	}
 }
 
-/**
- * Initializes the router for when the device wants to send SMS message
- */
+// Initializes the router for when the device wants to send SMS message
 func InitializeRouter(dataStore *store.Datastore, router *mux.Router) {
 	router.HandleFunc("", addSendSmsJob(dataStore)).Methods("POST")
 	router.HandleFunc("/{uuid}/status", getSendSmsJobStatus(dataStore)).Methods("GET")

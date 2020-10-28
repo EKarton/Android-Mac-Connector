@@ -60,7 +60,7 @@ class FirebaseMessagingServiceInstance : FirebaseMessagingService() {
         if (createSmsSenderService) {
             smsSenderService = SmsSenderService()
 
-            val subscriber = SendSmsRequestFcmSubscriber(smsSenderService!!, webService!!)
+            val subscriber = SendSmsRequestFcmSubscriber(this.applicationContext, smsSenderService!!, webService!!)
 
             subscriptionService?.addSubscriber(subscriber)
         }

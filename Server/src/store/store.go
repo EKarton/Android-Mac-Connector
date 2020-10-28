@@ -23,7 +23,7 @@ func CreateInMemoryDatastore() *Datastore {
 
 	return &Datastore{
 		DevicesStores:              devices.CreateFirestoreDevicesStore(fcm.GetFirestoreClient()),
-		JobStatusStore:             jobs.CreateInMemoryStore(),
+		JobStatusStore:             jobs.CreateFirestoreJobsStore(fcm.GetFirestoreClient()),
 		ResourcePoliciesStore:      resourcepolicies.CreateInMemoryStore(),
 		SmsMessagesStore:           messages.CreateInMemoryStore(),
 		SmsNotifications:           smsNotificationsStore,

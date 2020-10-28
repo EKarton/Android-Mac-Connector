@@ -1,7 +1,6 @@
 package com.androidmacconnector.androidapp
 
 import android.app.Activity
-import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
@@ -12,7 +11,6 @@ import com.androidmacconnector.androidapp.devices.IsDeviceRegisteredHandler
 import com.androidmacconnector.androidapp.utils.getOrCreateUniqueDeviceId
 import com.firebase.ui.auth.AuthUI
 import com.google.firebase.auth.FirebaseAuth
-import java.util.*
 
 class LoginActivity : AppCompatActivity() {
 
@@ -33,7 +31,7 @@ class LoginActivity : AppCompatActivity() {
         val firebaseLoginActivity = AuthUI.getInstance()
             .createSignInIntentBuilder()
             .setAvailableProviders(providers)
-            .setTheme(R.style.LoginTheme)
+//            .setTheme(R.style.LoginTheme)
             .build()
 
         startActivityForResult(firebaseLoginActivity, RC_SIGN_IN)
