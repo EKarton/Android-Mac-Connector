@@ -8,6 +8,11 @@ import (
 	"google.golang.org/api/iterator"
 )
 
+type FirebaseQueueClient struct {
+	firebaseClient         *firestore.Client
+	firebaseCollectionName string
+}
+
 type FirebaseQueue struct {
 	firebaseClient         *firestore.Client
 	firebaseCollectionName string
@@ -18,11 +23,6 @@ type FirebaseQueue struct {
 	curLength              int
 	maxLength              int
 	changedFieldNames      []string
-}
-
-type FirebaseQueueClient struct {
-	firebaseClient         *firestore.Client
-	firebaseCollectionName string
 }
 
 func NewFirebaseQueueClient(client *firestore.Client, collectionName string) *FirebaseQueueClient {
