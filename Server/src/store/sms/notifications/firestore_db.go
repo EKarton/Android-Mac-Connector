@@ -4,13 +4,9 @@ import (
 	"Android-Mac-Connector-Server/src/store/sms/notifications/firebase"
 	"errors"
 	"fmt"
-	"log"
 
 	"cloud.google.com/go/firestore"
 )
-
-type SmsNotificationIteratorRule = func(*firebase.FirebaseNode) string
-type SmsNotificationsIterator = func(startingUuid string, numNotifications int) ([]SmsNotification, error)
 
 type FirestoreNotificationsStore struct {
 	client               *firestore.Client
@@ -89,10 +85,25 @@ func (store *FirestoreNotificationsStore) AddSmsNotification(deviceId string, no
 // 2. An error object, if an error occured; else nil
 //
 func (store *FirestoreNotificationsStore) GetNewSmsNotificationsFromUuid(deviceId string, numNotifications int, startingUuid string) ([]SmsNotification, error) {
+	// Create our iterator
 	rule := func(node *firebase.FirebaseNode) string {
 		return node.GetNextNode()
 	}
-	return store.CreateNotificationsIterator(rule)(startingUuid, numNotifications)
+	iterator := firebase.CreateNodeIterator(store.firebaseNodeService, rule)
+
+	// Get the starting node
+	startingNode, err := store.firebaseNodeService.GetNode(startingUuid)
+	if err != nil {
+		return nil, err
+	}
+
+	// Iterate through the nodes
+	nodes, err := iterator(startingNode.GetNextNode(), numNotifications)
+	if err != nil {
+		return nil, err
+	}
+
+	return store.parseNodesData(nodes)
 }
 
 // Returns a list of at most X oldest SMS notifications starting from (but not including) a starting notification id
@@ -103,48 +114,25 @@ func (store *FirestoreNotificationsStore) GetNewSmsNotificationsFromUuid(deviceI
 // 2. An error object, if an error occured; else nil
 //
 func (store *FirestoreNotificationsStore) GetPreviousSmsNotificationsFromUuid(deviceId string, numNotifications int, startingUuid string) ([]SmsNotification, error) {
+	// Create our iterator
 	rule := func(node *firebase.FirebaseNode) string {
 		return node.GetPreviousNode()
 	}
-	return store.CreateNotificationsIterator(rule)(startingUuid, numNotifications)
-}
+	iterator := firebase.CreateNodeIterator(store.firebaseNodeService, rule)
 
-// Creates a new iterator which can be used to iterate over SMS notifications in both directions
-// It takes in a 'rule' which takes in the current node, and outputs the id of the next node
-//
-// Returns an iterator, which can be run by specifying the starting node and the number of notifications to fetch
-// Note: when running the iterator, it will not take in the first starting node
-//
-func (store *FirestoreNotificationsStore) CreateNotificationsIterator(rule SmsNotificationIteratorRule) SmsNotificationsIterator {
-	return func(startingUuid string, numNotifications int) ([]SmsNotification, error) {
-		curNode, err := store.firebaseNodeService.GetNode(startingUuid)
-		if err != nil {
-			return nil, err
-		}
-
-		lst := make([]SmsNotification, 0, numNotifications)
-
-		for len(lst) < numNotifications && curNode != nil {
-			log.Println(curNode)
-			nextNode, err := store.firebaseNodeService.GetNode(rule(curNode))
-			if err != nil {
-				return nil, err
-			}
-			if nextNode == nil {
-				break
-			}
-
-			smsNotification, err := store.parseNodeData(nextNode)
-			if err != nil {
-				return nil, err
-			}
-			lst = append(lst, smsNotification)
-
-			curNode = nextNode
-		}
-
-		return lst, nil
+	// Get the starting node
+	startingNode, err := store.firebaseNodeService.GetNode(startingUuid)
+	if err != nil {
+		return nil, err
 	}
+
+	// Iterate through the nodes
+	nodes, err := iterator(startingNode.GetNextNode(), numNotifications)
+	if err != nil {
+		return nil, err
+	}
+
+	return store.parseNodesData(nodes)
 }
 
 func (store *FirestoreNotificationsStore) GetOldestSmsNotification(deviceId string) (SmsNotification, error) {
@@ -189,6 +177,20 @@ func (store *FirestoreNotificationsStore) GetLatestSmsNotification(deviceId stri
 
 func (store *FirestoreNotificationsStore) RemoveSmsNotification(deviceId string, nodeUuid string) error {
 	return nil
+}
+
+func (store *FirestoreNotificationsStore) parseNodesData(nodes [](*firebase.FirebaseNode)) ([]SmsNotification, error) {
+	smsNotifications := make([]SmsNotification, 0)
+	for _, node := range nodes {
+		smsNotification, err := store.parseNodeData(node)
+		if err != nil {
+			return nil, err
+		}
+
+		smsNotifications = append(smsNotifications, smsNotification)
+	}
+
+	return smsNotifications, nil
 }
 
 func (store *FirestoreNotificationsStore) parseNodeData(node *firebase.FirebaseNode) (SmsNotification, error) {
