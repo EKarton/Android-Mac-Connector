@@ -1,33 +1,26 @@
 package notifications
 
 import (
+	"Android-Mac-Connector-Server/src/store/sms/notifications/firebase"
 	"context"
 
 	"cloud.google.com/go/firestore"
-	"google.golang.org/api/iterator"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 )
 
 type FirestoreNotificationsStore struct {
-	client         *firestore.Client
-	maxQueueLength int
+	client               *firestore.Client
+	firebaseQueueService *firebase.FirebaseQueueClient
+	maxQueueLength       int
 }
 
 func CreateFirestoreNotificationsStore(client *firestore.Client, maxQueueLength int) *FirestoreNotificationsStore {
 	return &FirestoreNotificationsStore{
-		client:         client,
-		maxQueueLength: maxQueueLength,
+		client:               client,
+		firebaseQueueService: firebase.NewFirebaseQueueClient(client, "sms-notification-queues"),
+		maxQueueLength:       maxQueueLength,
 	}
-}
-
-type smsNotificationQueue struct {
-	queueId             string
-	deviceId            string
-	firstNotificationId string
-	lastNotificationId  string
-	curLength           int64
-	maxLength           int64
 }
 
 type smsNotification struct {
@@ -46,146 +39,67 @@ type smsNotification struct {
 // It returns an error if an error occured; else nil
 //
 func (store *FirestoreNotificationsStore) AddSmsNotification(deviceId string, notification SmsNotification) error {
-	// Get or create an SMS notification queue
-	queue, err := store.getOrCreateSmsNotificationsQueue(deviceId)
+	// Get our queue
+	queue, err := store.firebaseQueueService.GetOrCreateQueue(deviceId, 1000)
 	if err != nil {
 		return err
 	}
 
-	// Create the SMS notification
-	newSmsNotification := map[string]interface{}{
-		"next":     nil,
-		"previous": nil,
-		"notification": map[string]interface{}{
-			"contact_info": notification.ContactInfo,
-			"data":         notification.Data,
-			"timestamp":    int64(notification.Timestamp),
-		},
+	// Create a SMS notification
+	newSmsNotification := smsNotification{
+		next:        "",
+		previous:    "",
+		contactInfo: notification.ContactInfo,
+		data:        notification.Data,
+		timestamp:   int64(notification.Timestamp),
 	}
-	if queue.curLength > 0 {
-		newSmsNotification["previous"] = queue.firstNotificationId
+	if queue.GetCurLength() > 0 {
+		newSmsNotification.previous = queue.GetFirstNotificationId()
 	}
 
-	// Add the notification to the collection
-	newSmsNotificationId := ""
-	notificationsCollection := store.client.Collection("sms-notifications")
-	if doc, _, err := notificationsCollection.Add(context.Background(), newSmsNotification); err != nil {
+	// Add the SMS notification to the queue
+	newSmsNotificationId, err := store.addSmsNotification(&newSmsNotification)
+	if err != nil {
 		return err
-	} else {
-		newSmsNotificationId = doc.ID
 	}
 
 	// Update the first notification's 'next' field to point to our current one
-	if queue.curLength > 0 {
+	if queue.GetCurLength() > 0 {
 		updatedData := map[string]interface{}{
 			"next": newSmsNotificationId,
 		}
-		_, err = notificationsCollection.Doc(queue.firstNotificationId).Set(context.Background(), updatedData, firestore.MergeAll)
+		notificationsCollection := store.client.Collection("sms-notifications")
+		_, err = notificationsCollection.Doc(queue.GetFirstNotificationId()).Set(context.Background(), updatedData, firestore.MergeAll)
 	}
 
 	// Update the queue's 'first_notification' and 'cur_length' field
-	updatedLastNotificationId := queue.lastNotificationId
-	if queue.curLength == 0 {
-		updatedLastNotificationId = newSmsNotificationId
+	if queue.GetCurLength() == 0 {
+		queue.SetLastNotificationId(newSmsNotificationId)
 	}
-	updatedData := map[string]interface{}{
-		"first_notification_id": newSmsNotificationId,
-		"last_notification_id":  updatedLastNotificationId,
-		"cur_length":            queue.curLength + 1,
-	}
-	queuesCollection := store.client.Collection("sms-notification-queues")
-	_, err = queuesCollection.Doc(queue.queueId).Set(context.Background(), updatedData, firestore.MergeAll)
+	queue.SetFirstNotificationId(newSmsNotificationId)
+	queue.SetCurLength(queue.GetCurLength() + 1)
 
-	return err
+	return queue.Commit()
 }
 
-// Gets the Sms notification queue
-// If it cannot find it, it will make one
-//
-// It returns:
-// 1. The sms queue
-// 2. An error, if an error occured; else nil
-//
-func (store *FirestoreNotificationsStore) getOrCreateSmsNotificationsQueue(deviceId string) (*smsNotificationQueue, error) {
-	queue, err := store.getSmsNotificationQueue(deviceId)
-	if err != nil {
-		return nil, err
+func (store *FirestoreNotificationsStore) addSmsNotification(notification *smsNotification) (string, error) {
+	newSmsNotification := map[string]interface{}{
+		"next":     notification.next,
+		"previous": notification.previous,
+		"notification": map[string]interface{}{
+			"contact_info": notification.contactInfo,
+			"data":         notification.data,
+			"timestamp":    notification.timestamp,
+		},
 	}
 
-	if queue == nil {
-		return store.createSmsNotificationQueue(deviceId)
-	}
-
-	return queue, nil
-}
-
-// Gets the SMS Notification Queue from a device id
-// Note: if the queue could not be found, it does not return an error
-//
-// Returns two things:
-// 1. The queue, if it finds one, else nil
-// 2. The error, if an error occured; else nil
-//
-func (store *FirestoreNotificationsStore) getSmsNotificationQueue(deviceId string) (*smsNotificationQueue, error) {
-	queuesCollection := store.client.Collection("sms-notification-queues")
-	query := queuesCollection.Where("device_id", "==", deviceId)
-
-	doc, err := query.Limit(1).Documents(context.Background()).Next()
-	if err == iterator.Done {
-		return nil, nil
-
-	} else if err != nil {
-		return nil, err
-	}
-
-	rawData := doc.Data()
-	queue := smsNotificationQueue{
-		queueId:             doc.Ref.ID,
-		deviceId:            rawData["device_id"].(string),
-		firstNotificationId: rawData["first_notification_id"].(string),
-		lastNotificationId:  rawData["last_notification_id"].(string),
-		curLength:           rawData["cur_length"].(int64),
-		maxLength:           rawData["max_length"].(int64),
-	}
-	queue.queueId = doc.Ref.ID
-
-	return &queue, nil
-}
-
-// Creates a new Sms notification queue given the device id
-// NOTE: It does not check if a queue with the same device id exists!!
-//
-// Returns two things:
-// 1. A typed SMS notification queue
-// 2. The error object, if an error occured, else nil
-//
-func (store *FirestoreNotificationsStore) createSmsNotificationQueue(deviceId string) (*smsNotificationQueue, error) {
-	newQueue := map[string]interface{}{
-		"first_notification_id": "",
-		"last_notification_id":  "",
-		"device_id":             deviceId,
-		"cur_length":            0,
-		"max_length":            store.maxQueueLength,
-	}
-
-	queuesCollection := store.client.Collection("sms-notification-queues")
-	queueId := ""
-	if doc, _, err := queuesCollection.Add(context.Background(), newQueue); err != nil {
-		return nil, err
+	// Add the notification to the collection
+	notificationsCollection := store.client.Collection("sms-notifications")
+	if doc, _, err := notificationsCollection.Add(context.Background(), newSmsNotification); err != nil {
+		return "", err
 	} else {
-		queueId = doc.ID
+		return doc.ID, nil
 	}
-
-	queue := smsNotificationQueue{
-		queueId:             queueId,
-		firstNotificationId: "",
-		lastNotificationId:  "",
-		deviceId:            deviceId,
-		curLength:           0,
-		maxLength:           int64(store.maxQueueLength),
-	}
-
-	return &queue, nil
 }
 
 // Returns a list of at most X newest SMS notifications starting from (but not including) a starting notification id
@@ -263,6 +177,16 @@ func (store *FirestoreNotificationsStore) RemoveSmsNotification(deviceId string,
 	return nil
 }
 
+// Get a SMS notification from an SMS notification id
+//
+// It returns two things:
+// 1. *smsNotification:
+//    a) nil, if it could not find the SMS notification, or
+//    b) the SMS notification itself
+// 2. error:
+//    a) nil, if no error occured, or
+//    b) the error object, if an error occured
+//
 func (store *FirestoreNotificationsStore) getSmsNotification(uuid string) (*smsNotification, error) {
 	if uuid == "" {
 		return nil, nil
