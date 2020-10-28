@@ -14,12 +14,23 @@ type FirestoreJobsStore struct {
 	client *firestore.Client
 }
 
+// Creates a FirestoreJobsStore instance
+// It needs a valid firestore client (refer to https://firebase.google.com/docs/firestore/quickstart)
+//
+// Returns a pointer to a FirestoreJobsStore instance
+//
 func CreateFirestoreJobsStore(client *firestore.Client) *FirestoreJobsStore {
 	return &FirestoreJobsStore{
 		client: client,
 	}
 }
 
+// Adds a new job to the jobs store
+//
+// It returns two things:
+// 1. the job id (string), and
+// 2. an error, which is nil if no errors occured; else an error object is returned
+//
 func (store *FirestoreJobsStore) AddJob(status string) (string, error) {
 	devicesCollection := store.client.Collection("jobs")
 	doc, _, err := devicesCollection.Add(context.Background(), map[string]interface{}{
@@ -32,6 +43,11 @@ func (store *FirestoreJobsStore) AddJob(status string) (string, error) {
 	return doc.ID, nil
 }
 
+// Deletes a job from the job queue
+// If the `jobId` does not exist in the job queue, it will not do anything
+//
+// It returns an error if an error occured, else nil
+//
 func (store *FirestoreJobsStore) DeleteJob(jobId string) error {
 	devicesCollection := store.client.Collection("jobs")
 	_, err := devicesCollection.Doc(jobId).Delete(context.Background())
@@ -39,6 +55,11 @@ func (store *FirestoreJobsStore) DeleteJob(jobId string) error {
 	return err
 }
 
+// Updates the status of a job
+// The `jobId` is the jobId returned from calling `store.AddJob()`
+//
+// It returns an error if an error occured; else nil
+//
 func (store *FirestoreJobsStore) UpdateJobStatus(jobId string, newStatus string) error {
 	devicesCollection := store.client.Collection("jobs")
 	_, err := devicesCollection.Doc(jobId).Get(context.Background())
@@ -59,6 +80,13 @@ func (store *FirestoreJobsStore) UpdateJobStatus(jobId string, newStatus string)
 	return err
 }
 
+// Gets the current job status
+// The `jobId` is the jobId returned from calling `store.AddJob()`
+//
+// It returns two things:
+// 1. The current job status (string), and
+// 2. An error, which is either nil (if no error occured), or an error object
+//
 func (store *FirestoreJobsStore) GetJobStatus(jobId string) (string, error) {
 	devicesCollection := store.client.Collection("jobs")
 	doc, err := devicesCollection.Doc(jobId).Get(context.Background())
