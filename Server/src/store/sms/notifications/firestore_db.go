@@ -30,11 +30,11 @@ func CreateFirestoreNotificationsStore(client *firestore.Client, maxQueueLength 
 //
 // It returns an error if an error occured; else nil
 //
-func (store *FirestoreNotificationsStore) AddSmsNotification(deviceId string, notification SmsNotification) error {
+func (store *FirestoreNotificationsStore) AddSmsNotification(deviceId string, notification SmsNotification) (string, error) {
 	// Get our queue
 	queue, err := store.firebaseQueueService.GetOrCreateQueue(deviceId, 1000)
 	if err != nil {
-		return err
+		return "", err
 	}
 
 	// Create a SMS notification
@@ -45,7 +45,7 @@ func (store *FirestoreNotificationsStore) AddSmsNotification(deviceId string, no
 	})
 
 	if err != nil {
-		return err
+		return "", err
 	}
 
 	// Update the first node's 'next' field to point to our new node
@@ -58,12 +58,12 @@ func (store *FirestoreNotificationsStore) AddSmsNotification(deviceId string, no
 	if queue.GetCurLength() > 0 {
 		node, err := store.firebaseNodeService.GetNode(queue.GetFirstNotificationId())
 		if err != nil {
-			return err
+			return "", err
 		}
 
 		node.SetNextNode(smsNotification.GetId())
 		if err := node.Commit(); err != nil {
-			return err
+			return "", err
 		}
 	}
 
@@ -74,7 +74,10 @@ func (store *FirestoreNotificationsStore) AddSmsNotification(deviceId string, no
 	queue.SetFirstNotificationId(smsNotification.GetId())
 	queue.SetCurLength(queue.GetCurLength() + 1)
 
-	return queue.Commit()
+	if err := queue.Commit(); err != nil {
+		return "", err
+	}
+	return smsNotification.GetId(), nil
 }
 
 // Returns a list of at most X newest SMS notifications starting from (but not including) a starting notification id
@@ -173,10 +176,6 @@ func (store *FirestoreNotificationsStore) GetLatestSmsNotification(deviceId stri
 	}
 
 	return store.parseNodeData(node)
-}
-
-func (store *FirestoreNotificationsStore) RemoveSmsNotification(deviceId string, nodeUuid string) error {
-	return nil
 }
 
 func (store *FirestoreNotificationsStore) parseNodesData(nodes [](*firebase.FirebaseNode)) ([]SmsNotification, error) {

@@ -44,7 +44,7 @@ func notifyNewSmsMessageReceived(dataStore *store.Datastore) http.HandlerFunc {
 			Timestamp:   newSmsMessage.Timestamp,
 		}
 
-		if err := dataStore.SmsNotifications.AddSmsNotification(deviceId, newSmsMsg); err != nil {
+		if _, err := dataStore.SmsNotifications.AddSmsNotification(deviceId, newSmsMsg); err != nil {
 			panic(err)
 		}
 	}
@@ -87,12 +87,12 @@ func getNewSmsMessagesReceived(dataStore *store.Datastore) http.HandlerFunc {
 		}
 
 		// Get the notifications starting from the Uuid
-		newNotifications, err := dataStore.SmsNotifications.GetNewSmsNotificationsFromUuid(deviceId, int(numNotifications), startingUuid)
+		pastUnreadNotifications, err := dataStore.SmsNotifications.GetNewSmsNotificationsFromUuid(deviceId, int(numNotifications), startingUuid)
 		if err != nil {
 			panic(err)
 		}
 
-		if isLongPolling && len(newNotifications) == 0 {
+		if isLongPolling && len(pastUnreadNotifications) == 0 {
 			log.Println("Subscribing to new sms notifications from", deviceId)
 
 			subscriber, err := dataStore.SmsNotificationSubscribers.CreateSubscriber(deviceId)
@@ -101,6 +101,7 @@ func getNewSmsMessagesReceived(dataStore *store.Datastore) http.HandlerFunc {
 				panic(err)
 			}
 
+			// log.Println("Reading data")
 			newNotification := <-subscriber.Channel
 			dataStore.SmsNotificationSubscribers.RemoveSubscriber(subscriber)
 
@@ -111,7 +112,7 @@ func getNewSmsMessagesReceived(dataStore *store.Datastore) http.HandlerFunc {
 		} else {
 			// Write response
 			responseWriter.Header().Set("Content-Type", "application/json")
-			json.NewEncoder(responseWriter).Encode(newNotifications)
+			json.NewEncoder(responseWriter).Encode(pastUnreadNotifications)
 		}
 	}
 }

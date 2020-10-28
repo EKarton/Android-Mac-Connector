@@ -1,6 +1,8 @@
 package notifications
 
-import "github.com/google/uuid"
+import (
+	"github.com/google/uuid"
+)
 
 type Subscriber struct {
 	uuid    string
@@ -57,22 +59,45 @@ func (store *SmsNotificationSubscribersStore) RemoveSubscriber(subscriber Subscr
 	delete(store.subscriberUuidToDeviceId, subscriber.uuid)
 }
 
-func (store *SmsNotificationSubscribersStore) AddSmsNotification(deviceId string, notification SmsNotification) error {
-	err := store.actualStore.AddSmsNotification(deviceId, notification)
+func (store *SmsNotificationSubscribersStore) AddSmsNotification(deviceId string, notification SmsNotification) (string, error) {
+	nodeId, err := store.actualStore.AddSmsNotification(deviceId, notification)
 	if err != nil {
-		return err
+		return "", err
 	}
 
-	// Notify the channels
+	// Make a copy of the original notification object so that
+	// the data is not gone when the sender's request is finished
+	copiedNotification := SmsNotification{
+		Uuid:        nodeId,
+		ContactInfo: notification.ContactInfo,
+		Data:        notification.Data,
+		Timestamp:   notification.Timestamp,
+	}
+
+	// Notify the channels in parallel
 	for subscriberUuid := range store.deviceIdToSubscriberUuid[deviceId] {
 		subscriber := store.subscriberUuidToSubscribers[subscriberUuid]
 
-		// We send notifications in parallel
 		go func(channel chan SmsNotification) {
-			channel <- notification
-			close(channel)
+			channel <- copiedNotification
 		}(subscriber.Channel)
 	}
 
-	return nil
+	return nodeId, nil
+}
+
+func (store *SmsNotificationSubscribersStore) GetNewSmsNotificationsFromUuid(deviceId string, numNotifications int, startingUuid string) ([]SmsNotification, error) {
+	return store.actualStore.GetNewSmsNotificationsFromUuid(deviceId, numNotifications, startingUuid)
+}
+
+func (store *SmsNotificationSubscribersStore) GetPreviousSmsNotificationsFromUuid(deviceId string, numNotifications int, startingUuid string) ([]SmsNotification, error) {
+	return store.actualStore.GetPreviousSmsNotificationsFromUuid(deviceId, numNotifications, startingUuid)
+}
+
+func (store *SmsNotificationSubscribersStore) GetOldestSmsNotification(deviceId string) (SmsNotification, error) {
+	return store.actualStore.GetOldestSmsNotification(deviceId)
+}
+
+func (store *SmsNotificationSubscribersStore) GetLatestSmsNotification(deviceId string) (SmsNotification, error) {
+	return store.actualStore.GetLatestSmsNotification(deviceId)
 }
