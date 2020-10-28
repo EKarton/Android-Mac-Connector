@@ -1,7 +1,7 @@
 package notifications
 
 import (
-	"Android-Mac-Connector-Server/src/store/sms/notifications/firebase"
+	"Android-Mac-Connector-Server/src/store/queues"
 	"errors"
 	"fmt"
 
@@ -10,16 +10,16 @@ import (
 
 type FirestoreNotificationsStore struct {
 	client               *firestore.Client
-	firebaseQueueService *firebase.FirebaseQueueClient
-	firebaseNodeService  *firebase.FirebaseNodeClient
+	firebaseQueueService *queues.FirebaseQueueClient
+	firebaseNodeService  *queues.FirebaseNodeClient
 	maxQueueLength       int
 }
 
 func CreateFirestoreNotificationsStore(client *firestore.Client, maxQueueLength int) *FirestoreNotificationsStore {
 	return &FirestoreNotificationsStore{
 		client:               client,
-		firebaseQueueService: firebase.NewFirebaseQueueClient(client, "sms-notification-queues"),
-		firebaseNodeService:  firebase.CreateFirebaseNodeClient(client, "sms-notifications"),
+		firebaseQueueService: queues.NewFirebaseQueueClient(client, "sms-notification-queues"),
+		firebaseNodeService:  queues.CreateFirebaseNodeClient(client, "sms-notifications"),
 		maxQueueLength:       maxQueueLength,
 	}
 }
@@ -89,10 +89,10 @@ func (store *FirestoreNotificationsStore) AddSmsNotification(deviceId string, no
 //
 func (store *FirestoreNotificationsStore) GetNewSmsNotificationsFromUuid(deviceId string, numNotifications int, startingUuid string) ([]SmsNotification, error) {
 	// Create our iterator
-	rule := func(node *firebase.FirebaseNode) string {
+	rule := func(node *queues.FirebaseNode) string {
 		return node.GetNextNode()
 	}
-	iterator := firebase.CreateNodeIterator(store.firebaseNodeService, rule)
+	iterator := queues.CreateNodeIterator(store.firebaseNodeService, rule)
 
 	// Get the starting node
 	startingNode, err := store.firebaseNodeService.GetNode(startingUuid)
@@ -118,10 +118,10 @@ func (store *FirestoreNotificationsStore) GetNewSmsNotificationsFromUuid(deviceI
 //
 func (store *FirestoreNotificationsStore) GetPreviousSmsNotificationsFromUuid(deviceId string, numNotifications int, startingUuid string) ([]SmsNotification, error) {
 	// Create our iterator
-	rule := func(node *firebase.FirebaseNode) string {
+	rule := func(node *queues.FirebaseNode) string {
 		return node.GetPreviousNode()
 	}
-	iterator := firebase.CreateNodeIterator(store.firebaseNodeService, rule)
+	iterator := queues.CreateNodeIterator(store.firebaseNodeService, rule)
 
 	// Get the starting node
 	startingNode, err := store.firebaseNodeService.GetNode(startingUuid)
@@ -178,7 +178,7 @@ func (store *FirestoreNotificationsStore) GetLatestSmsNotification(deviceId stri
 	return store.parseNodeData(node)
 }
 
-func (store *FirestoreNotificationsStore) parseNodesData(nodes [](*firebase.FirebaseNode)) ([]SmsNotification, error) {
+func (store *FirestoreNotificationsStore) parseNodesData(nodes [](*queues.FirebaseNode)) ([]SmsNotification, error) {
 	smsNotifications := make([]SmsNotification, 0)
 	for _, node := range nodes {
 		smsNotification, err := store.parseNodeData(node)
@@ -192,7 +192,7 @@ func (store *FirestoreNotificationsStore) parseNodesData(nodes [](*firebase.Fire
 	return smsNotifications, nil
 }
 
-func (store *FirestoreNotificationsStore) parseNodeData(node *firebase.FirebaseNode) (SmsNotification, error) {
+func (store *FirestoreNotificationsStore) parseNodeData(node *queues.FirebaseNode) (SmsNotification, error) {
 	nodeData, isParsable := node.GetData().(map[string]interface{})
 	if !isParsable {
 		return SmsNotification{}, errors.New(fmt.Sprintf("The data %s is not parsable with type (map[string]interface{})", node.GetData()))

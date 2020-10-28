@@ -1,4 +1,4 @@
-package firebase
+package queues
 
 type NodeIteratorRule = func(*FirebaseNode) string
 type NodeIterator = func(startingNodeId string, numNodesToFetch int) ([](*FirebaseNode), error)
