@@ -109,6 +109,12 @@ func (store *FirestoreNotificationsStore) GetPreviousSmsNotificationsFromUuid(de
 	return store.CreateNotificationsIterator(rule)(startingUuid, numNotifications)
 }
 
+// Creates a new iterator which can be used to iterate over SMS notifications in both directions
+// It takes in a 'rule' which takes in the current node, and outputs the id of the next node
+//
+// Returns an iterator, which can be run by specifying the starting node and the number of notifications to fetch
+// Note: when running the iterator, it will not take in the first starting node
+//
 func (store *FirestoreNotificationsStore) CreateNotificationsIterator(rule SmsNotificationIteratorRule) SmsNotificationsIterator {
 	return func(startingUuid string, numNotifications int) ([]SmsNotification, error) {
 		curNode, err := store.firebaseNodeService.GetNode(startingUuid)
@@ -128,17 +134,11 @@ func (store *FirestoreNotificationsStore) CreateNotificationsIterator(rule SmsNo
 				break
 			}
 
-			nodeData, isParsable := nextNode.GetData().(map[string]interface{})
-			if !isParsable {
-				return nil, errors.New(fmt.Sprintf("The data %s is not parsable with type (map[string]interface{})", nextNode.GetData()))
+			smsNotification, err := store.parseNodeData(nextNode)
+			if err != nil {
+				return nil, err
 			}
-
-			lst = append(lst, SmsNotification{
-				Uuid:        nextNode.GetId(),
-				ContactInfo: nodeData["contact_info"].(string),
-				Data:        nodeData["data"].(string),
-				Timestamp:   int(nodeData["timestamp"].(int64)),
-			})
+			lst = append(lst, smsNotification)
 
 			curNode = nextNode
 		}
@@ -148,13 +148,60 @@ func (store *FirestoreNotificationsStore) CreateNotificationsIterator(rule SmsNo
 }
 
 func (store *FirestoreNotificationsStore) GetOldestSmsNotification(deviceId string) (SmsNotification, error) {
-	return SmsNotification{}, nil
+	queue, err := store.firebaseQueueService.GetQueue(deviceId)
+	if err != nil {
+		return SmsNotification{}, err
+	}
+	if queue == nil {
+		return SmsNotification{}, nil
+	}
+
+	node, err := store.firebaseNodeService.GetNode(queue.GetLastNotificationId())
+	if err != nil {
+		return SmsNotification{}, err
+	}
+	if node == nil {
+		return SmsNotification{}, nil
+	}
+
+	return store.parseNodeData(node)
 }
 
 func (store *FirestoreNotificationsStore) GetLatestSmsNotification(deviceId string) (SmsNotification, error) {
-	return SmsNotification{}, nil
+	queue, err := store.firebaseQueueService.GetQueue(deviceId)
+	if err != nil {
+		return SmsNotification{}, err
+	}
+	if queue == nil {
+		return SmsNotification{}, nil
+	}
+
+	node, err := store.firebaseNodeService.GetNode(queue.GetFirstNotificationId())
+	if err != nil {
+		return SmsNotification{}, err
+	}
+	if node == nil {
+		return SmsNotification{}, nil
+	}
+
+	return store.parseNodeData(node)
 }
 
 func (store *FirestoreNotificationsStore) RemoveSmsNotification(deviceId string, nodeUuid string) error {
 	return nil
+}
+
+func (store *FirestoreNotificationsStore) parseNodeData(node *firebase.FirebaseNode) (SmsNotification, error) {
+	nodeData, isParsable := node.GetData().(map[string]interface{})
+	if !isParsable {
+		return SmsNotification{}, errors.New(fmt.Sprintf("The data %s is not parsable with type (map[string]interface{})", node.GetData()))
+	}
+	smsNotification := SmsNotification{
+		Uuid:        node.GetId(),
+		ContactInfo: nodeData["contact_info"].(string),
+		Data:        nodeData["data"].(string),
+		Timestamp:   int(nodeData["timestamp"].(int64)),
+	}
+
+	return smsNotification, nil
 }
