@@ -196,33 +196,10 @@ func (store *FirestoreNotificationsStore) createSmsNotificationQueue(deviceId st
 // 2. An error object, if an error occured; else nil
 //
 func (store *FirestoreNotificationsStore) GetNewSmsNotificationsFromUuid(deviceId string, numNotifications int, startingUuid string) ([]SmsNotification, error) {
-	notification, err := store.getSmsNotification(startingUuid)
-	if err != nil {
-		return nil, err
+	rule := func(sn *smsNotification) string {
+		return sn.next
 	}
-
-	lst := make([]SmsNotification, 0, numNotifications)
-
-	for len(lst) < numNotifications && notification != nil {
-		nextNotification, err := store.getSmsNotification(notification.next)
-		if err != nil {
-			return nil, err
-		}
-		if nextNotification == nil {
-			break
-		}
-
-		lst = append(lst, SmsNotification{
-			Uuid:        nextNotification.notificationId,
-			ContactInfo: nextNotification.contactInfo,
-			Data:        nextNotification.data,
-			Timestamp:   int(nextNotification.timestamp),
-		})
-
-		notification = nextNotification
-	}
-
-	return lst, nil
+	return store.createNotificationsIterator(rule)(startingUuid, numNotifications)
 }
 
 // Returns a list of at most X oldest SMS notifications starting from (but not including) a starting notification id
@@ -233,33 +210,45 @@ func (store *FirestoreNotificationsStore) GetNewSmsNotificationsFromUuid(deviceI
 // 2. An error object, if an error occured; else nil
 //
 func (store *FirestoreNotificationsStore) GetPreviousSmsNotificationsFromUuid(deviceId string, numNotifications int, startingUuid string) ([]SmsNotification, error) {
-	notification, err := store.getSmsNotification(startingUuid)
-	if err != nil {
-		return nil, err
+	rule := func(sn *smsNotification) string {
+		return sn.previous
 	}
+	return store.createNotificationsIterator(rule)(startingUuid, numNotifications)
+}
 
-	lst := make([]SmsNotification, 0, numNotifications)
+type smsNotificationIteratorRule = func(*smsNotification) string
+type smsNotificationsIterator = func(startingUuid string, numNotifications int) ([]SmsNotification, error)
 
-	for len(lst) < numNotifications && notification != nil {
-		prevNotification, err := store.getSmsNotification(notification.previous)
+func (store *FirestoreNotificationsStore) createNotificationsIterator(rule smsNotificationIteratorRule) smsNotificationsIterator {
+	return func(startingUuid string, numNotifications int) ([]SmsNotification, error) {
+		notification, err := store.getSmsNotification(startingUuid)
 		if err != nil {
 			return nil, err
 		}
-		if prevNotification == nil {
-			break
+
+		lst := make([]SmsNotification, 0, numNotifications)
+
+		for len(lst) < numNotifications && notification != nil {
+			prevNotification, err := store.getSmsNotification(rule(notification))
+			if err != nil {
+				return nil, err
+			}
+			if prevNotification == nil {
+				break
+			}
+
+			lst = append(lst, SmsNotification{
+				Uuid:        prevNotification.notificationId,
+				ContactInfo: prevNotification.contactInfo,
+				Data:        prevNotification.data,
+				Timestamp:   int(prevNotification.timestamp),
+			})
+
+			notification = prevNotification
 		}
 
-		lst = append(lst, SmsNotification{
-			Uuid:        prevNotification.notificationId,
-			ContactInfo: prevNotification.contactInfo,
-			Data:        prevNotification.data,
-			Timestamp:   int(prevNotification.timestamp),
-		})
-
-		notification = prevNotification
+		return lst, nil
 	}
-
-	return lst, nil
 }
 
 func (store *FirestoreNotificationsStore) GetOldestSmsNotification(deviceId string) (SmsNotification, error) {
