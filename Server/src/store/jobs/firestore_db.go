@@ -66,7 +66,7 @@ func (store *FirestoreJobsStore) UpdateJobStatus(jobId string, newStatus string)
 
 	if err != nil {
 		if grpc.Code(err) == codes.NotFound {
-			return errors.New(fmt.Sprintf("Job with id %s does not exist", jobId))
+			return CreateJobNotFoundError(jobId)
 		}
 		return err
 	}
@@ -93,7 +93,7 @@ func (store *FirestoreJobsStore) GetJobStatus(jobId string) (string, error) {
 
 	if err != nil {
 		if grpc.Code(err) == codes.NotFound {
-			return "", nil
+			return "", CreateJobNotFoundError(jobId)
 		}
 		return "", err
 	}

@@ -25,8 +25,6 @@ func (err *DeviceNotFoundError) Error() string {
 	return fmt.Sprintf("Device %s is not found", err.deviceId)
 }
 
-// ------------------------- DeviceAlreadyRegisteredError ---------------------------------
-
 type DeviceAlreadyRegisteredError struct {
 	userId     string
 	deviceType string

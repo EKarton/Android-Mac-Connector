@@ -101,12 +101,9 @@ func addSendSmsJob(dataStore *store.Datastore) http.HandlerFunc {
 func getSendSmsJobStatus(dataStore *store.Datastore) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		variables := mux.Vars(r)
-		deviceId := variables["deviceId"]
 		jobUuid := variables["uuid"]
 		sendSmsMessageRequest := SendSmsMessageRequest{}
 		json.NewDecoder(r.Body).Decode(&sendSmsMessageRequest)
-
-		log.Println("Received get sms job status for", deviceId, "with payload", sendSmsMessageRequest)
 
 		jobStatus, err := dataStore.JobStatusStore.GetJobStatus(jobUuid)
 
@@ -134,13 +131,10 @@ func updateSendSmsJobStatus(dataStore *store.Datastore) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		// Get request path variables
 		variables := mux.Vars(r)
-		deviceId := variables["deviceId"]
 		jobUuid := variables["uuid"]
 
 		var jsonBody SendSmsJob
 		json.NewDecoder(r.Body).Decode(&jsonBody)
-
-		log.Println("Update send sms job", jobUuid, "from", deviceId, "with payload", jsonBody.JobStatus)
 
 		err := dataStore.JobStatusStore.UpdateJobStatus(jobUuid, jsonBody.JobStatus)
 		if err != nil {
