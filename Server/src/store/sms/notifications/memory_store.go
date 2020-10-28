@@ -56,12 +56,12 @@ func (store *InMemoryNotificationsStore) getOrCreateSmsNotificationQueue(deviceI
 	return store.deviceIdToQueue[deviceId]
 }
 
-func (store *InMemoryNotificationsStore) AddSmsNotification(deviceId string, notification SmsNotification) (string, error) {
+func (store *InMemoryNotificationsStore) AddSmsNotification(deviceId string, notification SmsNotification) error {
 	queue := store.getOrCreateSmsNotificationQueue(deviceId)
 
 	nodeUuid := ""
 	if uuid, err := uuid.NewRandom(); err != nil {
-		return "", err
+		return err
 	} else {
 		nodeUuid = uuid.String()
 	}
@@ -94,11 +94,11 @@ func (store *InMemoryNotificationsStore) AddSmsNotification(deviceId string, not
 		lastNodeUuid := queue.lastNode.uuid
 
 		if err := store.RemoveSmsNotification(deviceId, lastNodeUuid); err != nil {
-			return "", err
+			return err
 		}
 	}
 
-	return nodeUuid, nil
+	return nil
 }
 
 func (store *InMemoryNotificationsStore) GetNewSmsNotificationsFromUuid(deviceId string, numNotifications int, startingUuid string) ([]SmsNotification, error) {

@@ -19,7 +19,7 @@ type Datastore struct {
 }
 
 func CreateInMemoryDatastore() *Datastore {
-	var smsNotificationsStore notifications.SmsNotificationsStore = notifications.CreateInMemoryStore(1000)
+	var smsNotificationsStore notifications.SmsNotificationsStore = notifications.CreateFirestoreNotificationsStore(fcm.GetFirestoreClient(), 10)
 
 	return &Datastore{
 		DevicesStores:              devices.CreateFirestoreDevicesStore(fcm.GetFirestoreClient()),

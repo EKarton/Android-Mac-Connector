@@ -57,10 +57,10 @@ func (store *SmsNotificationSubscribersStore) RemoveSubscriber(subscriber Subscr
 	delete(store.subscriberUuidToDeviceId, subscriber.uuid)
 }
 
-func (store *SmsNotificationSubscribersStore) AddSmsNotification(deviceId string, notification SmsNotification) (string, error) {
-	uuid, err := store.actualStore.AddSmsNotification(deviceId, notification)
+func (store *SmsNotificationSubscribersStore) AddSmsNotification(deviceId string, notification SmsNotification) error {
+	err := store.actualStore.AddSmsNotification(deviceId, notification)
 	if err != nil {
-		return "", err
+		return err
 	}
 
 	// Notify the channels
@@ -74,5 +74,5 @@ func (store *SmsNotificationSubscribersStore) AddSmsNotification(deviceId string
 		}(subscriber.Channel)
 	}
 
-	return uuid, nil
+	return nil
 }
