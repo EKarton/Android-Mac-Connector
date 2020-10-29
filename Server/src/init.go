@@ -1,11 +1,11 @@
 package main
 
 import (
+	"Android-Mac-Connector-Server/src/application"
 	"Android-Mac-Connector-Server/src/middlewares"
 	"Android-Mac-Connector-Server/src/routes/devices"
 	"Android-Mac-Connector-Server/src/routes/jobs"
-	"Android-Mac-Connector-Server/src/routes/sms"
-	"Android-Mac-Connector-Server/src/store"
+	"Android-Mac-Connector-Server/src/routes/sms_notifications"
 	"log"
 	"net/http"
 	"time"
@@ -14,24 +14,8 @@ import (
 )
 
 func main() {
-
-	// // Initialize default app
-	// app, err := firebase.NewApp(context.Background(), nil)
-	// if err != nil {
-	// 	log.Fatalf("error initializing app: %v\n", err)
-	// }
-
-	// // Access auth service from the default app
-	// client, err := app.Auth(context.Background())
-	// if err != nil {
-	// 	log.Fatalf("error getting Auth client: %v\n", err)
-	// }
-
-	// _, err = client.VerifyIDTokenAndCheckRevoked(context.Background(), "wasdf")
-	// fmt.Println(err)
-
-	// Create our data store
-	dataStore := store.CreateInMemoryDatastore()
+	// Create our application context
+	appContext := application.CreateApplicationContext()
 
 	// Create our router
 	router := mux.NewRouter()
@@ -44,9 +28,9 @@ func main() {
 	devicesRouter := router.PathPrefix("/api/v1/devices").Subrouter()
 
 	// Add paths to each subrouter
-	sms.InitializeRouter(dataStore, smsRouter)
-	jobs.InitializeRouter(dataStore, jobsRouter)
-	devices.InitializeRouter(dataStore, devicesRouter)
+	sms_notifications.InitializeRouter(appContext, smsRouter)
+	jobs.InitializeRouter(appContext, jobsRouter)
+	devices.InitializeRouter(appContext, devicesRouter)
 
 	// Create and start our server
 	server := &http.Server{

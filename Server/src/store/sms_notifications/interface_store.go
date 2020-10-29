@@ -1,4 +1,4 @@
-package notifications
+package sms_notifications
 
 type SmsNotification struct {
 	Uuid        string

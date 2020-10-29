@@ -1,8 +1,8 @@
 package jobs
 
 import (
+	"Android-Mac-Connector-Server/src/application"
 	"Android-Mac-Connector-Server/src/data/fcm"
-	"Android-Mac-Connector-Server/src/store"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -24,7 +24,7 @@ type GetJobResults2xxResponse struct {
 	Results interface{} `json:"results"`
 }
 
-func publishJob(dataStore *store.Datastore) http.HandlerFunc {
+func publishJob(appContext *application.ApplicationContext) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		variables := mux.Vars(r)
 		deviceId := variables["deviceId"]
@@ -40,7 +40,7 @@ func publishJob(dataStore *store.Datastore) http.HandlerFunc {
 		}
 
 		// Keep track of the job
-		queue, err := dataStore.JobQueueService.GetQueue(deviceId)
+		queue, err := appContext.DataStores.JobQueueService.GetQueue(deviceId)
 		if err != nil {
 			panic(err)
 		}
@@ -51,7 +51,7 @@ func publishJob(dataStore *store.Datastore) http.HandlerFunc {
 		}
 
 		// Get the Push notification token
-		token, err := dataStore.DevicesStores.GetPushNotificationToken(deviceId)
+		token, err := appContext.DataStores.DevicesStores.GetPushNotificationToken(deviceId)
 		if err != nil {
 			panic(err)
 		}
@@ -70,7 +70,7 @@ func publishJob(dataStore *store.Datastore) http.HandlerFunc {
 	}
 }
 
-func publishJobResults(dataStore *store.Datastore) http.HandlerFunc {
+func publishJobResults(appContext *application.ApplicationContext) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 
 		// Getting the request info
@@ -88,7 +88,7 @@ func publishJobResults(dataStore *store.Datastore) http.HandlerFunc {
 		}
 		updatedResults := jsonBody["results"]
 
-		queue, err := dataStore.JobQueueService.GetQueue(deviceId)
+		queue, err := appContext.DataStores.JobQueueService.GetQueue(deviceId)
 		if err != nil {
 			panic(err)
 		}
@@ -106,7 +106,7 @@ func publishJobResults(dataStore *store.Datastore) http.HandlerFunc {
 	}
 }
 
-func getJobResults(dataStore *store.Datastore) http.HandlerFunc {
+func getJobResults(appContext *application.ApplicationContext) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 
 		// Getting request info
@@ -115,7 +115,7 @@ func getJobResults(dataStore *store.Datastore) http.HandlerFunc {
 		jobId := variables["jobId"]
 
 		// Getting the job results and status
-		queue, err := dataStore.JobQueueService.GetQueue(deviceId)
+		queue, err := appContext.DataStores.JobQueueService.GetQueue(deviceId)
 		if err != nil {
 			panic(err)
 		}
@@ -138,9 +138,9 @@ func getJobResults(dataStore *store.Datastore) http.HandlerFunc {
 	}
 }
 
-func InitializeRouter(dataStore *store.Datastore, router *mux.Router) {
-	router.HandleFunc("", publishJob(dataStore)).Methods("POST")
-	router.HandleFunc("/{jobId}/results", publishJobResults(dataStore)).Methods("POST")
+func InitializeRouter(appContext *application.ApplicationContext, router *mux.Router) {
+	router.HandleFunc("", publishJob(appContext)).Methods("POST")
+	router.HandleFunc("/{jobId}/results", publishJobResults(appContext)).Methods("POST")
 
-	router.HandleFunc("/{jobId}/results", getJobResults(dataStore)).Methods("GET")
+	router.HandleFunc("/{jobId}/results", getJobResults(appContext)).Methods("GET")
 }

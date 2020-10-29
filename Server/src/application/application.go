@@ -1,26 +1,36 @@
-package store
+package application
 
 import (
 	"Android-Mac-Connector-Server/src/data/fcm"
 	"Android-Mac-Connector-Server/src/store/devices"
 	"Android-Mac-Connector-Server/src/store/jobs"
 	"Android-Mac-Connector-Server/src/store/resourcepolicies"
-	"Android-Mac-Connector-Server/src/store/sms/notifications"
+	"Android-Mac-Connector-Server/src/store/sms_notifications"
 )
 
-type Datastore struct {
+type ApplicationContext struct {
+	DataStores *DataStores
+}
+
+type DataStores struct {
 	DevicesStores              devices.DevicesStore
 	JobQueueService            jobs.JobQueueService
 	ResourcePoliciesStore      resourcepolicies.ResourcePoliciesStore
-	SmsNotifications           notifications.SmsNotificationsStore
-	SmsNotificationSubscribers *notifications.SmsNotificationSubscribersStore
+	SmsNotifications           sms_notifications.SmsNotificationsStore
+	SmsNotificationSubscribers *sms_notifications.SmsNotificationSubscribersStore
 }
 
-func CreateInMemoryDatastore() *Datastore {
-	var smsNotificationsStore notifications.SmsNotificationsStore = notifications.CreateFirestoreNotificationsStore(fcm.GetFirestoreClient(), 10)
-	var smsNotificationSubscribersStore = notifications.CreateNotificationSubscribersStore(smsNotificationsStore)
+func CreateApplicationContext() *ApplicationContext {
+	return &ApplicationContext{
+		DataStores: createDatastore(),
+	}
+}
 
-	return &Datastore{
+func createDatastore() *DataStores {
+	smsNotificationsStore := sms_notifications.CreateFirestoreNotificationsStore(fcm.GetFirestoreClient(), 10)
+	smsNotificationSubscribersStore := sms_notifications.CreateNotificationSubscribersStore(smsNotificationsStore)
+
+	return &DataStores{
 		DevicesStores:              devices.CreateFirestoreDevicesStore(fcm.GetFirestoreClient()),
 		JobQueueService:            jobs.CreateFirebaseJobQueueService(fcm.GetFirestoreClient()),
 		ResourcePoliciesStore:      resourcepolicies.CreateInMemoryStore(),

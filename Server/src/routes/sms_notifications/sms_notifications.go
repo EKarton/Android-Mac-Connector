@@ -1,4 +1,4 @@
-package notifications
+package sms_notifications
 
 import (
 	"encoding/json"
@@ -8,8 +8,8 @@ import (
 
 	"github.com/gorilla/mux"
 
-	"Android-Mac-Connector-Server/src/store"
-	"Android-Mac-Connector-Server/src/store/sms/notifications"
+	"Android-Mac-Connector-Server/src/application"
+	"Android-Mac-Connector-Server/src/store/sms_notifications"
 )
 
 type NewSmsMessageReceived struct {
@@ -29,7 +29,7 @@ type GetNewSmsMessagesReceivedErrorResponse struct {
 /**
  * Handler for when the device wants to notify all subscribers that a new SMS message has been received
  */
-func notifyNewSmsMessageReceived(dataStore *store.Datastore) http.HandlerFunc {
+func notifyNewSmsMessageReceived(appContext *application.ApplicationContext) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		variables := mux.Vars(r)
 		deviceId := variables["deviceId"]
@@ -38,13 +38,13 @@ func notifyNewSmsMessageReceived(dataStore *store.Datastore) http.HandlerFunc {
 		json.NewDecoder(r.Body).Decode(&newSmsMessage)
 
 		// Store new msg in db
-		var newSmsMsg = notifications.SmsNotification{
+		var newSmsMsg = sms_notifications.SmsNotification{
 			ContactInfo: newSmsMessage.Address,
 			Data:        newSmsMessage.Body,
 			Timestamp:   newSmsMessage.Timestamp,
 		}
 
-		if _, err := dataStore.SmsNotifications.AddSmsNotification(deviceId, newSmsMsg); err != nil {
+		if _, err := appContext.DataStores.SmsNotifications.AddSmsNotification(deviceId, newSmsMsg); err != nil {
 			panic(err)
 		}
 	}
@@ -59,7 +59,7 @@ func notifyNewSmsMessageReceived(dataStore *store.Datastore) http.HandlerFunc {
  *     - If true, and there are no new notifications, then it will hold the request until a new notification arrives from the device
  *     - Else, it returns an empty array
  */
-func getNewSmsMessagesReceived(dataStore *store.Datastore) http.HandlerFunc {
+func getNewSmsMessagesReceived(appContext *application.ApplicationContext) http.HandlerFunc {
 	return func(responseWriter http.ResponseWriter, request *http.Request) {
 		// Get the contents from the request
 		variables := mux.Vars(request)
@@ -87,7 +87,7 @@ func getNewSmsMessagesReceived(dataStore *store.Datastore) http.HandlerFunc {
 		}
 
 		// Get the notifications starting from the Uuid
-		pastUnreadNotifications, err := dataStore.SmsNotifications.GetNewSmsNotificationsFromUuid(deviceId, int(numNotifications), startingUuid)
+		pastUnreadNotifications, err := appContext.DataStores.SmsNotifications.GetNewSmsNotificationsFromUuid(deviceId, int(numNotifications), startingUuid)
 		if err != nil {
 			panic(err)
 		}
@@ -95,7 +95,7 @@ func getNewSmsMessagesReceived(dataStore *store.Datastore) http.HandlerFunc {
 		if isLongPolling && len(pastUnreadNotifications) == 0 {
 			log.Println("Subscribing to new sms notifications from", deviceId)
 
-			subscriber, err := dataStore.SmsNotificationSubscribers.CreateSubscriber(deviceId)
+			subscriber, err := appContext.DataStores.SmsNotificationSubscribers.CreateSubscriber(deviceId)
 
 			if err != nil {
 				panic(err)
@@ -103,7 +103,7 @@ func getNewSmsMessagesReceived(dataStore *store.Datastore) http.HandlerFunc {
 
 			// log.Println("Reading data")
 			newNotification := <-subscriber.Channel
-			dataStore.SmsNotificationSubscribers.RemoveSubscriber(subscriber)
+			appContext.DataStores.SmsNotificationSubscribers.RemoveSubscriber(subscriber)
 
 			// Send the output to the user
 			responseWriter.Header().Set("Content-Type", "application/json")
@@ -120,7 +120,7 @@ func getNewSmsMessagesReceived(dataStore *store.Datastore) http.HandlerFunc {
 /**
  * Initializes the router to include paths and path handlers
  */
-func InitializeRouter(dataStore *store.Datastore, router *mux.Router) {
-	router.HandleFunc("", notifyNewSmsMessageReceived(dataStore)).Methods("POST")
-	router.HandleFunc("", getNewSmsMessagesReceived(dataStore)).Methods("GET")
+func InitializeRouter(appContext *application.ApplicationContext, router *mux.Router) {
+	router.HandleFunc("", notifyNewSmsMessageReceived(appContext)).Methods("POST")
+	router.HandleFunc("", getNewSmsMessagesReceived(appContext)).Methods("GET")
 }
