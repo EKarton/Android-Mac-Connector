@@ -50,8 +50,6 @@ class MainActivity : AppCompatActivity() {
         // Google play services are required with FCM
         GoogleApiAvailability.getInstance().makeGooglePlayServicesAvailable(this)
 
-        val deviceService = DeviceWebService(this)
-
         FirebaseMessaging.getInstance().token.addOnCompleteListener(OnCompleteListener { task ->
             if (!task.isSuccessful || task.result == null) {
                 Log.w(TAG, "Fetching FCM registration token failed", task.exception)
@@ -73,13 +71,11 @@ class MainActivity : AppCompatActivity() {
                     // Upload the fcm token to our server
                     val deviceWebService = DeviceWebService(this)
                     deviceWebService.updatePushNotificationToken(accessToken, deviceId, token, object: UpdatePushNotificationTokenHandler() {
-                        override fun onSuccess(response: JSONObject?) {
+                        override fun onSuccess() {
                             Log.d(TAG, "Successfully updated fcm token")
                         }
 
-                        override fun onError(exception: Exception) {
-                            throw exception
-                        }
+                        override fun onError(exception: Exception) {}
                     })
                 }
             }

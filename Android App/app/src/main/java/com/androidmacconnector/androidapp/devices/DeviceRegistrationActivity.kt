@@ -10,7 +10,7 @@ import com.androidmacconnector.androidapp.MainActivity
 import com.androidmacconnector.androidapp.R
 import com.androidmacconnector.androidapp.sms.SmsBroadcastReceiver
 import com.androidmacconnector.androidapp.sms.SmsQueryService
-import com.androidmacconnector.androidapp.sms.SmsSenderService
+import com.androidmacconnector.androidapp.sms.sender.SmsSenderService
 import com.androidmacconnector.androidapp.utils.getOrCreateUniqueDeviceId
 import com.androidmacconnector.androidapp.utils.saveDeviceId
 import com.google.firebase.auth.FirebaseAuth

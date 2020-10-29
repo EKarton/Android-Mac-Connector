@@ -7,6 +7,8 @@ import com.android.volley.Request
 import com.android.volley.VolleyError
 import com.androidmacconnector.androidapp.utils.WebService
 import com.androidmacconnector.androidapp.utils.WebServiceResponseHandler
+import com.androidmacconnector.androidapp.utils.WebServiceStringResponseHandler
+import org.json.JSONArray
 import org.json.JSONException
 import org.json.JSONObject
 
@@ -24,11 +26,6 @@ interface SmsService {
         handler: UpdateSmsSentStatusHandler
     )
 
-    fun updateSmsThreads(
-        threads: List<SmsThreadSummary>,
-        handler: UpdateSmsThreadsHandler
-    )
-
     fun updateSmsMessagesForThread(
         threadId: String,
         messages: List<MySmsMessage>,
@@ -44,7 +41,7 @@ class SmsWebService(context: Context) : WebService(context), SmsService {
         // Paths
         private const val NOTIFY_RECEIVED_SMS_MESSAGE_PATH = "/api/v1/%s/sms/messages/new"
         private const val UPDATE_SMS_SENT_STATUS_PATH = "/api/v1/%s/sms/send/%s/status"
-        private const val UPDATE_SMS_THREADS_PATH = "/api/v1/%s/sms/threads"
+        private const val PUBLISH_SMS_THREAD_RESULTS = "api/v1/%s/jobs/%s/results"
         private const val UPDATE_SMS_MESSAGES_FOR_THREAD_PATH = "/api/v1/%s/sms/threads/%s/messages"
     }
 
@@ -61,7 +58,7 @@ class SmsWebService(context: Context) : WebService(context), SmsService {
             .appendEncodedPath(apiPath)
             .build()
 
-        makeRequest(Request.Method.POST, uri.toString(), jsonBody, null, handler)
+        makeJsonObjectRequest(Request.Method.POST, uri.toString(), jsonBody, null, handler)
     }
 
     override fun updateSmsMessageSentStatus(deviceId: String, uuid: String, newStatus: String, handler: UpdateSmsSentStatusHandler) {
@@ -76,22 +73,7 @@ class SmsWebService(context: Context) : WebService(context), SmsService {
             .encodedPath(apiPath)
             .build()
 
-        makeRequest(Request.Method.PUT, uri.toString(), jsonBody, null, handler)
-    }
-
-    override fun updateSmsThreads(threads: List<SmsThreadSummary>, handler: UpdateSmsThreadsHandler) {
-        val jsonBody = JSONObject()
-
-        val apiPath = java.lang.String.format(UPDATE_SMS_THREADS_PATH, "deviceid")
-        val uri = Uri.Builder()
-            .scheme(getServerProtocol())
-            .encodedAuthority(getServerAuthority())
-            .appendEncodedPath(apiPath)
-            .build()
-
-        Log.d(LOG_TAG, "Making HTTP request to $uri")
-
-        makeRequest(Request.Method.PUT, uri.toString(), jsonBody, null, handler)
+        makeJsonObjectRequest(Request.Method.PUT, uri.toString(), jsonBody, null, handler)
     }
 
     override fun updateSmsMessagesForThread(threadId: String, messages: List<MySmsMessage>, handler: UpdateSmsMessagesForThreadHandler) {
@@ -104,7 +86,7 @@ class SmsWebService(context: Context) : WebService(context), SmsService {
             .appendEncodedPath(apiPath)
             .build()
 
-        makeRequest(Request.Method.PUT, uri.toString(), jsonBody, null, handler)
+        makeJsonObjectRequest(Request.Method.PUT, uri.toString(), jsonBody, null, handler)
     }
 }
 
@@ -156,12 +138,6 @@ abstract class UpdateSmsSentStatusHandler : WebServiceResponseHandler {
 
     abstract fun onSuccess()
     abstract fun onError(exception: Exception)
-}
-
-abstract class UpdateSmsThreadsHandler : AndroidMacConnectorServiceBaseHandler() {
-    override fun getLogTag(): String {
-        return "UpdateSmsThreadsHandler"
-    }
 }
 
 abstract class UpdateSmsMessagesForThreadHandler : AndroidMacConnectorServiceBaseHandler() {

@@ -4,7 +4,6 @@ import android.content.Context
 import android.net.Uri
 import android.util.Log
 import com.android.volley.Request
-import com.android.volley.Response
 import com.android.volley.VolleyError
 import com.androidmacconnector.androidapp.utils.WebService
 import com.androidmacconnector.androidapp.utils.WebServiceResponseHandler
@@ -41,7 +40,7 @@ class DeviceWebService(context: Context): WebService(context), DeviceService {
             .build()
 
         val headers = mapOf("Authorization" to format("Bearer %s", authToken))
-        makeRequest(Request.Method.GET, uri.toString(), null, headers, handler)
+        makeJsonObjectRequest(Request.Method.GET, uri.toString(), null, headers, handler)
     }
 
     override fun registerDevice(authToken: String, androidDeviceId: String, capabilities: List<String>, handler: RegisterDeviceHandler) {
@@ -62,7 +61,7 @@ class DeviceWebService(context: Context): WebService(context), DeviceService {
             .build()
 
         val headers = mapOf("Authorization" to format("Bearer %s", authToken))
-        makeRequest(Request.Method.POST, uri.toString(), jsonBody, headers, handler)
+        makeJsonObjectRequest(Request.Method.POST, uri.toString(), jsonBody, headers, handler)
     }
 
     override fun updateDeviceCapabilities(authToken: String, deviceId: String, capabilities: List<String>, handler: UpdateDeviceCapabilitiesHandler) {
@@ -83,7 +82,7 @@ class DeviceWebService(context: Context): WebService(context), DeviceService {
             .build()
 
         val headers = mapOf("Authorization" to format("Bearer %s", authToken))
-        makeRequest(Request.Method.PUT, uri.toString(), jsonBody, headers, handler)
+        makeJsonObjectRequest(Request.Method.PUT, uri.toString(), jsonBody, headers, handler)
     }
 
     override fun updatePushNotificationToken(authToken: String, deviceId: String, newToken: String, handler: UpdatePushNotificationTokenHandler) {
@@ -101,7 +100,7 @@ class DeviceWebService(context: Context): WebService(context), DeviceService {
             .build()
 
         val headers = mapOf("Authorization" to format("Bearer %s", authToken))
-        makeRequest(Request.Method.PUT, uri.toString(), jsonBody, headers, handler)
+        makeJsonObjectRequest(Request.Method.PUT, uri.toString(), jsonBody, headers, handler)
     }
 }
 

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"Android-Mac-Connector-Server/src/jobs"
 	"Android-Mac-Connector-Server/src/middlewares"
 	"Android-Mac-Connector-Server/src/routes/devices"
 	"Android-Mac-Connector-Server/src/routes/sms"
@@ -39,10 +40,12 @@ func main() {
 
 	// Add subrouters
 	smsRouter := router.PathPrefix("/api/v1/{deviceId}/sms").Subrouter()
+	jobsRouter := router.PathPrefix("/api/v1/{deviceId}/jobs").Subrouter()
 	devicesRouter := router.PathPrefix("/api/v1/devices").Subrouter()
 
 	// Add paths to each subrouter
 	sms.InitializeRouter(dataStore, smsRouter)
+	jobs.InitializeRouter(dataStore, jobsRouter)
 	devices.InitializeRouter(dataStore, devicesRouter)
 
 	// Create and start our server
