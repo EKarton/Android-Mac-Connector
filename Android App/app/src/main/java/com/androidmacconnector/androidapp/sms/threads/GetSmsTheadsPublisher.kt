@@ -10,11 +10,11 @@ import org.json.JSONArray
 import org.json.JSONException
 import org.json.JSONObject
 
-interface SmsThreadsQueryResults {
+interface GetSmsThreadsResult {
     fun buildResponse(): JSONObject
 }
 
-class SmsThreadsQuerySuccessfulResults(private val threads: List<SmsThreadSummary>): SmsThreadsQueryResults {
+class GetSmsThreadsSuccessfulResult(private val threads: List<SmsThreadSummary>): GetSmsThreadsResult {
     override fun buildResponse(): JSONObject {
         val jsonArrayBody = JSONArray()
         threads.forEach {
@@ -38,7 +38,7 @@ class SmsThreadsQuerySuccessfulResults(private val threads: List<SmsThreadSummar
     }
 }
 
-class SmsThreadsQueryFailedResults(private val reason: String): SmsThreadsQueryResults {
+class GetSmsThreadFailedResult(private val reason: String): GetSmsThreadsResult {
     override fun buildResponse(): JSONObject {
         val jsonBody = JSONObject()
         jsonBody.put("status", "failed")
@@ -52,7 +52,7 @@ interface GetSmsThreadsResultPublisher {
     fun publishResults(
         deviceId: String,
         jobId: String,
-        result: SmsThreadsQueryResults,
+        result: GetSmsThreadsResult,
         handler: PublishResultsHandler
     )
 }
@@ -63,7 +63,7 @@ class GetSmsThreadsResultWebPublisher(context: Context) : WebService(context), G
         private const val PUBLISH_SMS_THREAD_RESULTS = "api/v1/%s/jobs/%s/results"
     }
 
-    override fun publishResults(deviceId: String, jobId: String, result: SmsThreadsQueryResults, handler: PublishResultsHandler) {
+    override fun publishResults(deviceId: String, jobId: String, result: GetSmsThreadsResult, handler: PublishResultsHandler) {
         val jsonBody = result.buildResponse()
         val apiPath = java.lang.String.format(PUBLISH_SMS_THREAD_RESULTS, deviceId, jobId)
         val uri = Uri.Builder()

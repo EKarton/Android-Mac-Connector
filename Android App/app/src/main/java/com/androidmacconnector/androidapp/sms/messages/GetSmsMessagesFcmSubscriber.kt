@@ -31,9 +31,19 @@ class GetSmsMessagesFcmSubscriber(
                 throw Exception("Missing thread_id in job")
             }
 
-            val threadId = remoteMessage.data["thread_id"]!!
+            if (remoteMessage.data["limit"].isNullOrBlank()) {
+                throw Exception("It should have a limit value")
+            }
 
-            val messages = getSmsMessagesService.getSmsMessagesFromThread(threadId)
+            if (remoteMessage.data["start"].isNullOrBlank()) {
+                throw Exception("It should have a start value")
+            }
+
+            val threadId = remoteMessage.data["thread_id"]!!
+            val limit = remoteMessage.data["limit"]!!.toInt()
+            val start = remoteMessage.data["start"]!!.toInt()
+
+            val messages = getSmsMessagesService.getSmsMessagesFromThread(threadId, limit, start)
             val result = GetSmsMessagesSuccessfulResult(messages)
 
             publisher.publishResults(deviceId, jobId, result, object : ResponseHandler() {

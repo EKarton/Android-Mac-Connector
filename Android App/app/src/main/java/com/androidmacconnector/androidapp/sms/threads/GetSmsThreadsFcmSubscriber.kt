@@ -7,7 +7,7 @@ import com.androidmacconnector.androidapp.utils.getDeviceId
 import com.google.firebase.messaging.RemoteMessage
 
 class GetSmsThreadsFcmSubscriber(private val context: Context,
-                                 private val smsQueryService: SmsThreadsQueryService,
+                                 private val getSmsService: GetSmsThreadsService,
                                  private val webResultPublisherGet: GetSmsThreadsResultPublisher
 ) : FcmSubscriber {
     companion object {
@@ -24,20 +24,20 @@ class GetSmsThreadsFcmSubscriber(private val context: Context,
         val deviceId = getDeviceId(context)
         val jobId = remoteMessage.data["uuid"]!!
 
-        if (remoteMessage.data["limit"].isNullOrBlank()) {
-            throw Exception("It should have a limit value")
-        }
-
-        if (remoteMessage.data["start"].isNullOrBlank()) {
-            throw Exception("It should have a start value")
-        }
-
-        val limit = remoteMessage.data["limit"]!!.toInt()
-        val start = remoteMessage.data["start"]!!.toInt()
-
         try {
-            val threads = smsQueryService.getSmsThreadsSummary(limit, start)
-            val results = SmsThreadsQuerySuccessfulResults(threads)
+            if (remoteMessage.data["limit"].isNullOrBlank()) {
+                throw Exception("It should have a limit value")
+            }
+
+            if (remoteMessage.data["start"].isNullOrBlank()) {
+                throw Exception("It should have a start value")
+            }
+
+            val limit = remoteMessage.data["limit"]!!.toInt()
+            val start = remoteMessage.data["start"]!!.toInt()
+
+            val threads = getSmsService.getSmsThreadsSummary(limit, start)
+            val results = GetSmsThreadsSuccessfulResult(threads)
             webResultPublisherGet.publishResults(deviceId, jobId, results, object : PublishResultsHandler() {
                 override fun onSuccess() {}
                 override fun onError(exception: Exception) {
@@ -45,7 +45,7 @@ class GetSmsThreadsFcmSubscriber(private val context: Context,
                 }
             })
         } catch (e: Exception) {
-            val results = SmsThreadsQueryFailedResults(e.toString())
+            val results = GetSmsThreadFailedResult(e.toString())
             webResultPublisherGet.publishResults(deviceId, jobId, results, object : PublishResultsHandler() {
                 override fun onSuccess() {}
                 override fun onError(exception: Exception) {

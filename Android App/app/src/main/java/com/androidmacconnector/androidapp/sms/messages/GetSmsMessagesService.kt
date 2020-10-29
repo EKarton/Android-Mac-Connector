@@ -15,7 +15,7 @@ data class SmsMessage(
 )
 
 interface GetSmsMessagesService {
-    fun getSmsMessagesFromThread(threadId: String): List<SmsMessage>
+    fun getSmsMessagesFromThread(threadId: String, limit: Int, start: Int): List<SmsMessage>
 }
 
 /**
@@ -31,7 +31,7 @@ class GetSmsMessagesServiceImpl(private val contentResolver: ContentResolver) : 
     /**
      * Returns a list of SMS messages from a particular thread
      */
-    override fun getSmsMessagesFromThread(threadId: String): List<SmsMessage> {
+    override fun getSmsMessagesFromThread(threadId: String, limit: Int, start: Int): List<SmsMessage> {
         val projection =
             arrayOf("_id", "address", "person", "date", "body", "read", "date", "type");
         val selection = "thread_id = ?";
@@ -44,10 +44,12 @@ class GetSmsMessagesServiceImpl(private val contentResolver: ContentResolver) : 
             Telephony.Sms.DEFAULT_SORT_ORDER
         )
 
-        val smsMessages = arrayListOf<SmsMessage>();
+        val smsMessages = arrayListOf<SmsMessage>()
 
-        if (cursor != null && cursor.moveToFirst()) {
-            for (i in 0 until cursor.count) {
+        if (cursor != null && start < cursor.count && cursor.moveToPosition(start)) {
+            val numElementsToFetch = Math.min(limit, cursor.count - start)
+
+            for (i in 0 until numElementsToFetch) {
                 val messageId = cursor.getString(cursor.getColumnIndexOrThrow("_id"))
                 val address = cursor.getString(cursor.getColumnIndexOrThrow("address"))
                 val person = cursor.getString(cursor.getColumnIndexOrThrow("person"))

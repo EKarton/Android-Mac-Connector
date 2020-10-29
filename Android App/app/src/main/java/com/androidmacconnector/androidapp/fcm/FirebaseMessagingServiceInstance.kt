@@ -19,7 +19,7 @@ class FirebaseMessagingServiceInstance : FirebaseMessagingService() {
 
     private var subscriptionService: FcmSubscriptionServiceImpl? = null
 
-    private var getSmsThreadsService: SmsThreadsQueryService? = null
+    private var getGetSmsThreadsService: GetSmsThreadsService? = null
     private var getSmsMessagesService: GetSmsMessagesService? = null
     private var sendSmsService: SendSmsServiceImpl? = null
 
@@ -45,13 +45,13 @@ class FirebaseMessagingServiceInstance : FirebaseMessagingService() {
     }
 
     private fun checkAndCreateSmsThreadsService() {
-        if (getSmsThreadsService == null && checkPermissions(SmsThreadsQueryServiceImpl.getRequiredPermissions())) {
-            getSmsThreadsService = SmsThreadsQueryServiceImpl(this.contentResolver)
+        if (getGetSmsThreadsService == null && checkPermissions(GetSmsThreadsServiceImpl.getRequiredPermissions())) {
+            getGetSmsThreadsService = GetSmsThreadsServiceImpl(this.contentResolver)
 
             val publisher = GetSmsThreadsResultWebPublisher(this.applicationContext)
             val subscriber = GetSmsThreadsFcmSubscriber(
                 this.applicationContext,
-                getSmsThreadsService!!,
+                getGetSmsThreadsService!!,
                 publisher
             )
 

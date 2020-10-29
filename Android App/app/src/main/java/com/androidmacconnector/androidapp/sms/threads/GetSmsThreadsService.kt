@@ -6,14 +6,14 @@ import android.net.Uri
 import android.provider.ContactsContract
 import android.provider.Telephony
 
-interface SmsThreadsQueryService {
+interface GetSmsThreadsService {
     fun getSmsThreadsSummary(limit: Int, start: Int): List<SmsThreadSummary>
 }
 
 /**
  * A class used to handle all types of SMS-related tasks
  */
-class SmsThreadsQueryServiceImpl(private val contentResolver: ContentResolver) : SmsThreadsQueryService {
+class GetSmsThreadsServiceImpl(private val contentResolver: ContentResolver) : GetSmsThreadsService {
     companion object {
         fun getRequiredPermissions(): List<String> {
             return arrayListOf(Manifest.permission.READ_SMS, Manifest.permission.READ_CONTACTS)
