@@ -21,6 +21,7 @@ func main() {
 	router := mux.NewRouter()
 
 	router.Use(middlewares.HandleErrors(appContext))
+	router.Use(middlewares.LogRequests(appContext))
 
 	// Add subrouters
 	smsRouter := router.PathPrefix("/api/v1/{deviceId}/sms").Subrouter()

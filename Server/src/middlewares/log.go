@@ -2,16 +2,15 @@ package middlewares
 
 import (
 	"Android-Mac-Connector-Server/src/app_context"
-	logger "log"
+	"log"
 	"net/http"
 )
 
-func Log(appContext *app_context.ApplicationContext) func(http.Handler) http.Handler {
+func LogRequests(appContext *app_context.ApplicationContext) func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			logger.Println("Before")
-			next.ServeHTTP(w, r) // call original
-			logger.Println("After")
+			log.Println("Incoming request:", r.URL, r.Body, r.Header)
+			next.ServeHTTP(w, r)
 		})
 	}
 }
