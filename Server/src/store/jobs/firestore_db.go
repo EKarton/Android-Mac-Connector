@@ -31,10 +31,11 @@ func CreateFirestoreJobsStore(client *firestore.Client) *FirestoreJobsStore {
 // 1. the job id (string), and
 // 2. an error, which is nil if no errors occured; else an error object is returned
 //
-func (store *FirestoreJobsStore) AddJob(status string) (string, error) {
+func (store *FirestoreJobsStore) AddJob(status string, data interface{}) (string, error) {
 	devicesCollection := store.client.Collection("jobs")
 	doc, _, err := devicesCollection.Add(context.Background(), map[string]interface{}{
 		"status": status,
+		"data":   data,
 	})
 
 	if err != nil {
@@ -80,6 +81,26 @@ func (store *FirestoreJobsStore) UpdateJobStatus(jobId string, newStatus string)
 	return err
 }
 
+func (store *FirestoreJobsStore) UpdateJobData(jobId string, newData interface{}) error {
+	devicesCollection := store.client.Collection("jobs")
+	_, err := devicesCollection.Doc(jobId).Get(context.Background())
+
+	if err != nil {
+		if grpc.Code(err) == codes.NotFound {
+			return CreateJobNotFoundError(jobId)
+		}
+		return err
+	}
+
+	updatedData := map[string]interface{}{
+		"data": newData,
+	}
+
+	_, err = devicesCollection.Doc(jobId).Set(context.Background(), updatedData, firestore.MergeAll)
+
+	return err
+}
+
 // Gets the current job status
 // The `jobId` is the jobId returned from calling `store.AddJob()`
 //
@@ -109,4 +130,22 @@ func (store *FirestoreJobsStore) GetJobStatus(jobId string) (string, error) {
 	}
 
 	return jobStatus, nil
+}
+
+func (store *FirestoreJobsStore) GetJobData(jobId string) (interface{}, error) {
+	devicesCollection := store.client.Collection("jobs")
+	doc, err := devicesCollection.Doc(jobId).Get(context.Background())
+
+	if err != nil {
+		if grpc.Code(err) == codes.NotFound {
+			return "", CreateJobNotFoundError(jobId)
+		}
+		return "", err
+	}
+
+	data, err := doc.DataAt("data")
+	if err != nil {
+		return "", err
+	}
+	return data, nil
 }

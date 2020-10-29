@@ -11,7 +11,7 @@ import (
 
 type Datastore struct {
 	DevicesStores              devices.DevicesStore
-	JobStatusStore             jobs.JobStatusStore
+	JobStatusStore             jobs.JobStore
 	ResourcePoliciesStore      resourcepolicies.ResourcePoliciesStore
 	SmsMessagesStore           messages.SmsMessagesStore
 	SmsNotifications           notifications.SmsNotificationsStore

@@ -59,7 +59,7 @@ func addSendSmsJob(dataStore *store.Datastore) http.HandlerFunc {
 		w.Header().Set("Content-Type", "application/json")
 
 		// Keep track of the job
-		uuid, err := dataStore.JobStatusStore.AddJob("pending")
+		uuid, err := dataStore.JobStatusStore.AddJob("pending", nil)
 
 		if err != nil {
 			panic(err)

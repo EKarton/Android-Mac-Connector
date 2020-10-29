@@ -8,17 +8,19 @@ import (
 
 type InMemoryJobsStore struct {
 	jobIdToJobStatus map[string]string
+	jobIdToData      map[string](interface{})
 }
 
 func CreateInMemoryStore() *InMemoryJobsStore {
 	store := InMemoryJobsStore{
 		jobIdToJobStatus: make(map[string]string),
+		jobIdToData:      make(map[string](interface{})),
 	}
 
 	return &store
 }
 
-func (store *InMemoryJobsStore) AddJob(status string) (string, error) {
+func (store *InMemoryJobsStore) AddJob(status string, data interface{}) (string, error) {
 	jobId := ""
 
 	if uuid, err := uuid.NewRandom(); err != nil {
@@ -29,6 +31,7 @@ func (store *InMemoryJobsStore) AddJob(status string) (string, error) {
 	}
 
 	store.jobIdToJobStatus[jobId] = status
+	store.jobIdToData[jobId] = status
 	return jobId, nil
 }
 
@@ -49,10 +52,26 @@ func (store *InMemoryJobsStore) UpdateJobStatus(jobId string, newStatus string) 
 	return errors.New("Job ID " + jobId + " does not exist in InMemoryJobsStore")
 }
 
+func (store *InMemoryJobsStore) UpdateJobData(jobId string, newData interface{}) error {
+	if _, ok := store.jobIdToData[jobId]; ok {
+		store.jobIdToData[jobId] = newData
+		return nil
+	}
+	return errors.New("Job ID " + jobId + " does not exist in InMemoryJobsStore")
+}
+
 func (store *InMemoryJobsStore) GetJobStatus(jobId string) (string, error) {
 	if _, ok := store.jobIdToJobStatus[jobId]; ok {
 		jobStatus := store.jobIdToJobStatus[jobId]
 		return jobStatus, nil
+	}
+
+	return "", errors.New("Job ID " + jobId + " does not exist in InMemoryJobsStore")
+}
+
+func (store *InMemoryJobsStore) GetJobData(jobId string) (interface{}, error) {
+	if _, ok := store.jobIdToData[jobId]; ok {
+		return store.jobIdToData[jobId], nil
 	}
 
 	return "", errors.New("Job ID " + jobId + " does not exist in InMemoryJobsStore")
