@@ -1,4 +1,4 @@
-package store
+package jobs
 
 type JobQueue interface {
 	AddJob() (string, error)

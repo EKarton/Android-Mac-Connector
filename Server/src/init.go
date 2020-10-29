@@ -1,9 +1,9 @@
 package main
 
 import (
-	"Android-Mac-Connector-Server/src/jobs"
 	"Android-Mac-Connector-Server/src/middlewares"
 	"Android-Mac-Connector-Server/src/routes/devices"
+	"Android-Mac-Connector-Server/src/routes/jobs"
 	"Android-Mac-Connector-Server/src/routes/sms"
 	"Android-Mac-Connector-Server/src/store"
 	"log"
