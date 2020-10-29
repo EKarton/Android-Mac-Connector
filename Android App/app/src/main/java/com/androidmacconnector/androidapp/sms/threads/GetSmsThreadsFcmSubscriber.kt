@@ -6,16 +6,16 @@ import com.androidmacconnector.androidapp.fcm.FcmSubscriber
 import com.androidmacconnector.androidapp.utils.getDeviceId
 import com.google.firebase.messaging.RemoteMessage
 
-class UpdateSmsThreadsFcmSubscriber(private val context: Context,
-                                    private val smsQueryService: SmsThreadsQueryService,
-                                    private val webService: SmsThreadsService
+class GetSmsThreadsFcmSubscriber(private val context: Context,
+                                 private val smsQueryService: SmsThreadsQueryService,
+                                 private val webResultPublisherGet: GetSmsThreadsResultPublisher
 ) : FcmSubscriber {
     companion object {
-        private const val LOG_TAG = "UpdateSmsThreads"
+        private const val LOG_TAG = "GetSmsThreads"
     }
 
     override fun getMessageAction(): String {
-        return "update_sms_threads"
+        return "get_sms_threads"
     }
 
     override fun onMessageReceived(remoteMessage: RemoteMessage) {
@@ -38,7 +38,7 @@ class UpdateSmsThreadsFcmSubscriber(private val context: Context,
         try {
             val threads = smsQueryService.getSmsThreadsSummary(limit, start)
             val results = SmsThreadsQuerySuccessfulResults(threads)
-            webService.publishResults(deviceId, jobId, results, object : PublishResultsHandler() {
+            webResultPublisherGet.publishResults(deviceId, jobId, results, object : PublishResultsHandler() {
                 override fun onSuccess() {}
                 override fun onError(exception: Exception) {
                     throw exception
@@ -46,7 +46,7 @@ class UpdateSmsThreadsFcmSubscriber(private val context: Context,
             })
         } catch (e: Exception) {
             val results = SmsThreadsQueryFailedResults(e.toString())
-            webService.publishResults(deviceId, jobId, results, object : PublishResultsHandler() {
+            webResultPublisherGet.publishResults(deviceId, jobId, results, object : PublishResultsHandler() {
                 override fun onSuccess() {}
                 override fun onError(exception: Exception) {
                     throw exception

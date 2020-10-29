@@ -8,9 +8,10 @@ import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import com.androidmacconnector.androidapp.MainActivity
 import com.androidmacconnector.androidapp.R
-import com.androidmacconnector.androidapp.sms.SmsBroadcastReceiver
-import com.androidmacconnector.androidapp.sms.SmsQueryService
-import com.androidmacconnector.androidapp.sms.sender.SmsSenderService
+import com.androidmacconnector.androidapp.sms.receiver.SmsBroadcastReceiver
+import com.androidmacconnector.androidapp.sms.messages.GetSmsMessagesService
+import com.androidmacconnector.androidapp.sms.messages.GetSmsMessagesServiceImpl
+import com.androidmacconnector.androidapp.sms.sender.SendSmsServiceImpl
 import com.androidmacconnector.androidapp.utils.getOrCreateUniqueDeviceId
 import com.androidmacconnector.androidapp.utils.saveDeviceId
 import com.google.firebase.auth.FirebaseAuth
@@ -40,8 +41,8 @@ class DeviceRegistrationActivity : AppCompatActivity() {
     }
 
     fun onYesButtonClickedHandler(view: View) {
-        val requiredPermissions = SmsQueryService.getRequiredPermissions() +
-                SmsSenderService.getRequiredPermissions() + SmsBroadcastReceiver.getRequiredPermissions()
+        val requiredPermissions = GetSmsMessagesServiceImpl.getRequiredPermissions() +
+                SendSmsServiceImpl.getRequiredPermissions() + SmsBroadcastReceiver.getRequiredPermissions()
 
         val permsListener = object : MultiplePermissionsListener {
             override fun onPermissionsChecked(report: MultiplePermissionsReport) {

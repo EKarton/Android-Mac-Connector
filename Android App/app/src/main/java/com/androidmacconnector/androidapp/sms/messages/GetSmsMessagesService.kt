@@ -1,21 +1,27 @@
-package com.androidmacconnector.androidapp.sms
+package com.androidmacconnector.androidapp.sms.messages
 
 import android.Manifest
 import android.content.ContentResolver
 import android.provider.Telephony
-import android.util.Log
-import com.androidmacconnector.androidapp.fcm.FcmSubscriber
-import com.google.firebase.messaging.RemoteMessage
-import org.json.JSONObject
 
-interface GetSmsMessagesFromThreadService {
-    fun getSmsMessagesFromThread(threadId: String): List<MySmsMessage>
+data class SmsMessage(
+    val messageId: String,
+    val address: String?,
+    val person: String?,
+    val body: String,
+    val readState: Boolean,
+    val time: Int,
+    val type: String
+)
+
+interface GetSmsMessagesService {
+    fun getSmsMessagesFromThread(threadId: String): List<SmsMessage>
 }
 
 /**
  * A class used to handle all types of SMS-related tasks
  */
-class SmsQueryService(private val contentResolver: ContentResolver) : GetSmsMessagesFromThreadService {
+class GetSmsMessagesServiceImpl(private val contentResolver: ContentResolver) : GetSmsMessagesService {
     companion object {
         fun getRequiredPermissions(): List<String> {
             return arrayListOf(Manifest.permission.READ_SMS, Manifest.permission.READ_CONTACTS)
@@ -25,7 +31,7 @@ class SmsQueryService(private val contentResolver: ContentResolver) : GetSmsMess
     /**
      * Returns a list of SMS messages from a particular thread
      */
-    override fun getSmsMessagesFromThread(threadId: String): List<MySmsMessage> {
+    override fun getSmsMessagesFromThread(threadId: String): List<SmsMessage> {
         val projection =
             arrayOf("_id", "address", "person", "date", "body", "read", "date", "type");
         val selection = "thread_id = ?";
@@ -38,7 +44,7 @@ class SmsQueryService(private val contentResolver: ContentResolver) : GetSmsMess
             Telephony.Sms.DEFAULT_SORT_ORDER
         )
 
-        val smsMessages = arrayListOf<MySmsMessage>();
+        val smsMessages = arrayListOf<SmsMessage>();
 
         if (cursor != null && cursor.moveToFirst()) {
             for (i in 0 until cursor.count) {
@@ -57,7 +63,7 @@ class SmsQueryService(private val contentResolver: ContentResolver) : GetSmsMess
                 }
 
                 val smsMessage =
-                    MySmsMessage(messageId, address, person, body, readState, timeInSeconds, type)
+                    SmsMessage(messageId, address, person, body, readState, timeInSeconds, type)
                 smsMessages.add(smsMessage)
 
                 cursor.moveToNext()
@@ -68,40 +74,3 @@ class SmsQueryService(private val contentResolver: ContentResolver) : GetSmsMess
         return smsMessages
     }
 }
-
-class UpdateSmsForThreadRequestFcmSubscriber(private val smsQueryService: SmsQueryService, private val webService: SmsService) : FcmSubscriber {
-    companion object {
-        private const val LOG_TAG = "UpdateSmsForThread"
-    }
-
-    override fun getMessageAction(): String {
-        return "update_sms_thread_messages"
-    }
-
-    override fun onMessageReceived(remoteMessage: RemoteMessage) {
-        Log.d(LOG_TAG, "Message received: ${remoteMessage.data}")
-
-        if (remoteMessage.data["thread_id"].isNullOrEmpty()) {
-            Log.e(LOG_TAG, "Empty thread_id")
-            return
-        }
-
-        val threadId = remoteMessage.data["thread_id"]!!
-        val messages = smsQueryService.getSmsMessagesFromThread(threadId)
-
-        webService.updateSmsMessagesForThread(threadId, messages, object : UpdateSmsMessagesForThreadHandler() {
-            override fun onSuccess(response: JSONObject) {}
-            override fun onError(exception: Exception?) {}
-        })
-    }
-}
-
-data class MySmsMessage(
-    val messageId: String,
-    val address: String?,
-    val person: String?,
-    val body: String,
-    val readState: Boolean,
-    val time: Int,
-    val type: String
-)

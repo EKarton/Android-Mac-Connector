@@ -48,7 +48,7 @@ class SmsThreadsQueryFailedResults(private val reason: String): SmsThreadsQueryR
     }
 }
 
-interface SmsThreadsService {
+interface GetSmsThreadsResultPublisher {
     fun publishResults(
         deviceId: String,
         jobId: String,
@@ -57,7 +57,7 @@ interface SmsThreadsService {
     )
 }
 
-class SmsThreadsWebService(context: Context) : WebService(context), SmsThreadsService {
+class GetSmsThreadsResultWebPublisher(context: Context) : WebService(context), GetSmsThreadsResultPublisher {
 
     companion object {
         private const val PUBLISH_SMS_THREAD_RESULTS = "api/v1/%s/jobs/%s/results"

@@ -1,18 +1,16 @@
 package com.androidmacconnector.androidapp.fcm
 
-import android.Manifest
 import android.content.pm.PackageManager
 import android.util.Log
 import androidx.core.content.ContextCompat
-import com.androidmacconnector.androidapp.sms.SmsService
-import com.androidmacconnector.androidapp.sms.SmsWebService
-import com.androidmacconnector.androidapp.sms.*
-import com.androidmacconnector.androidapp.sms.sender.OnSendSmsFcmSubscriber
+import com.androidmacconnector.androidapp.sms.messages.*
+import com.androidmacconnector.androidapp.sms.sender.SendSmsFcmSubscriber
 import com.androidmacconnector.androidapp.sms.sender.SendSmsResultsWebPublisher
-import com.androidmacconnector.androidapp.sms.sender.SmsSenderService
+import com.androidmacconnector.androidapp.sms.sender.SendSmsServiceImpl
 import com.androidmacconnector.androidapp.sms.threads.*
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
+import android.Manifest
 
 class FirebaseMessagingServiceInstance : FirebaseMessagingService() {
     companion object {
@@ -20,13 +18,10 @@ class FirebaseMessagingServiceInstance : FirebaseMessagingService() {
     }
 
     private var subscriptionService: FcmSubscriptionServiceImpl? = null
-    private var webService: SmsService? = null
 
-    private var smsThreadsWebService: SmsThreadsService? = null
-    private var smsThreadsQueryService: SmsThreadsQueryService? = null
-
-    private var smsQueryService: SmsQueryService? = null
-    private var smsSenderService: SmsSenderService? = null
+    private var getSmsThreadsService: SmsThreadsQueryService? = null
+    private var getSmsMessagesService: GetSmsMessagesService? = null
+    private var sendSmsService: SendSmsServiceImpl? = null
 
     override fun onCreate() {
         this.subscriptionService = FcmSubscriptionServiceImpl()
@@ -42,61 +37,52 @@ class FirebaseMessagingServiceInstance : FirebaseMessagingService() {
     }
 
     private fun checkAndCreateSubscribers() {
-        checkAndCreateWebService()
-        checkAndCreateSmsThreadsService()
-        checkAndCreateSmsQueryService()
-        checkAndCreateSmsSenderSubscriber()
-    }
-
-    private fun checkAndCreateWebService() {
-        val createWebService = webService == null &&
-                checkPermissions(Manifest.permission.INTERNET)
-
-        if (createWebService) {
-            webService = SmsWebService(this)
+        if (checkPermission(Manifest.permission.INTERNET)) {
+            checkAndCreateSmsThreadsService()
+            checkAndCreateSmsQueryService()
+            checkAndCreateSmsSenderSubscriber()
         }
     }
 
     private fun checkAndCreateSmsThreadsService() {
-        val createSmsThreadsService = (webService != null && smsThreadsQueryService == null) &&
-                (checkPermissions(SmsThreadsQueryServiceImpl.getRequiredPermissions()))
+        if (getSmsThreadsService == null && checkPermissions(SmsThreadsQueryServiceImpl.getRequiredPermissions())) {
+            getSmsThreadsService = SmsThreadsQueryServiceImpl(this.contentResolver)
 
-        if (createSmsThreadsService) {
-            smsThreadsQueryService = SmsThreadsQueryServiceImpl(this.contentResolver)
-            smsThreadsWebService = SmsThreadsWebService(this.applicationContext)
-
-            val subscriber = UpdateSmsThreadsFcmSubscriber(
+            val publisher = GetSmsThreadsResultWebPublisher(this.applicationContext)
+            val subscriber = GetSmsThreadsFcmSubscriber(
                 this.applicationContext,
-                smsThreadsQueryService!!,
-                smsThreadsWebService!!
+                getSmsThreadsService!!,
+                publisher
             )
+
             subscriptionService?.addSubscriber(subscriber)
         }
     }
 
     private fun checkAndCreateSmsQueryService() {
-        val createSmsQueryService = (webService != null && smsQueryService == null) &&
-                (checkPermissions(Manifest.permission.READ_SMS, Manifest.permission.READ_CONTACTS))
+        if (getSmsMessagesService == null && checkPermissions(GetSmsMessagesServiceImpl.getRequiredPermissions())) {
+            getSmsMessagesService = GetSmsMessagesServiceImpl(this.contentResolver)
 
-        if (createSmsQueryService) {
-            smsQueryService = SmsQueryService(this.contentResolver)
-            val subscriber = UpdateSmsForThreadRequestFcmSubscriber(smsQueryService!!, webService!!)
+            val publisher = GetSmsMessegesResultsWebPublisher(this.applicationContext)
+            val subscriber = GetSmsMessagesFcmSubscriber(
+                this.applicationContext,
+                getSmsMessagesService!!,
+                publisher
+            )
+
             subscriptionService?.addSubscriber(subscriber)
         }
     }
 
     private fun checkAndCreateSmsSenderSubscriber() {
-        val createSmsSenderService = (webService != null && smsSenderService == null) &&
-                checkPermissions(SmsSenderService.getRequiredPermissions())
+        if (sendSmsService == null && checkPermissions(SendSmsServiceImpl.getRequiredPermissions())) {
+            sendSmsService = SendSmsServiceImpl()
 
-        if (createSmsSenderService) {
-            smsSenderService = SmsSenderService()
-
-            val publishSendSmsResultsService = SendSmsResultsWebPublisher(this.applicationContext)
-            val subscriber = OnSendSmsFcmSubscriber(
+            val publisher = SendSmsResultsWebPublisher(this.applicationContext)
+            val subscriber = SendSmsFcmSubscriber(
                 this.applicationContext,
-                smsSenderService!!,
-                publishSendSmsResultsService
+                sendSmsService!!,
+                publisher
             )
 
             subscriptionService?.addSubscriber(subscriber)
@@ -105,14 +91,10 @@ class FirebaseMessagingServiceInstance : FirebaseMessagingService() {
 
 
     private fun checkPermissions(permission: List<String>): Boolean {
-        return !permission.map {
-            ContextCompat.checkSelfPermission(this, it) == PackageManager.PERMISSION_GRANTED
-        }.contains(false)
+        return !permission.map { checkPermission(it) }.contains(false)
     }
 
-    private fun checkPermissions(vararg permission: String): Boolean {
-        return !permission.map {
-            ContextCompat.checkSelfPermission(this, it) == PackageManager.PERMISSION_GRANTED
-        }.contains(false)
+    private fun checkPermission(permission: String): Boolean {
+        return ContextCompat.checkSelfPermission(this, permission) == PackageManager.PERMISSION_GRANTED
     }
 }

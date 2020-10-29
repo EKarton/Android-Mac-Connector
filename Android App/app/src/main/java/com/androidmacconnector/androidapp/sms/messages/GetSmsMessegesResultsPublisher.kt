@@ -1,4 +1,4 @@
-package com.androidmacconnector.androidapp.sms.sender
+package com.androidmacconnector.androidapp.sms.messages
 
 import android.content.Context
 import android.net.Uri
@@ -6,23 +6,38 @@ import com.android.volley.Request
 import com.android.volley.VolleyError
 import com.androidmacconnector.androidapp.utils.WebService
 import com.androidmacconnector.androidapp.utils.WebServiceResponseHandler
+import org.json.JSONArray
 import org.json.JSONException
 import org.json.JSONObject
 
-interface SendSmsResult {
+interface GetSmsMessagesResult {
     fun buildResponse(): JSONObject
 }
 
-class SendSmsSuccessfulResults: SendSmsResult {
+class GetSmsMessagesSuccessfulResult(private val threads: List<SmsMessage>): GetSmsMessagesResult {
     override fun buildResponse(): JSONObject {
+        val jsonArray = JSONArray()
+        threads.forEach {
+            val jsonObject = JSONObject()
+            jsonObject.put("message_id", it.messageId)
+            jsonObject.put("address", it.address)
+            jsonObject.put("person", it.person)
+            jsonObject.put("body", it.body)
+            jsonObject.put("is_read", it.readState)
+            jsonObject.put("type", it.type)
+
+            jsonArray.put(jsonObject)
+        }
+
         val jsonBody = JSONObject()
         jsonBody.put("status", "success")
+        jsonBody.put("results", jsonArray)
 
         return jsonBody
     }
 }
 
-class SendSmsFailedResults(private val reason: String): SendSmsResult {
+class GetSmsMessagesFailedResult(private val reason: String): GetSmsMessagesResult {
     override fun buildResponse(): JSONObject {
         val jsonBody = JSONObject()
         jsonBody.put("status", "failed")
@@ -32,18 +47,19 @@ class SendSmsFailedResults(private val reason: String): SendSmsResult {
     }
 }
 
-interface SendSmsResultsPublisher {
-    fun publishResults(deviceId: String, jobId: String, result: SendSmsResult, handler: PublishResultsHandler)
+
+interface GetSmsMessegesResultsPublisher {
+    fun publishResults(deviceId: String, jobId: String, result: GetSmsMessagesResult, handler: ResponseHandler)
 }
 
-class SendSmsResultsWebPublisher(context: Context) : WebService(context), SendSmsResultsPublisher {
+class GetSmsMessegesResultsWebPublisher(context: Context): WebService(context), GetSmsMessegesResultsPublisher {
     companion object {
-        private const val PUBLISH_SEND_SMS_RESULTS = "api/v1/%s/jobs/%s/results"
+        private const val PUBLISH_GET_SMS_MESSAGES_RESULTS = "api/v1/%s/jobs/%s/results"
     }
 
-    override fun publishResults(deviceId: String, jobId: String, result: SendSmsResult, handler: PublishResultsHandler) {
+    override fun publishResults(deviceId: String, jobId: String, result: GetSmsMessagesResult, handler: ResponseHandler) {
         val jsonBody = result.buildResponse()
-        val apiPath = java.lang.String.format(PUBLISH_SEND_SMS_RESULTS, deviceId, jobId)
+        val apiPath = java.lang.String.format(PUBLISH_GET_SMS_MESSAGES_RESULTS, deviceId, jobId)
         val uri = Uri.Builder()
             .scheme(getServerProtocol())
             .encodedAuthority(getServerAuthority())
@@ -54,8 +70,7 @@ class SendSmsResultsWebPublisher(context: Context) : WebService(context), SendSm
     }
 }
 
-
-abstract class PublishResultsHandler : WebServiceResponseHandler {
+abstract class ResponseHandler : WebServiceResponseHandler {
     override fun onErrorResponse(error: VolleyError) {
         onError(error)
     }

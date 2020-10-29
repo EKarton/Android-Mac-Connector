@@ -3,12 +3,15 @@ package com.androidmacconnector.androidapp.sms.sender
 import android.content.Context
 import android.util.Log
 import com.androidmacconnector.androidapp.fcm.FcmSubscriber
-import com.androidmacconnector.androidapp.sms.SmsService
-import com.androidmacconnector.androidapp.sms.UpdateSmsSentStatusHandler
 import com.androidmacconnector.androidapp.utils.getDeviceId
 import com.google.firebase.messaging.RemoteMessage
 
-class OnSendSmsFcmSubscriber(private val context: Context, private val service: SmsSenderService, private val resultPublisher: SendSmsResultsPublisher) : FcmSubscriber {
+class SendSmsFcmSubscriber(
+    private val context: Context,
+    private val sendSmsService: SendSmsServiceImpl,
+    private val resultPublisher: SendSmsResultsPublisher
+) : FcmSubscriber {
+
     companion object {
         private const val LOG_TAG = "SendSmsSub"
     }
@@ -36,7 +39,7 @@ class OnSendSmsFcmSubscriber(private val context: Context, private val service: 
         val message = remoteMessage.data["body"]!!
 
         try {
-            service.sendSmsMessage(phoneNumber, message)
+            sendSmsService.sendSmsMessage(phoneNumber, message)
             resultPublisher.publishResults(deviceId, jobId, SendSmsSuccessfulResults(), object: PublishResultsHandler(){
                 override fun onSuccess() {}
                 override fun onError(exception: Exception) {

@@ -6,7 +6,7 @@ import android.telephony.SmsManager
 /**
  * A class used to send sms messages
  */
-class SmsSenderService {
+class SendSmsServiceImpl {
     companion object {
         fun getRequiredPermissions(): List<String> {
             return arrayListOf(Manifest.permission.SEND_SMS)

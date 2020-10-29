@@ -1,4 +1,4 @@
-package com.androidmacconnector.androidapp.sms
+package com.androidmacconnector.androidapp.sms.receiver
 
 import android.Manifest
 import android.annotation.TargetApi
@@ -8,7 +8,7 @@ import android.content.Intent
 import android.os.Build
 import android.telephony.SmsMessage
 import android.util.Log
-import org.json.JSONObject
+import com.androidmacconnector.androidapp.utils.getDeviceId
 
 /**
  * This class is responsible for receiving SMS messages from Android
@@ -56,7 +56,8 @@ class SmsBroadcastReceiver : BroadcastReceiver() {
     }
 
     private fun onReceiveSmsMessages(context: Context, smsMessages: List<SmsMessage>) {
-        val webService = SmsWebService(context)
+        val webService = ReceiveSmsWebNotifier(context)
+        val deviceId = getDeviceId(context)
 
         // Get the contact info for each sms message
         smsMessages.forEach {
@@ -65,8 +66,8 @@ class SmsBroadcastReceiver : BroadcastReceiver() {
             val timestamp = (it.timestampMillis / 1000).toInt()
             val sms = ReceivedSmsMessage(phoneNumber, body, timestamp)
 
-            webService.notifyNewSmsMessageRecieved(sms, object : NotifyNewSmsMessageReceivedHandler() {
-                override fun onSuccess(response: JSONObject) {}
+            webService.publishResult(deviceId, sms, object : ResponseHandler() {
+                override fun onSuccess() {}
                 override fun onError(exception: Exception?) {}
             })
         }
