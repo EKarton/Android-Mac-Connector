@@ -41,7 +41,7 @@ func getMessagingClient() *messaging.Client {
 	return cachedFcmClient
 }
 
-func getAuthClient() *auth.Client {
+func GetAuthClient() *auth.Client {
 	if cachedAuthClient == nil {
 
 		if client, err := getApp().Auth(context.Background()); err != nil {
@@ -75,13 +75,4 @@ func SendFcmMessage(deviceToken string, data map[string]string, notification *me
 
 	_, err := getMessagingClient().Send(context.Background(), &message)
 	return err
-}
-
-func VerifyAccessToken(accessToken string) (bool, string, error) {
-	token, err := getAuthClient().VerifyIDTokenAndCheckRevoked(context.Background(), accessToken)
-
-	if err != nil {
-		return false, "", err
-	}
-	return true, token.UID, nil
 }

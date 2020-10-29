@@ -2,6 +2,7 @@ package application
 
 import (
 	"Android-Mac-Connector-Server/src/data/fcm"
+	"Android-Mac-Connector-Server/src/services/auth"
 	"Android-Mac-Connector-Server/src/store/devices"
 	"Android-Mac-Connector-Server/src/store/jobs"
 	"Android-Mac-Connector-Server/src/store/resourcepolicies"
@@ -9,7 +10,12 @@ import (
 )
 
 type ApplicationContext struct {
+	Services   *Services
 	DataStores *DataStores
+}
+
+type Services struct {
+	AuthService auth.AuthService
 }
 
 type DataStores struct {
@@ -22,6 +28,7 @@ type DataStores struct {
 
 func CreateApplicationContext() *ApplicationContext {
 	return &ApplicationContext{
+		Services:   createServices(),
 		DataStores: createDatastore(),
 	}
 }
@@ -36,5 +43,11 @@ func createDatastore() *DataStores {
 		ResourcePoliciesStore:      resourcepolicies.CreateInMemoryStore(),
 		SmsNotifications:           smsNotificationSubscribersStore,
 		SmsNotificationSubscribers: smsNotificationSubscribersStore,
+	}
+}
+
+func createServices() *Services {
+	return &Services{
+		AuthService: auth.CreateFirebaseAuthService(fcm.GetAuthClient()),
 	}
 }

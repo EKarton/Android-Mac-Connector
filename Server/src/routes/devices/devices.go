@@ -126,11 +126,30 @@ func updatePushNotificationToken(appContext *application.ApplicationContext) htt
 }
 
 func InitializeRouter(appContext *application.ApplicationContext, router *mux.Router) {
-	router.Handle("/registered", middlewares.VerifyCredentials(http.HandlerFunc(isDeviceRegistered(appContext)))).Methods("GET")
-	router.Handle("/register", middlewares.VerifyCredentials(http.HandlerFunc(registerDevice(appContext)))).Methods("POST")
+	verifyCredentials := middlewares.VerifyCredentials(appContext)
 
-	router.Handle("/{deviceId}/capabilities", middlewares.VerifyCredentials(http.HandlerFunc(updateDeviceCapabilities(appContext)))).Methods("PUT")
-	router.Handle("/{deviceId}/capabilities", middlewares.VerifyCredentials(http.HandlerFunc(getDeviceCapabilities(appContext)))).Methods("GET")
+	router.Handle("/registered",
+		verifyCredentials(
+			http.HandlerFunc(
+				isDeviceRegistered(appContext)))).Methods("GET")
 
-	router.Handle("/{deviceId}/token", middlewares.VerifyCredentials(http.HandlerFunc(updatePushNotificationToken(appContext)))).Methods("PUT")
+	router.Handle("/register",
+		verifyCredentials(
+			http.HandlerFunc(
+				registerDevice(appContext)))).Methods("POST")
+
+	router.Handle("/{deviceId}/capabilities",
+		verifyCredentials(
+			http.HandlerFunc(
+				updateDeviceCapabilities(appContext)))).Methods("PUT")
+
+	router.Handle("/{deviceId}/capabilities",
+		verifyCredentials(
+			http.HandlerFunc(
+				getDeviceCapabilities(appContext)))).Methods("GET")
+
+	router.Handle("/{deviceId}/token",
+		verifyCredentials(
+			http.HandlerFunc(
+				updatePushNotificationToken(appContext)))).Methods("PUT")
 }
