@@ -3,6 +3,7 @@ package application
 import (
 	"Android-Mac-Connector-Server/src/data/fcm"
 	"Android-Mac-Connector-Server/src/services/auth"
+	"Android-Mac-Connector-Server/src/services/push_notification"
 	"Android-Mac-Connector-Server/src/store/devices"
 	"Android-Mac-Connector-Server/src/store/jobs"
 	"Android-Mac-Connector-Server/src/store/resourcepolicies"
@@ -15,7 +16,8 @@ type ApplicationContext struct {
 }
 
 type Services struct {
-	AuthService auth.AuthService
+	AuthService                    auth.AuthService
+	AndroidPushNotificationService push_notification.PushNotificationService
 }
 
 type DataStores struct {
@@ -48,6 +50,7 @@ func createDatastore() *DataStores {
 
 func createServices() *Services {
 	return &Services{
-		AuthService: auth.CreateFirebaseAuthService(fcm.GetAuthClient()),
+		AuthService:                    auth.CreateFirebaseAuthService(fcm.GetAuthClient()),
+		AndroidPushNotificationService: push_notification.CreateAndroidPushNotificationService(fcm.GetMessagingClient()),
 	}
 }

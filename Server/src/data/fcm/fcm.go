@@ -8,7 +8,6 @@ import (
 
 	firestore "cloud.google.com/go/firestore"
 	firebase "firebase.google.com/go"
-	firebaseMessaging "firebase.google.com/go/messaging"
 )
 
 var cachedApp *firebase.App
@@ -29,7 +28,7 @@ func getApp() *firebase.App {
 	return cachedApp
 }
 
-func getMessagingClient() *messaging.Client {
+func GetMessagingClient() *messaging.Client {
 	if cachedFcmClient == nil {
 		if client, err := getApp().Messaging(context.Background()); err != nil {
 			panic("Error initializing Firebase Cloud Messaging client: %v\n" + err.Error())
@@ -64,15 +63,4 @@ func GetFirestoreClient() *firestore.Client {
 		}
 	}
 	return cachedFirestoreClient
-}
-
-func SendFcmMessage(deviceToken string, data map[string]string, notification *messaging.Notification) error {
-	var message = firebaseMessaging.Message{
-		Data:         data,
-		Notification: notification,
-		Token:        deviceToken,
-	}
-
-	_, err := getMessagingClient().Send(context.Background(), &message)
-	return err
 }

@@ -2,7 +2,6 @@ package jobs
 
 import (
 	"Android-Mac-Connector-Server/src/application"
-	"Android-Mac-Connector-Server/src/data/fcm"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -58,7 +57,7 @@ func publishJob(appContext *application.ApplicationContext) http.HandlerFunc {
 
 		// Inject the job id to the payload
 		jsonBody["uuid"] = jobId
-		if err := fcm.SendFcmMessage(token, jsonBody, nil); err != nil {
+		if err := appContext.Services.AndroidPushNotificationService.SendMessage(token, jsonBody); err != nil {
 			panic(err)
 		}
 
