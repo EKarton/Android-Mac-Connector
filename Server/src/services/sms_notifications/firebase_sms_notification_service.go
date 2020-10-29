@@ -8,15 +8,15 @@ import (
 	"cloud.google.com/go/firestore"
 )
 
-type FirestoreNotificationsStore struct {
+type FirebaseSmsNotificationService struct {
 	client               *firestore.Client
 	firebaseQueueService *queues.FirebaseQueueClient
 	firebaseNodeService  *queues.FirebaseNodeClient
 	maxQueueLength       int
 }
 
-func CreateFirestoreNotificationsStore(client *firestore.Client, maxQueueLength int) *FirestoreNotificationsStore {
-	return &FirestoreNotificationsStore{
+func CreateFirebaseSmsNotificationService(client *firestore.Client, maxQueueLength int) *FirebaseSmsNotificationService {
+	return &FirebaseSmsNotificationService{
 		client:               client,
 		firebaseQueueService: queues.NewFirebaseQueueClient(client, "sms-notification-queues"),
 		firebaseNodeService:  queues.CreateFirebaseNodeClient(client, "sms-notifications"),
@@ -30,7 +30,7 @@ func CreateFirestoreNotificationsStore(client *firestore.Client, maxQueueLength 
 //
 // It returns an error if an error occured; else nil
 //
-func (store *FirestoreNotificationsStore) AddSmsNotification(deviceId string, notification SmsNotification) (string, error) {
+func (store *FirebaseSmsNotificationService) AddSmsNotification(deviceId string, notification SmsNotification) (string, error) {
 	// Get our queue
 	queue, err := store.firebaseQueueService.GetOrCreateQueue(deviceId, 1000)
 	if err != nil {
@@ -87,7 +87,7 @@ func (store *FirestoreNotificationsStore) AddSmsNotification(deviceId string, no
 // 1. A list of SMS notifications
 // 2. An error object, if an error occured; else nil
 //
-func (store *FirestoreNotificationsStore) GetNewSmsNotificationsFromUuid(deviceId string, numNotifications int, startingUuid string) ([]SmsNotification, error) {
+func (store *FirebaseSmsNotificationService) GetNewSmsNotificationsFromUuid(deviceId string, numNotifications int, startingUuid string) ([]SmsNotification, error) {
 	// Create our iterator
 	rule := func(node *queues.FirebaseNode) string {
 		return node.GetNextNode()
@@ -116,7 +116,7 @@ func (store *FirestoreNotificationsStore) GetNewSmsNotificationsFromUuid(deviceI
 // 1. A list of SMS notifications
 // 2. An error object, if an error occured; else nil
 //
-func (store *FirestoreNotificationsStore) GetPreviousSmsNotificationsFromUuid(deviceId string, numNotifications int, startingUuid string) ([]SmsNotification, error) {
+func (store *FirebaseSmsNotificationService) GetPreviousSmsNotificationsFromUuid(deviceId string, numNotifications int, startingUuid string) ([]SmsNotification, error) {
 	// Create our iterator
 	rule := func(node *queues.FirebaseNode) string {
 		return node.GetPreviousNode()
@@ -138,7 +138,7 @@ func (store *FirestoreNotificationsStore) GetPreviousSmsNotificationsFromUuid(de
 	return store.parseNodesData(nodes)
 }
 
-func (store *FirestoreNotificationsStore) GetOldestSmsNotification(deviceId string) (SmsNotification, error) {
+func (store *FirebaseSmsNotificationService) GetOldestSmsNotification(deviceId string) (SmsNotification, error) {
 	queue, err := store.firebaseQueueService.GetQueue(deviceId)
 	if err != nil {
 		return SmsNotification{}, err
@@ -158,7 +158,7 @@ func (store *FirestoreNotificationsStore) GetOldestSmsNotification(deviceId stri
 	return store.parseNodeData(node)
 }
 
-func (store *FirestoreNotificationsStore) GetLatestSmsNotification(deviceId string) (SmsNotification, error) {
+func (store *FirebaseSmsNotificationService) GetLatestSmsNotification(deviceId string) (SmsNotification, error) {
 	queue, err := store.firebaseQueueService.GetQueue(deviceId)
 	if err != nil {
 		return SmsNotification{}, err
@@ -178,7 +178,7 @@ func (store *FirestoreNotificationsStore) GetLatestSmsNotification(deviceId stri
 	return store.parseNodeData(node)
 }
 
-func (store *FirestoreNotificationsStore) parseNodesData(nodes [](*queues.FirebaseNode)) ([]SmsNotification, error) {
+func (store *FirebaseSmsNotificationService) parseNodesData(nodes [](*queues.FirebaseNode)) ([]SmsNotification, error) {
 	smsNotifications := make([]SmsNotification, 0)
 	for _, node := range nodes {
 		smsNotification, err := store.parseNodeData(node)
@@ -192,7 +192,7 @@ func (store *FirestoreNotificationsStore) parseNodesData(nodes [](*queues.Fireba
 	return smsNotifications, nil
 }
 
-func (store *FirestoreNotificationsStore) parseNodeData(node *queues.FirebaseNode) (SmsNotification, error) {
+func (store *FirebaseSmsNotificationService) parseNodeData(node *queues.FirebaseNode) (SmsNotification, error) {
 	nodeData, isParsable := node.GetData().(map[string]interface{})
 	if !isParsable {
 		return SmsNotification{}, errors.New(fmt.Sprintf("The data %s is not parsable with type (map[string]interface{})", node.GetData()))

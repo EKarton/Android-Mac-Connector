@@ -9,15 +9,15 @@ type Subscriber struct {
 	Channel chan SmsNotification
 }
 
-type SmsNotificationSubscribersStore struct {
-	actualStore                 SmsNotificationsStore
+type SmsNotificationSubscriptionService struct {
+	actualStore                 SmsNotificationService
 	deviceIdToSubscriberUuid    map[string](map[string]bool)
 	subscriberUuidToSubscribers map[string](*Subscriber)
 	subscriberUuidToDeviceId    map[string]string
 }
 
-func CreateNotificationSubscribersStore(store SmsNotificationsStore) *SmsNotificationSubscribersStore {
-	return &SmsNotificationSubscribersStore{
+func CreateSmsNotificationSubscriptionService(store SmsNotificationService) *SmsNotificationSubscriptionService {
+	return &SmsNotificationSubscriptionService{
 		actualStore:                 store,
 		deviceIdToSubscriberUuid:    make(map[string](map[string]bool)),
 		subscriberUuidToSubscribers: make(map[string](*Subscriber)),
@@ -25,7 +25,7 @@ func CreateNotificationSubscribersStore(store SmsNotificationsStore) *SmsNotific
 	}
 }
 
-func (store *SmsNotificationSubscribersStore) CreateSubscriber(deviceId string) (Subscriber, error) {
+func (store *SmsNotificationSubscriptionService) CreateSubscriber(deviceId string) (Subscriber, error) {
 	subscriberUuid := ""
 	if uuid, err := uuid.NewRandom(); err != nil {
 		return Subscriber{}, err
@@ -50,7 +50,7 @@ func (store *SmsNotificationSubscribersStore) CreateSubscriber(deviceId string) 
 	return subscriber, nil
 }
 
-func (store *SmsNotificationSubscribersStore) RemoveSubscriber(subscriber Subscriber) {
+func (store *SmsNotificationSubscriptionService) RemoveSubscriber(subscriber Subscriber) {
 	// Get the device id the subscriber belongs to
 	deviceId := store.subscriberUuidToDeviceId[subscriber.uuid]
 
@@ -59,7 +59,7 @@ func (store *SmsNotificationSubscribersStore) RemoveSubscriber(subscriber Subscr
 	delete(store.subscriberUuidToDeviceId, subscriber.uuid)
 }
 
-func (store *SmsNotificationSubscribersStore) AddSmsNotification(deviceId string, notification SmsNotification) (string, error) {
+func (store *SmsNotificationSubscriptionService) AddSmsNotification(deviceId string, notification SmsNotification) (string, error) {
 	nodeId, err := store.actualStore.AddSmsNotification(deviceId, notification)
 	if err != nil {
 		return "", err
@@ -86,18 +86,18 @@ func (store *SmsNotificationSubscribersStore) AddSmsNotification(deviceId string
 	return nodeId, nil
 }
 
-func (store *SmsNotificationSubscribersStore) GetNewSmsNotificationsFromUuid(deviceId string, numNotifications int, startingUuid string) ([]SmsNotification, error) {
+func (store *SmsNotificationSubscriptionService) GetNewSmsNotificationsFromUuid(deviceId string, numNotifications int, startingUuid string) ([]SmsNotification, error) {
 	return store.actualStore.GetNewSmsNotificationsFromUuid(deviceId, numNotifications, startingUuid)
 }
 
-func (store *SmsNotificationSubscribersStore) GetPreviousSmsNotificationsFromUuid(deviceId string, numNotifications int, startingUuid string) ([]SmsNotification, error) {
+func (store *SmsNotificationSubscriptionService) GetPreviousSmsNotificationsFromUuid(deviceId string, numNotifications int, startingUuid string) ([]SmsNotification, error) {
 	return store.actualStore.GetPreviousSmsNotificationsFromUuid(deviceId, numNotifications, startingUuid)
 }
 
-func (store *SmsNotificationSubscribersStore) GetOldestSmsNotification(deviceId string) (SmsNotification, error) {
+func (store *SmsNotificationSubscriptionService) GetOldestSmsNotification(deviceId string) (SmsNotification, error) {
 	return store.actualStore.GetOldestSmsNotification(deviceId)
 }
 
-func (store *SmsNotificationSubscribersStore) GetLatestSmsNotification(deviceId string) (SmsNotification, error) {
+func (store *SmsNotificationSubscriptionService) GetLatestSmsNotification(deviceId string) (SmsNotification, error) {
 	return store.actualStore.GetLatestSmsNotification(deviceId)
 }

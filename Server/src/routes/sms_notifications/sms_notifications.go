@@ -9,7 +9,7 @@ import (
 	"github.com/gorilla/mux"
 
 	"Android-Mac-Connector-Server/src/app_context"
-	"Android-Mac-Connector-Server/src/store/sms_notifications"
+	"Android-Mac-Connector-Server/src/services/sms_notifications"
 )
 
 type NewSmsMessageReceived struct {
@@ -44,7 +44,7 @@ func notifyNewSmsMessageReceived(appContext *app_context.ApplicationContext) htt
 			Timestamp:   newSmsMessage.Timestamp,
 		}
 
-		if _, err := appContext.DataStores.SmsNotifications.AddSmsNotification(deviceId, newSmsMsg); err != nil {
+		if _, err := appContext.Services.SmsNotificationSubscriptionService.AddSmsNotification(deviceId, newSmsMsg); err != nil {
 			panic(err)
 		}
 	}
@@ -87,7 +87,7 @@ func getNewSmsMessagesReceived(appContext *app_context.ApplicationContext) http.
 		}
 
 		// Get the notifications starting from the Uuid
-		pastUnreadNotifications, err := appContext.DataStores.SmsNotifications.GetNewSmsNotificationsFromUuid(deviceId, int(numNotifications), startingUuid)
+		pastUnreadNotifications, err := appContext.Services.SmsNotificationSubscriptionService.GetNewSmsNotificationsFromUuid(deviceId, int(numNotifications), startingUuid)
 		if err != nil {
 			panic(err)
 		}
@@ -95,7 +95,7 @@ func getNewSmsMessagesReceived(appContext *app_context.ApplicationContext) http.
 		if isLongPolling && len(pastUnreadNotifications) == 0 {
 			log.Println("Subscribing to new sms notifications from", deviceId)
 
-			subscriber, err := appContext.DataStores.SmsNotificationSubscribers.CreateSubscriber(deviceId)
+			subscriber, err := appContext.Services.SmsNotificationSubscriptionService.CreateSubscriber(deviceId)
 
 			if err != nil {
 				panic(err)
@@ -103,7 +103,7 @@ func getNewSmsMessagesReceived(appContext *app_context.ApplicationContext) http.
 
 			// log.Println("Reading data")
 			newNotification := <-subscriber.Channel
-			appContext.DataStores.SmsNotificationSubscribers.RemoveSubscriber(subscriber)
+			appContext.Services.SmsNotificationSubscriptionService.RemoveSubscriber(subscriber)
 
 			// Send the output to the user
 			responseWriter.Header().Set("Content-Type", "application/json")

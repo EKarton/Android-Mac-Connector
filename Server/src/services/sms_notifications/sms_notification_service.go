@@ -7,7 +7,7 @@ type SmsNotification struct {
 	Timestamp   int
 }
 
-type SmsNotificationsStore interface {
+type SmsNotificationService interface {
 	AddSmsNotification(deviceId string, notification SmsNotification) (string, error)
 	GetNewSmsNotificationsFromUuid(deviceId string, numNotifications int, startingUuid string) ([]SmsNotification, error)
 	GetPreviousSmsNotificationsFromUuid(deviceId string, numNotifications int, startingUuid string) ([]SmsNotification, error)

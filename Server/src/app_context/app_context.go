@@ -4,10 +4,10 @@ import (
 	authService "Android-Mac-Connector-Server/src/services/auth"
 	"Android-Mac-Connector-Server/src/services/push_notification"
 	pushNotificationService "Android-Mac-Connector-Server/src/services/push_notification"
+	"Android-Mac-Connector-Server/src/services/sms_notifications"
 	"Android-Mac-Connector-Server/src/store/devices"
 	"Android-Mac-Connector-Server/src/store/jobs"
 	"Android-Mac-Connector-Server/src/store/resourcepolicies"
-	"Android-Mac-Connector-Server/src/store/sms_notifications"
 	"context"
 
 	"cloud.google.com/go/firestore"
@@ -22,16 +22,15 @@ type ApplicationContext struct {
 }
 
 type Services struct {
-	AuthService                    authService.AuthService
-	AndroidPushNotificationService push_notification.PushNotificationService
+	AuthService                        authService.AuthService
+	AndroidPushNotificationService     push_notification.PushNotificationService
+	SmsNotificationSubscriptionService *sms_notifications.SmsNotificationSubscriptionService
 }
 
 type DataStores struct {
-	DevicesStores              devices.DevicesStore
-	JobQueueService            jobs.JobQueueService
-	ResourcePoliciesStore      resourcepolicies.ResourcePoliciesStore
-	SmsNotifications           sms_notifications.SmsNotificationsStore
-	SmsNotificationSubscribers *sms_notifications.SmsNotificationSubscribersStore
+	DevicesStores         devices.DevicesStore
+	JobQueueService       jobs.JobQueueService
+	ResourcePoliciesStore resourcepolicies.ResourcePoliciesStore
 }
 
 type firebaseClients struct {
@@ -44,20 +43,19 @@ type firebaseClients struct {
 func CreateApplicationContext() *ApplicationContext {
 	firebaseClients := createFirebaseClients()
 
-	smsNotificationsStore := sms_notifications.CreateFirestoreNotificationsStore(firebaseClients.firestoreClient, 10)
-	smsNotificationSubscribersStore := sms_notifications.CreateNotificationSubscribersStore(smsNotificationsStore)
+	smsNotificationService := sms_notifications.CreateFirebaseSmsNotificationService(firebaseClients.firestoreClient, 10)
+	smsNotificationSubService := sms_notifications.CreateSmsNotificationSubscriptionService(smsNotificationService)
 
 	return &ApplicationContext{
 		Services: &Services{
-			AuthService:                    authService.CreateFirebaseAuthService(firebaseClients.authClient),
-			AndroidPushNotificationService: pushNotificationService.CreateAndroidPushNotificationService(firebaseClients.messagingClient),
+			AuthService:                        authService.CreateFirebaseAuthService(firebaseClients.authClient),
+			AndroidPushNotificationService:     pushNotificationService.CreateAndroidPushNotificationService(firebaseClients.messagingClient),
+			SmsNotificationSubscriptionService: smsNotificationSubService,
 		},
 		DataStores: &DataStores{
-			DevicesStores:              devices.CreateFirestoreDevicesStore(firebaseClients.firestoreClient),
-			JobQueueService:            jobs.CreateFirebaseJobQueueService(firebaseClients.firestoreClient),
-			ResourcePoliciesStore:      resourcepolicies.CreateInMemoryStore(),
-			SmsNotifications:           smsNotificationSubscribersStore,
-			SmsNotificationSubscribers: smsNotificationSubscribersStore,
+			DevicesStores:         devices.CreateFirestoreDevicesStore(firebaseClients.firestoreClient),
+			JobQueueService:       jobs.CreateFirebaseJobQueueService(firebaseClients.firestoreClient),
+			ResourcePoliciesStore: resourcepolicies.CreateInMemoryStore(),
 		},
 	}
 }
