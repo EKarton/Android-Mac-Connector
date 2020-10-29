@@ -8,7 +8,7 @@ import (
 
 	"github.com/gorilla/mux"
 
-	"Android-Mac-Connector-Server/src/application"
+	"Android-Mac-Connector-Server/src/app_context"
 	"Android-Mac-Connector-Server/src/store/sms_notifications"
 )
 
@@ -29,7 +29,7 @@ type GetNewSmsMessagesReceivedErrorResponse struct {
 /**
  * Handler for when the device wants to notify all subscribers that a new SMS message has been received
  */
-func notifyNewSmsMessageReceived(appContext *application.ApplicationContext) http.HandlerFunc {
+func notifyNewSmsMessageReceived(appContext *app_context.ApplicationContext) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		variables := mux.Vars(r)
 		deviceId := variables["deviceId"]
@@ -59,7 +59,7 @@ func notifyNewSmsMessageReceived(appContext *application.ApplicationContext) htt
  *     - If true, and there are no new notifications, then it will hold the request until a new notification arrives from the device
  *     - Else, it returns an empty array
  */
-func getNewSmsMessagesReceived(appContext *application.ApplicationContext) http.HandlerFunc {
+func getNewSmsMessagesReceived(appContext *app_context.ApplicationContext) http.HandlerFunc {
 	return func(responseWriter http.ResponseWriter, request *http.Request) {
 		// Get the contents from the request
 		variables := mux.Vars(request)
@@ -120,7 +120,7 @@ func getNewSmsMessagesReceived(appContext *application.ApplicationContext) http.
 /**
  * Initializes the router to include paths and path handlers
  */
-func InitializeRouter(appContext *application.ApplicationContext, router *mux.Router) {
+func InitializeRouter(appContext *app_context.ApplicationContext, router *mux.Router) {
 	router.HandleFunc("", notifyNewSmsMessageReceived(appContext)).Methods("POST")
 	router.HandleFunc("", getNewSmsMessagesReceived(appContext)).Methods("GET")
 }

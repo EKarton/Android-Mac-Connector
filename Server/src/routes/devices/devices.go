@@ -6,7 +6,7 @@ import (
 
 	"github.com/gorilla/mux"
 
-	"Android-Mac-Connector-Server/src/application"
+	"Android-Mac-Connector-Server/src/app_context"
 	"Android-Mac-Connector-Server/src/middlewares"
 )
 
@@ -39,7 +39,7 @@ type UpdateAndroidPushNotificationTokenRequest struct {
 /*
  * Checks if a device is registered or not, based on the user id, the device type, and the hardware number
  */
-func isDeviceRegistered(appContext *application.ApplicationContext) http.HandlerFunc {
+func isDeviceRegistered(appContext *app_context.ApplicationContext) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		userId := r.Header.Get("user_id")
 		deviceType := r.URL.Query().Get("device_type")
@@ -60,7 +60,7 @@ func isDeviceRegistered(appContext *application.ApplicationContext) http.Handler
 /**
  * Registers a device given the user id, device type, and the hardware id
  */
-func registerDevice(appContext *application.ApplicationContext) http.HandlerFunc {
+func registerDevice(appContext *app_context.ApplicationContext) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		userId := r.Header.Get("user_id")
 
@@ -79,7 +79,7 @@ func registerDevice(appContext *application.ApplicationContext) http.HandlerFunc
 	}
 }
 
-func updateDeviceCapabilities(appContext *application.ApplicationContext) http.HandlerFunc {
+func updateDeviceCapabilities(appContext *app_context.ApplicationContext) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		variables := mux.Vars(r)
 		deviceId := variables["deviceId"]
@@ -93,7 +93,7 @@ func updateDeviceCapabilities(appContext *application.ApplicationContext) http.H
 	}
 }
 
-func getDeviceCapabilities(appContext *application.ApplicationContext) http.HandlerFunc {
+func getDeviceCapabilities(appContext *app_context.ApplicationContext) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		variables := mux.Vars(r)
 		deviceId := variables["deviceId"]
@@ -111,7 +111,7 @@ func getDeviceCapabilities(appContext *application.ApplicationContext) http.Hand
 	}
 }
 
-func updatePushNotificationToken(appContext *application.ApplicationContext) http.HandlerFunc {
+func updatePushNotificationToken(appContext *app_context.ApplicationContext) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		variables := mux.Vars(r)
 		deviceId := variables["deviceId"]
@@ -125,7 +125,7 @@ func updatePushNotificationToken(appContext *application.ApplicationContext) htt
 	}
 }
 
-func InitializeRouter(appContext *application.ApplicationContext, router *mux.Router) {
+func InitializeRouter(appContext *app_context.ApplicationContext, router *mux.Router) {
 	verifyCredentials := middlewares.VerifyCredentials(appContext)
 
 	router.Handle("/registered",

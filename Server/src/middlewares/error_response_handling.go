@@ -1,7 +1,7 @@
 package middlewares
 
 import (
-	"Android-Mac-Connector-Server/src/application"
+	"Android-Mac-Connector-Server/src/app_context"
 	"encoding/json"
 	"net/http"
 )
@@ -17,7 +17,7 @@ type HttpErrorResponseBody struct {
 	Reason    string `json:"reason"`
 }
 
-func HandleErrors(appContext *application.ApplicationContext) func(http.Handler) http.Handler {
+func HandleErrors(appContext *app_context.ApplicationContext) func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			defer func() {

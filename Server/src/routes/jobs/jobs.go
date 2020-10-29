@@ -1,7 +1,7 @@
 package jobs
 
 import (
-	"Android-Mac-Connector-Server/src/application"
+	"Android-Mac-Connector-Server/src/app_context"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -23,7 +23,7 @@ type GetJobResults2xxResponse struct {
 	Results interface{} `json:"results"`
 }
 
-func publishJob(appContext *application.ApplicationContext) http.HandlerFunc {
+func publishJob(appContext *app_context.ApplicationContext) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		variables := mux.Vars(r)
 		deviceId := variables["deviceId"]
@@ -69,7 +69,7 @@ func publishJob(appContext *application.ApplicationContext) http.HandlerFunc {
 	}
 }
 
-func publishJobResults(appContext *application.ApplicationContext) http.HandlerFunc {
+func publishJobResults(appContext *app_context.ApplicationContext) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 
 		// Getting the request info
@@ -105,7 +105,7 @@ func publishJobResults(appContext *application.ApplicationContext) http.HandlerF
 	}
 }
 
-func getJobResults(appContext *application.ApplicationContext) http.HandlerFunc {
+func getJobResults(appContext *app_context.ApplicationContext) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 
 		// Getting request info
@@ -137,7 +137,7 @@ func getJobResults(appContext *application.ApplicationContext) http.HandlerFunc 
 	}
 }
 
-func InitializeRouter(appContext *application.ApplicationContext, router *mux.Router) {
+func InitializeRouter(appContext *app_context.ApplicationContext, router *mux.Router) {
 	router.HandleFunc("", publishJob(appContext)).Methods("POST")
 	router.HandleFunc("/{jobId}/results", publishJobResults(appContext)).Methods("POST")
 

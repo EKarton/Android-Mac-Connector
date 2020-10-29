@@ -1,7 +1,7 @@
 package main
 
 import (
-	"Android-Mac-Connector-Server/src/application"
+	"Android-Mac-Connector-Server/src/app_context"
 	"Android-Mac-Connector-Server/src/middlewares"
 	"Android-Mac-Connector-Server/src/routes/devices"
 	"Android-Mac-Connector-Server/src/routes/jobs"
@@ -15,7 +15,7 @@ import (
 
 func main() {
 	// Create our application context
-	appContext := application.CreateApplicationContext()
+	appContext := app_context.CreateApplicationContext()
 
 	// Create our router
 	router := mux.NewRouter()

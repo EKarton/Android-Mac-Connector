@@ -1,4 +1,4 @@
-package application
+package app_context
 
 import (
 	authService "Android-Mac-Connector-Server/src/services/auth"
