@@ -9,7 +9,7 @@ let numRetries = 10
 
 if (cluster.isMaster) {
   // Make N copies of the same app with N being the number of CPUs
-  for (let i = 0; i < os.cpus.length; i++) {
+  for (let i = 0; i < 1; i++) { //os.cpus().length; i++) {
       cluster.fork();
   }
 
@@ -25,9 +25,5 @@ if (cluster.isMaster) {
   });
 } else {
   console.log("Child process #", process.pid, " has spawned");
-  const authenticator = new FirebaseAuthenticator()
-  const authorizer = new FirebaseAuthorizer()
-  const app = new MqttServerApp(authenticator, authorizer)
-
-  app.startServer()
+  new MqttServerApp().startServer()
 }

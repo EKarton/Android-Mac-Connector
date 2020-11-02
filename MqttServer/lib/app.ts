@@ -1,7 +1,9 @@
-import aedes, { AedesOptions, AuthenticateError, Client, PublishPacket, Subscription } from 'aedes'
+import aedes, { Aedes, AedesOptions, AuthenticateError, AuthErrorCode, Client, PublishPacket, Subscription } from 'aedes'
 import { createServer, Server } from 'net'
-import { Authenticator } from './authenticator'
-import { Authorizer } from './authorizer'
+import { Authenticator, FirebaseAuthenticator } from './authenticator'
+import { Authorizer, FirebaseAuthorizer } from './authorizer'
+
+import * as admin from 'firebase-admin';
 
 export interface App {
   startServer()
@@ -14,10 +16,20 @@ export class MqttServerApp implements App {
 
   /**
    * Creates the app server
-   * @param authenticator the authenticator
-   * @param authorizer the authorizer
    */
-  constructor(authenticator: Authenticator, authorizer: Authorizer) {
+  constructor() {
+    const app = admin.initializeApp();
+    const authServer = app.auth();
+    const firestore = app.firestore();
+
+    const authenticator = new FirebaseAuthenticator(authServer, firestore)
+    const authorizer = new FirebaseAuthorizer(firestore)
+
+    const mqttServer = this.createMqttServer(authenticator, authorizer)
+    this.server = createServer(mqttServer.handle)
+  }
+
+  private createMqttServer(authenticator: Authenticator, authorizer: Authorizer): Aedes {
     const mqttServerOpts: AedesOptions = {
       authenticate: (client: Client, username: string, password: Buffer, done: (error: AuthenticateError | null, success: boolean | null) => void) => {
         authenticator.authenticate(client.id, username, password.toString())
@@ -25,9 +37,9 @@ export class MqttServerApp implements App {
             done(null, isAuthenticated)
           })
           .catch((err: Error) => {
-            const wrappedError = {
+            const wrappedError: AuthenticateError = {
+              returnCode: 4,
               ...err,
-              returnCode: aedes.AuthErrorCode.SERVER_UNAVAILABLE
             }
             done(wrappedError, false)
           })
@@ -35,6 +47,7 @@ export class MqttServerApp implements App {
       authorizePublish: (client: Client, packet: PublishPacket, callback: (error?: Error | null) => void) => {
         authorizer.authorizePublish(packet.topic, client.id)
           .then((isAuthorized: boolean) => {
+            console.log('I am here')
             isAuthorized ? callback(null) : callback(new Error('Unauthorized'))
           })
           .catch((err: Error) => {
@@ -44,15 +57,14 @@ export class MqttServerApp implements App {
       authorizeSubscribe: (client: Client, subscription: Subscription, callback: (error: Error | null, subscription?: Subscription | null) => void) => {
         authorizer.authorizeSubscription(subscription.topic, client.id)
           .then((isAuthorized: boolean) => {
-            isAuthorized ? callback(null) : callback(new Error('Unauthorized'))
+            isAuthorized ? callback(null, subscription) : callback(new Error('Unauthorized'), null)
           })
           .catch((err: Error) => {
-            callback(err)
+            callback(err, null)
           })
       }
     }
-    const mqttServer = aedes(mqttServerOpts)
-    this.server = createServer(mqttServer.handle)
+    return aedes(mqttServerOpts)
   }
 
   /**
