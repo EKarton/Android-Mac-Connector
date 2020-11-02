@@ -10,44 +10,51 @@ export class FirebaseAuthorizer implements Authorizer {
     this.firestoreClient = firestoreClient
   }
 
-  public async authorizePublish(topic: string, clientId: string): Promise<boolean> {
+  public authorizePublish(topic: string, clientId: string): Promise<boolean> {
     const topicLevels = topic.split('/')
     if (topicLevels.length < 2) {
       throw new Error('Invalid topic ' + topic)
     }
 
-    console.log(topicLevels)
-
     const deviceId = topicLevels[0]
-    const action = topicLevels[1]
-
-    // Allow the originator to publish to its own topics
-    if (clientId == deviceId) {
-      return true
-    }
+    const action = `${topicLevels[1]}:publish`
 
     // Refer to resource policies to see if the client is authorized to publish
-
-    console.log(topic)
-    throw new Error("Method not implemented.");
+    return this.isActionAuthorized(deviceId, action, clientId)
   }
-  
-  public async authorizeSubscription(topic: string, clientId: string): Promise<boolean> {
+
+  public authorizeSubscription(topic: string, clientId: string): Promise<boolean> {
     const topicLevels = topic.split('/')
     if (topicLevels.length < 2) {
       throw new Error('Invalid topic ' + topic)
     }
 
-    console.log(topicLevels, clientId)
-
     const deviceId = topicLevels[0]
-    const action = topicLevels[1]
+    const action = `${topicLevels[1]}:subscribe`
 
-    // Allow the originator to subscribe to its own topics
-    if (clientId == deviceId) {
-      return true
+    return this.isActionAuthorized(deviceId, action, clientId)
+  }
+
+  /**
+   * Checks if an action under a resource is authorized for a principal
+   * If no resource policy is found, we assume that it is unauthorized
+   * @param resource the resource
+   * @param action the action
+   * @param principal the principal
+   */
+  private async isActionAuthorized(resource: string, action: string, principal: string): Promise<boolean> {
+    console.log(resource, action, principal)
+    const collection = this.firestoreClient.collection('resource-policies')
+    const allowQuery = collection
+      .where('resource', '==', resource)
+      .where('action', '==', action)
+      .where('principal', 'array-contains', principal)
+
+    const results = await allowQuery.get()
+    if (results.empty) {
+      return false
     }
 
-    throw new Error("Method not implemented.");
+    return true
   }
 }

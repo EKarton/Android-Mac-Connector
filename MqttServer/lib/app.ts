@@ -47,10 +47,10 @@ export class MqttServerApp implements App {
       authorizePublish: (client: Client, packet: PublishPacket, callback: (error?: Error | null) => void) => {
         authorizer.authorizePublish(packet.topic, client.id)
           .then((isAuthorized: boolean) => {
-            console.log('I am here')
             isAuthorized ? callback(null) : callback(new Error('Unauthorized'))
           })
           .catch((err: Error) => {
+            console.error(err)
             callback(err)
           })
       },
@@ -60,6 +60,7 @@ export class MqttServerApp implements App {
             isAuthorized ? callback(null, subscription) : callback(new Error('Unauthorized'), null)
           })
           .catch((err: Error) => {
+            console.error(err)
             callback(err, null)
           })
       }
