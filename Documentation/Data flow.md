@@ -100,7 +100,7 @@ Data message format:
 
 2. The server receives the request, adds a new entry to the database
 
-3. The Mac device repeatedly polls (**GET** ```/api/v1/<device-id>/sms/messages/new```), and gets the new updates
+3. The Mac device receives a new event from the web socket
 
 4. The Mac device makes a notification to the user
 

@@ -37,8 +37,14 @@ func (store *FirebaseSmsNotificationService) AddSmsNotification(deviceId string,
 		return "", err
 	}
 
+	// Set the previous node to point to the cur queue's first node
+	smsNotificationPrevious := ""
+	if queue.GetCurLength() > 0 {
+		smsNotificationPrevious = queue.GetFirstNotificationId()
+	}
+
 	// Create a SMS notification
-	smsNotification, err := store.firebaseNodeService.CreateNewNode("", "", map[string]interface{}{
+	smsNotification, err := store.firebaseNodeService.CreateNewNode("", smsNotificationPrevious, map[string]interface{}{
 		"contact_info": notification.ContactInfo,
 		"data":         notification.Data,
 		"timestamp":    int64(notification.Timestamp),
@@ -46,12 +52,6 @@ func (store *FirebaseSmsNotificationService) AddSmsNotification(deviceId string,
 
 	if err != nil {
 		return "", err
-	}
-
-	// Update the first node's 'next' field to point to our new node
-	if queue.GetCurLength() > 0 {
-		smsNotification.SetPreviousNode(queue.GetFirstNotificationId())
-		smsNotification.Commit()
 	}
 
 	// Update the first notification's 'next' field to point to our current one
