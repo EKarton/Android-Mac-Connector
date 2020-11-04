@@ -26,6 +26,9 @@ if (cluster.isMaster) {
   console.log("Child process #", process.pid, " has spawned");
   const firebaseApp = admin.initializeApp();
   
-  new MqttServerApp(firebaseApp).startServer()
+  new MqttServerApp(firebaseApp, {
+    verifyAuthorization: !(process.env.VERIFY_AUTHORIZATION == "false"),
+    verifyAuthentication: !(process.env.VERIFY_AUTHENTICATION == "false"),
+  }).startServer()
   new RestApiServerApp(firebaseApp).startServer()
 }
