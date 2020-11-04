@@ -46,7 +46,7 @@ export class MqttServerApp implements App {
         //   })
       },
       authorizePublish: (client: Client, packet: PublishPacket, callback: (error?: Error | null) => void) => {
-        authorizer.authorizePublish(packet.topic, client.id)
+        authorizer.isPublishAuthorized(packet.topic, client.id)
           .then((isAuthorized: boolean) => {
             isAuthorized ? callback(null) : callback(new Error('Unauthorized'))
           })
@@ -56,7 +56,7 @@ export class MqttServerApp implements App {
           })
       },
       authorizeSubscribe: (client: Client, subscription: Subscription, callback: (error: Error | null, subscription?: Subscription | null) => void) => {
-        authorizer.authorizeSubscription(subscription.topic, client.id)
+        authorizer.isSubscriptionAuthorized(subscription.topic, client.id)
           .then((isAuthorized: boolean) => {
             isAuthorized ? callback(null, subscription) : callback(new Error('Unauthorized'), null)
           })

@@ -1,8 +1,9 @@
 import { json, Router } from "express";
 import { Authenticator } from "../authenticator";
-import { DeviceService } from "./service";
+import { DeviceService } from "./device_service";
+import { ResourcePolicyService } from "./resource_policy_service";
 
-export const createDeviceRouter = (service: DeviceService, authService: Authenticator) => {
+export const createDeviceRouter = (service: DeviceService, authService: Authenticator, resourcePolicyService: ResourcePolicyService) => {
   const router = Router();
 
   // Middleware to authenticate user
@@ -44,15 +45,29 @@ export const createDeviceRouter = (service: DeviceService, authService: Authenti
     })
   });
 
-  router.post("/:deviceId/register", async (req, res) => {
+  router.post("/register", async (req, res) => {
     const userId = req.header("user_id")
     const deviceType = req.body["device_type"]
     const hardwareId = req.body["hardware_id"]
-    const capabilities = req.body["capabilities"]
+    const capabilities = <string[]>req.body["capabilities"]
 
     console.log(userId, deviceType, hardwareId, capabilities)
 
+    // Register the device
     const deviceId = await service.registerDevice(userId, deviceType, hardwareId, capabilities)
+    
+    // Add default resource policies
+    const pendingResults1 = capabilities.map(capability => {
+      const resource1 = `${capability}:publish`
+      return resourcePolicyService.addPermission(resource1, deviceId, deviceId)
+    });
+
+    const pendingResults2 = capabilities.map(capability => {
+      const resource1 = `${capability}:subscribe`
+      return resourcePolicyService.addPermission(resource1, deviceId, deviceId)
+    });
+
+    Promise.all([...pendingResults1, ...pendingResults2])
 
     res.setHeader('Content-Type', 'application/json');
     res.status(200).json({

@@ -1,6 +1,6 @@
 export interface Authorizer {
-  authorizePublish(topic: string, clientId: string): Promise<boolean>
-  authorizeSubscription(topic: string, clientId: string): Promise<boolean>
+  isPublishAuthorized(topic: string, clientId: string): Promise<boolean>
+  isSubscriptionAuthorized(topic: string, clientId: string): Promise<boolean>
 }
 
 export class FirebaseAuthorizer implements Authorizer {
@@ -15,7 +15,7 @@ export class FirebaseAuthorizer implements Authorizer {
    * @param topic the topic
    * @param clientId the client id
    */
-  public authorizePublish(topic: string, clientId: string): Promise<boolean> {
+  public isPublishAuthorized(topic: string, clientId: string): Promise<boolean> {
     const topicLevels = topic.split('/')
     if (topicLevels.length < 2) {
       throw new Error('Invalid topic ' + topic)
@@ -33,7 +33,7 @@ export class FirebaseAuthorizer implements Authorizer {
    * @param topic the topic
    * @param clientId the client id
    */
-  public authorizeSubscription(topic: string, clientId: string): Promise<boolean> {
+  public isSubscriptionAuthorized(topic: string, clientId: string): Promise<boolean> {
     const topicLevels = topic.split('/')
     if (topicLevels.length < 2) {
       throw new Error('Invalid topic ' + topic)

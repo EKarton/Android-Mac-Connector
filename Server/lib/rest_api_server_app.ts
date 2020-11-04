@@ -2,9 +2,10 @@ import express, { json } from "express";
 import { App } from "./app";
 import { Server } from "net"
 import admin from "firebase-admin";
-import { FirebaseDeviceService } from "./devices/service";
+import { FirebaseDeviceService } from "./devices/device_service";
 import { FirebaseAuthenticator } from "./authenticator";
 import { createDeviceRouter } from "./devices/routes";
+import { FirebaseResourcePolicyService } from "./devices/resource_policy_service";
 
 export class RestApiServerApp implements App {
   private readonly port = 8080
@@ -19,6 +20,7 @@ export class RestApiServerApp implements App {
     const firebaseAuth = firebaseApp.auth();
     const authService = new FirebaseAuthenticator(firebaseAuth, firestore)
     const service = new FirebaseDeviceService(firestore)
+    const resourcePolicyService = new FirebaseResourcePolicyService(firestore)
 
     // Middleware to parse json body
     this.app.use(json());
@@ -30,7 +32,7 @@ export class RestApiServerApp implements App {
       console.log(`${res.statusCode}`)
     })
 
-    this.app.use("/api/v1/devices", createDeviceRouter(service, authService))
+    this.app.use("/api/v1/devices", createDeviceRouter(service, authService, resourcePolicyService))
   }
 
   startServer() {
