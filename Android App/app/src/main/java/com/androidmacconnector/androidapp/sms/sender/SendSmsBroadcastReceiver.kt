@@ -9,7 +9,6 @@ import android.content.IntentFilter
 import android.telephony.SmsManager
 import android.util.Log
 import androidx.work.*
-import com.androidmacconnector.androidapp.mqtt.MqttClientListener.Companion.SEND_SMS_REQUEST_INTENT
 import com.androidmacconnector.androidapp.mqtt.MqttService
 import com.androidmacconnector.androidapp.utils.getDeviceId
 import org.json.JSONObject
@@ -18,50 +17,44 @@ import org.json.JSONObject
 /**
  * A receiver used to receive requests for when someone wants to send an sms message through this device
  */
-class SendSmsRequestBroadcastReceiver: BroadcastReceiver() {
+class SendSmsBroadcastReceiver: BroadcastReceiver() {
     companion object {
         private const val LOG_TAG = "SendSmsBcReceiver"
     }
 
     override fun onReceive(context: Context, intent: Intent) {
-        if (intent.action == SEND_SMS_REQUEST_INTENT) {
-            Log.d(LOG_TAG, "Received send sms intent: $intent")
-            val payload = intent.getStringExtra("payload")
-            val jsonBody = JSONObject(payload)
+        Log.d(LOG_TAG, "Received send sms intent: $intent")
+        val payload = intent.getStringExtra("payload")
+        Log.d(LOG_TAG, "Payload: ${payload.toString()}")
 
-            val myData: Data = workDataOf(
-                "phone_number" to jsonBody.getString("phone_number"),
-                "message" to jsonBody.getString("message")
-            )
+        val jsonBody = JSONObject(payload.toString())
 
-            val workRequest = OneTimeWorkRequestBuilder<SendSmsWorker>()
-                .setInputData(myData)
-                .build()
+        val myData: Data = workDataOf(
+            "phone_number" to jsonBody.getString("phone_number"),
+            "message" to jsonBody.getString("message"),
+            "message_id" to jsonBody.getString("message_id")
+        )
 
-            WorkManager.getInstance(context).enqueue(workRequest)
-        }
+        val workRequest = OneTimeWorkRequestBuilder<SendSmsWorker>()
+            .setInputData(myData)
+            .build()
+
+        WorkManager.getInstance(context).enqueue(workRequest)
     }
 
-    private class SendSmsWorker(context: Context, params: WorkerParameters): Worker(context, params) {
+    class SendSmsWorker(context: Context, params: WorkerParameters): Worker(context, params) {
 
         override fun doWork(): Result {
             val phoneNumber = inputData.getString("phone_number") ?: return Result.failure()
             val message = inputData.getString("message") ?: return Result.failure()
+            val messageId = inputData.getString("message_id")
+            val publishSmsResults = messageId != null
 
-            // Message id is an uint16 (https://stackoverflow.com/questions/11115364/mqtt-messageid-practical-implementation#:~:text=Message%20id%20is%20an%20unsigned%20int16%20so%20the%20max%20value%20is%2065535.)
-            // So if the message id returned is a max int32, then that means that the id was not specified
-            val messageId = inputData.getInt("message_id", Int.MAX_VALUE)
-
-            var publishSmsResults = true
-            if (kotlin.math.abs(messageId - Int.MAX_VALUE) < 0.00001) {
-                publishSmsResults = false
-            }
-
-            sendSMS(phoneNumber, message, messageId, publishSmsResults)
+            sendSMS(phoneNumber, message, messageId ?: "", publishSmsResults)
             return Result.success()
         }
 
-        private fun sendSMS(phoneNumber: String, message: String, messageId: Int, publishSmsResults: Boolean) {
+        private fun sendSMS(phoneNumber: String, message: String, messageId: String, publishSmsResults: Boolean) {
             // Intent Filter Tags for SMS SEND and DELIVER
             val sentIntentTag = "SMS_SENT"
             val deliveredIntentTag = "SMS_DELIVERED"
@@ -85,7 +78,7 @@ class SendSmsRequestBroadcastReceiver: BroadcastReceiver() {
 
                     // Ask the MQTT service to publish an event
                     if (publishSmsResults) {
-                        publishSendSmsRequestResult(messageId, resultCode)
+                        publishSendSmsResult(messageId, resultCode)
                     }
                 }
             }
@@ -99,7 +92,7 @@ class SendSmsRequestBroadcastReceiver: BroadcastReceiver() {
                     }
 
                     if (publishSmsResults) {
-                        publishSendSmsRequestResult(messageId, resultCode)
+                        publishSendSmsResult(messageId, resultCode)
                     }
                 }
             }
@@ -115,7 +108,9 @@ class SendSmsRequestBroadcastReceiver: BroadcastReceiver() {
             sms.sendTextMessage(phoneNumber, null, message, sentPI, deliveredPI)
         }
 
-        private fun publishSendSmsRequestResult(messageId: Int, resultCode: Int) {
+        private fun publishSendSmsResult(messageId: String, resultCode: Int) {
+            Log.d(LOG_TAG, "Publishing send sms results")
+
             val payload = JSONObject()
             payload.put("message_id", messageId)
             payload.put("result_code", resultCode)

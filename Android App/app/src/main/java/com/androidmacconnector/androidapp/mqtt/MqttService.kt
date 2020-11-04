@@ -4,6 +4,7 @@ import android.app.Service
 import android.content.Intent
 import android.os.IBinder
 import android.util.Log
+import com.androidmacconnector.androidapp.utils.getDeviceId
 import com.androidmacconnector.androidapp.utils.getDeviceIdSafely
 import com.google.firebase.auth.FirebaseAuth
 import org.eclipse.paho.client.mqttv3.*
@@ -64,13 +65,13 @@ class MqttService: Service() {
         })
 
         latch.await()
-//        this.client.subscribe("${getDeviceId(this)}/send-sms-request", 1)
+        this.client.subscribe("${getDeviceId(this)}/send-sms-request", 1)
 //        this.client.subscribe("${getDeviceId(this)}/jobs/new", 1)
     }
 
     private fun getAccessToken(): String? {
         val latch = CountDownLatch(1)
-        val tokenResult = FirebaseAuth.getInstance().currentUser?.getIdToken(false)?.addOnCompleteListener { task ->
+        val tokenResult = FirebaseAuth.getInstance().currentUser?.getIdToken(false)?.addOnCompleteListener { _ ->
             latch.countDown()
         }
         if (tokenResult != null && tokenResult.isSuccessful && tokenResult.result?.token != null) {
