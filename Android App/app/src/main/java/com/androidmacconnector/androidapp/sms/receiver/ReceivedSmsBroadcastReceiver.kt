@@ -9,6 +9,8 @@ import android.os.Build
 import android.telephony.SmsMessage
 import android.util.Log
 import com.androidmacconnector.androidapp.utils.getDeviceId
+import org.greenrobot.eventbus.EventBus
+import org.greenrobot.eventbus.EventBusBuilder
 
 /**
  * This class is responsible for receiving SMS messages from Android
@@ -32,18 +34,14 @@ class SmsBroadcastReceiver : BroadcastReceiver() {
         // Retrieve the SMS message received.
         val pdus = bundle["pdus"] as Array<*>?
 
-        val smsMessages = arrayListOf<SmsMessage>()
-
         if (pdus != null) {
             for (i in pdus.indices) {
                 val smsMessage = getSmsMessageFromPdu(pdus[i] as ByteArray, format)
-                smsMessages.add(smsMessage)
 
                 Log.d(LOG_TAG, "Received SMS message: $smsMessage")
+                EventBus.getDefault().post(smsMessage)
             }
         }
-
-        this.onReceiveSmsMessages(context, smsMessages)
     }
 
     private fun getSmsMessageFromPdu(pdu: ByteArray, format: String?): SmsMessage {
@@ -52,24 +50,6 @@ class SmsBroadcastReceiver : BroadcastReceiver() {
             return SmsMessage.createFromPdu(pdu, format)
         } else {
             return SmsMessage.createFromPdu(pdu)
-        }
-    }
-
-    private fun onReceiveSmsMessages(context: Context, smsMessages: List<SmsMessage>) {
-        val webService = ReceiveSmsWebNotifier(context)
-        val deviceId = getDeviceId(context)
-
-        // Get the contact info for each sms message
-        smsMessages.forEach {
-            val phoneNumber = it.displayOriginatingAddress
-            val body = it.messageBody
-            val timestamp = (it.timestampMillis / 1000).toInt()
-            val sms = ReceivedSmsMessage(phoneNumber, body, timestamp)
-
-            webService.publishResult(deviceId, sms, object : ResponseHandler() {
-                override fun onSuccess() {}
-                override fun onError(exception: Exception?) {}
-            })
         }
     }
 }
