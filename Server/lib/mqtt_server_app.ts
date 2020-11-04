@@ -1,4 +1,4 @@
-import aedes, { Aedes, AedesOptions, AedesPublishPacket, AuthenticateError, AuthErrorCode, Client, PublishPacket, Subscription } from 'aedes'
+import aedes, { Aedes, AedesOptions, AuthenticateError, Client, PublishPacket, Subscription } from 'aedes'
 import { createServer, Server } from 'net'
 import { Authenticator, FirebaseAuthenticator } from './authenticator'
 import { Authorizer, FirebaseAuthorizer } from './authorizer'

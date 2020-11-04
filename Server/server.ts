@@ -30,5 +30,6 @@ if (cluster.isMaster) {
     verifyAuthorization: !(process.env.VERIFY_AUTHORIZATION == "false"),
     verifyAuthentication: !(process.env.VERIFY_AUTHENTICATION == "false"),
   }).startServer()
+  
   new RestApiServerApp(firebaseApp).startServer()
 }
