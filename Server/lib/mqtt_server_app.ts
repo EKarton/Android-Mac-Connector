@@ -1,4 +1,4 @@
-import aedes, { Aedes, AedesOptions, AuthenticateError, AuthErrorCode, Client, PublishPacket, Subscription } from 'aedes'
+import aedes, { Aedes, AedesOptions, AedesPublishPacket, AuthenticateError, AuthErrorCode, Client, PublishPacket, Subscription } from 'aedes'
 import { createServer, Server } from 'net'
 import { Authenticator, FirebaseAuthenticator } from './authenticator'
 import { Authorizer, FirebaseAuthorizer } from './authorizer'
@@ -27,22 +27,23 @@ export class MqttServerApp implements App {
   private createMqttServer(authenticator: Authenticator, authorizer: Authorizer): Aedes {
     const mqttServerOpts: AedesOptions = {
       authenticate: (client: Client, username: string, password: Buffer, done: (error: AuthenticateError | null, success: boolean | null) => void) => {
-        if (password.length == 0 || username.length == 0) {
-          done(null, false)
-          return
-        }
+        done(null, true)
+        // if (password.length == 0 || username.length == 0) {
+        //   done(null, false)
+        //   return
+        // }
 
-        authenticator.authenticate(client.id, username, password.toString())
-          .then((isAuthenticated: boolean) => {
-            done(null, isAuthenticated)
-          })
-          .catch((err: Error) => {
-            const wrappedError: AuthenticateError = {
-              returnCode: 4,
-              ...err,
-            }
-            done(wrappedError, false)
-          })
+        // authenticator.authenticate(client.id, username, password.toString())
+        //   .then((isAuthenticated: boolean) => {
+        //     done(null, isAuthenticated)
+        //   })
+        //   .catch((err: Error) => {
+        //     const wrappedError: AuthenticateError = {
+        //       returnCode: 4,
+        //       ...err,
+        //     }
+        //     done(wrappedError, false)
+        //   })
       },
       authorizePublish: (client: Client, packet: PublishPacket, callback: (error?: Error | null) => void) => {
         authorizer.authorizePublish(packet.topic, client.id)

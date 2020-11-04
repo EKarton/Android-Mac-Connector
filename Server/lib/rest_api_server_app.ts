@@ -24,9 +24,10 @@ export class RestApiServerApp implements App {
     this.app.use(json());
 
     // Middleware to log requests
-    this.app.use((req, _res, next) => {
-      console.log(`${req.method}: ${req.path} with payload ${JSON.stringify(req.body)}`)
+    this.app.use((req, res, next) => {
+      console.log(`${req.method}: ${req.url} with payload ${JSON.stringify(req.body)}`)
       next()
+      console.log(`${res.statusCode}`)
     })
 
     this.app.use("/api/v1/devices", createDeviceRouter(service, authService))

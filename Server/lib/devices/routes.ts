@@ -6,10 +6,10 @@ export const createDeviceRouter = (service: DeviceService, authService: Authenti
   const router = Router();
 
   // Middleware to authenticate user
-  router.use((req, res, next) => {
+  router.use(async (req, res, next) => {
     const authHeaderValue = req.header("Authorization")
 
-    if (authHeaderValue === "") {
+    if (!authHeaderValue) {
       throw new Error("Missing Authorization header")
     }
 
@@ -22,19 +22,19 @@ export const createDeviceRouter = (service: DeviceService, authService: Authenti
     }
 
     const accessToken = authHeaderValue.substring(7)
-    const isValid = authService.verifyOauthToken(accessToken)
+    const userId = await authService.getUserIdFromToken(accessToken)
 
-    if (!isValid) {
-      throw new Error("Invalid Authorization token")
-    }
+    req.headers.user_id = userId
 
     next()
   })
 
-  router.get("/:deviceId/registered", async (req, res) => {
+  router.get("/registered", async (req, res) => {
     const userId = req.header("user_id")
     const deviceType = req.query.device_type.toString()
     const hardwareId = req.query.hardware_id.toString()
+
+    console.log(userId, deviceType, hardwareId)
 
     const result = await service.doesDeviceExist(userId, deviceType, hardwareId)
 
@@ -49,6 +49,8 @@ export const createDeviceRouter = (service: DeviceService, authService: Authenti
     const deviceType = req.body["device_type"]
     const hardwareId = req.body["hardware_id"]
     const capabilities = req.body["capabilities"]
+
+    console.log(userId, deviceType, hardwareId, capabilities)
 
     const deviceId = await service.registerDevice(userId, deviceType, hardwareId, capabilities)
 

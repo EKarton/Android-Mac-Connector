@@ -2,7 +2,7 @@ import { auth } from "firebase-admin";
 
 export interface Authenticator {
   authenticate(deviceId: string, username: string, password: string): Promise<boolean>
-  verifyOauthToken(token: string): Promise<boolean>
+  getUserIdFromToken(token: string): Promise<string>
 }
 
 export class FirebaseAuthenticator implements Authenticator {
@@ -29,8 +29,8 @@ export class FirebaseAuthenticator implements Authenticator {
     }
   }
 
-  public async verifyOauthToken(token: string): Promise<boolean> {
-    await this.firebaseAuth.verifyIdToken(token, true)
-    return true
+  public async getUserIdFromToken(token: string): Promise<string> {
+    const result = await this.firebaseAuth.verifyIdToken(token, true)
+    return result.uid
   }
 }
