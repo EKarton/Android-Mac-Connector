@@ -4,13 +4,11 @@ import android.app.Service
 import android.content.Intent
 import android.os.IBinder
 import android.util.Log
-import android.widget.Toast
-import com.androidmacconnector.androidapp.utils.getDeviceId
+import com.androidmacconnector.androidapp.utils.getDeviceIdSafely
 import com.google.firebase.auth.FirebaseAuth
-import org.eclipse.paho.client.mqttv3.IMqttActionListener
-import org.eclipse.paho.client.mqttv3.IMqttToken
-import org.eclipse.paho.client.mqttv3.MqttAsyncClient
-import org.eclipse.paho.client.mqttv3.MqttConnectOptions
+import org.eclipse.paho.client.mqttv3.*
+import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence
+import java.util.concurrent.CountDownLatch
 
 
 class MqttService: Service() {
@@ -18,7 +16,9 @@ class MqttService: Service() {
 
     companion object {
         private const val LOG_TAG = "MqttClientService"
-        private const val SERVER_URL = "mqtt://192.168.0.102:1883"
+        private const val SERVER_URL = "tcp://192.168.0.102:1883"
+        const val PUBLISH_INTENT_ACTION = "com.androidmacconnector.androidapp.mqtt.intent.action.PUBLISH"
+        const val SUBSCRIBE_INTENT_ACTION = "com.androidmacconnector.androidapp.mqtt.intent.action.SUBSCRIBE"
     }
 
     /**
@@ -26,40 +26,78 @@ class MqttService: Service() {
      */
     override fun onCreate() {
         super.onCreate()
-        val message = "MqttService onCreate() method."
-        Toast.makeText(applicationContext, message, Toast.LENGTH_LONG).show()
+        Log.d(LOG_TAG, "onCreate() called")
 
-        val user = FirebaseAuth.getInstance().currentUser
-        user?.getIdToken(false)?.addOnCompleteListener { task ->
-            if (task.isSuccessful && task.result?.token != null) {
-                val accessToken = task.result?.token!!
+        val accessToken = getAccessToken() ?: return
+        val deviceId = getDeviceIdSafely(this) ?: return
 
-                Log.d(LOG_TAG, "Access token: $accessToken")
+        this.client = MqttAsyncClient(SERVER_URL, deviceId, MemoryPersistence())
+        this.client.setCallback(MqttClientListener(this))
 
-                val clientId = getDeviceId(this)
-                this.client = MqttAsyncClient(SERVER_URL, clientId)
+        // Set up the disconnected buffer
+        val disconnectedBufferOptions = DisconnectedBufferOptions()
+        disconnectedBufferOptions.isBufferEnabled = true
+        disconnectedBufferOptions.isDeleteOldestMessages = true
+        disconnectedBufferOptions.isPersistBuffer = true
+        this.client.setBufferOpts(disconnectedBufferOptions)
 
-                // Connect to the server
-                val connectOptions = MqttConnectOptions()
-                connectOptions.password = accessToken.toCharArray()
-                client.connect(connectOptions, null, object : IMqttActionListener {
-                    override fun onSuccess(asyncActionToken: IMqttToken?) {
-                        Log.d(LOG_TAG, "Connected successfully")
-                    }
+        // Set up connection to the server
+        val connectOptions = MqttConnectOptions()
+        connectOptions.userName = deviceId
+        connectOptions.password = accessToken.toCharArray()
+        connectOptions.isCleanSession = false
+        connectOptions.isAutomaticReconnect = true
 
-                    override fun onFailure(asyncActionToken: IMqttToken?, exception: Throwable?) {
-                        Log.d(LOG_TAG, "Failed to connect")
-                    }
-                })
+        Log.d(LOG_TAG, "Connect options: ${connectOptions.debug}")
+
+        // Connect to the server
+        val latch = CountDownLatch(1)
+        this.client.connect(connectOptions, null, object : IMqttActionListener {
+            override fun onSuccess(asyncActionToken: IMqttToken?) {
+                Log.d(LOG_TAG, "Connected successfully")
+                latch.countDown()
             }
+
+            override fun onFailure(asyncActionToken: IMqttToken?, exception: Throwable?) {
+                throw exception!!
+            }
+        })
+
+        latch.await()
+//        this.client.subscribe("${getDeviceId(this)}/send-sms-request", 1)
+//        this.client.subscribe("${getDeviceId(this)}/jobs/new", 1)
+    }
+
+    private fun getAccessToken(): String? {
+        val latch = CountDownLatch(1)
+        val tokenResult = FirebaseAuth.getInstance().currentUser?.getIdToken(false)?.addOnCompleteListener { task ->
+            latch.countDown()
         }
+        if (tokenResult != null && tokenResult.isSuccessful && tokenResult.result?.token != null) {
+            return tokenResult.result?.token!!
+        }
+        return null
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        Log.d(LOG_TAG, "onStartCommand()")
-        val message = "MqttService onStartCommand() method."
+        Log.d(LOG_TAG, "onStartCommand() with action ${intent?.action} and topic ${intent?.getStringExtra("topic")}")
 
-        Toast.makeText(applicationContext, message, Toast.LENGTH_LONG).show()
+        if (intent == null) {
+            return START_STICKY
+        }
+
+        val topic = intent.getStringExtra("topic") ?: return START_STICKY
+
+        if (intent.action == PUBLISH_INTENT_ACTION) {
+            val payload = intent.getByteArrayExtra("payload")
+
+            Log.d(LOG_TAG, "Publishing to topic $topic with payload $payload")
+            this.client.publish(topic, payload, 2, true)
+
+        } else if (intent.action == SUBSCRIBE_INTENT_ACTION) {
+            Log.d(LOG_TAG, "Subscribing topic $topic")
+            this.client.subscribe(topic, 2)
+        }
 
         return START_STICKY
     }
@@ -69,6 +107,8 @@ class MqttService: Service() {
      */
     override fun onDestroy() {
         super.onDestroy()
+        Log.d(LOG_TAG, "onDestroy()")
+        this.client.disconnect()
         this.client.close()
     }
 

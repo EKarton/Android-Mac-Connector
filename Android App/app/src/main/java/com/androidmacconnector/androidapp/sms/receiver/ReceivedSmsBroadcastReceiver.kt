@@ -2,20 +2,19 @@ package com.androidmacconnector.androidapp.sms.receiver
 
 import android.Manifest
 import android.annotation.TargetApi
-import android.content.BroadcastReceiver
-import android.content.Context
-import android.content.Intent
+import android.content.*
 import android.os.Build
 import android.telephony.SmsMessage
 import android.util.Log
+import com.androidmacconnector.androidapp.mqtt.MqttService
+import com.androidmacconnector.androidapp.mqtt.MqttService.Companion.PUBLISH_INTENT_ACTION
 import com.androidmacconnector.androidapp.utils.getDeviceId
-import org.greenrobot.eventbus.EventBus
-import org.greenrobot.eventbus.EventBusBuilder
+import org.json.JSONObject
 
 /**
  * This class is responsible for receiving SMS messages from Android
  */
-class SmsBroadcastReceiver : BroadcastReceiver() {
+class ReceivedSmsBroadcastReceiver : BroadcastReceiver() {
     companion object {
         private const val LOG_TAG = "SmsBroadcastReceiver"
 
@@ -39,7 +38,19 @@ class SmsBroadcastReceiver : BroadcastReceiver() {
                 val smsMessage = getSmsMessageFromPdu(pdus[i] as ByteArray, format)
 
                 Log.d(LOG_TAG, "Received SMS message: $smsMessage")
-                EventBus.getDefault().post(smsMessage)
+
+                val payload = JSONObject()
+                payload.put("phone_number", smsMessage.displayOriginatingAddress)
+                payload.put("body", smsMessage.messageBody)
+                payload.put("timestamp", (smsMessage.timestampMillis / 1000).toInt())
+
+                // Submit a job to our MQTT service with details for publishing
+                val startIntent = Intent(context, MqttService::class.java)
+                startIntent.action = PUBLISH_INTENT_ACTION
+                startIntent.putExtra("topic", "${getDeviceId(context)}/receive_sms")
+                startIntent.putExtra("payload", payload.toString().toByteArray())
+
+                context.startService(startIntent)
             }
         }
     }

@@ -8,6 +8,10 @@
     <uses-permission android:name="android.permission.RECEIVE_SMS" />
     <uses-permission android:name="android.permission.READ_CONTACTS" />
 
+    <!-- Additional permissions required for mqtt -->
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
@@ -17,16 +21,17 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.AndroidToMacContinuity">
         <activity android:name=".devices.DeviceRegistrationActivity" />
-        <activity android:name=".MainActivity" />
-        <activity android:name=".LoginActivity">
+        <activity android:name=".MainActivity" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+        </activity>
+        <activity android:name=".LoginActivity">
         </activity> <!-- The broadcast receiver for SMS messages -->
         <receiver
-            android:name=".sms.receiver.SmsBroadcastReceiver"
+            android:name=".sms.receiver.ReceivedSmsBroadcastReceiver"
             android:enabled="true"
             android:exported="true"
             android:permission="android.permission.BROADCAST_SMS">
@@ -51,6 +56,8 @@
         <meta-data
             android:name="com.google.firebase.messaging.default_notification_channel_id"
             android:value="default_channel_id" />
+        <!-- The MQTT service -->
+        <service android:name="com.androidmacconnector.androidapp.mqtt.MqttService"/>
     </application>
 
 </manifest>

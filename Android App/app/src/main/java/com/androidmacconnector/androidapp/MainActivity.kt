@@ -1,8 +1,8 @@
 package com.androidmacconnector.androidapp
 
-import android.Manifest
 import android.app.NotificationChannel
 import android.app.NotificationManager
+import android.content.Intent
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
@@ -11,22 +11,17 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.androidmacconnector.androidapp.devices.DeviceWebService
 import com.androidmacconnector.androidapp.devices.UpdatePushNotificationTokenHandler
-import com.androidmacconnector.androidapp.sms.*
+import com.androidmacconnector.androidapp.mqtt.MqttService
 import com.androidmacconnector.androidapp.utils.getDeviceId
+import com.androidmacconnector.androidapp.utils.getDeviceIdSafely
 import com.google.android.gms.common.GoogleApiAvailability
 import com.google.android.gms.tasks.OnCompleteListener
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.messaging.FirebaseMessaging
-import com.karumi.dexter.Dexter
-import com.karumi.dexter.MultiplePermissionsReport
-import com.karumi.dexter.PermissionToken
-import com.karumi.dexter.listener.PermissionRequest
-import com.karumi.dexter.listener.multi.MultiplePermissionsListener
-import org.json.JSONObject
 
 
 class MainActivity : AppCompatActivity() {
-    private val TAG = "MainActivity"
+    private val LOG_TAG = "MainActivity"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -45,6 +40,11 @@ class MainActivity : AppCompatActivity() {
             )
         }
 
+        if (getDeviceIdSafely(this) == null) {
+            startActivity(Intent(this, LoginActivity::class.java))
+            return
+        }
+
         FirebaseMessaging.getInstance().isAutoInitEnabled = true
 
         // Google play services are required with FCM
@@ -52,7 +52,7 @@ class MainActivity : AppCompatActivity() {
 
         FirebaseMessaging.getInstance().token.addOnCompleteListener(OnCompleteListener { task ->
             if (!task.isSuccessful || task.result == null) {
-                Log.w(TAG, "Fetching FCM registration token failed", task.exception)
+                Log.w(LOG_TAG, "Fetching FCM registration token failed", task.exception)
                 return@OnCompleteListener
             }
 
@@ -68,23 +68,38 @@ class MainActivity : AppCompatActivity() {
                 if (task.isSuccessful && task.result?.token != null) {
                     val accessToken = task.result?.token!!
 
+                    Log.d(LOG_TAG, "Access token: $accessToken")
+
                     // Upload the fcm token to our server
                     val deviceWebService = DeviceWebService(this)
                     deviceWebService.updatePushNotificationToken(accessToken, deviceId, token, object: UpdatePushNotificationTokenHandler() {
                         override fun onSuccess() {
-                            Log.d(TAG, "Successfully updated fcm token")
+                            Log.d(LOG_TAG, "Successfully updated fcm token")
                         }
 
-                        override fun onError(exception: Exception) {}
+                        override fun onError(exception: Exception) {
+                            throw exception
+                        }
                     })
                 }
             }
 
             // Log and toast
-            Log.d(TAG, token)
+            Log.d(LOG_TAG, token)
             textbox.setText(textbox.text.toString() + "\n\n" + token)
             Toast.makeText(baseContext, token, Toast.LENGTH_SHORT).show()
         })
+
+        Intent(this, MqttService::class.java).also {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                Log.d(LOG_TAG, "Starting the service in >=26 Mode")
+//                startForegroundService(it)
+                startService(it)
+                return
+            }
+            Log.d(LOG_TAG, "Starting the service in < 26 Mode")
+            startService(it)
+        }
     }
 
     override fun onResume() {

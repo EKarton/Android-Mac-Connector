@@ -23,20 +23,17 @@ class LoginActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_login)
 
-        goToMainActivity()
+        val providers = arrayListOf(
+            AuthUI.IdpConfig.EmailBuilder().build(),
+            AuthUI.IdpConfig.PhoneBuilder().build()
+        )
 
-//        val providers = arrayListOf(
-//            AuthUI.IdpConfig.EmailBuilder().build(),
-//            AuthUI.IdpConfig.PhoneBuilder().build()
-//        )
-//
-//        val firebaseLoginActivity = AuthUI.getInstance()
-//            .createSignInIntentBuilder()
-//            .setAvailableProviders(providers)
-////            .setTheme(R.style.LoginTheme)
-//            .build()
-//
-//        startActivityForResult(firebaseLoginActivity, RC_SIGN_IN)
+        val firebaseLoginActivity = AuthUI.getInstance()
+            .createSignInIntentBuilder()
+            .setAvailableProviders(providers)
+            .build()
+
+        startActivityForResult(firebaseLoginActivity, RC_SIGN_IN)
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
