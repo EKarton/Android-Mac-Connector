@@ -4,9 +4,6 @@ import android.content.pm.PackageManager
 import android.util.Log
 import androidx.core.content.ContextCompat
 import com.androidmacconnector.androidapp.sms.messages.*
-import com.androidmacconnector.androidapp.sms.sender.SendSmsFcmSubscriber
-import com.androidmacconnector.androidapp.sms.sender.SendSmsResultsWebPublisher
-import com.androidmacconnector.androidapp.sms.sender.SendSmsServiceImpl
 import com.androidmacconnector.androidapp.sms.threads.*
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
@@ -21,7 +18,6 @@ class FirebaseMessagingServiceInstance : FirebaseMessagingService() {
 
     private var getGetSmsThreadsService: GetSmsThreadsService? = null
     private var getSmsMessagesService: GetSmsMessagesService? = null
-    private var sendSmsService: SendSmsServiceImpl? = null
 
     override fun onCreate() {
         this.subscriptionService = FcmSubscriptionServiceImpl()
@@ -40,7 +36,6 @@ class FirebaseMessagingServiceInstance : FirebaseMessagingService() {
         if (checkPermission(Manifest.permission.INTERNET)) {
             checkAndCreateSmsThreadsService()
             checkAndCreateSmsQueryService()
-            checkAndCreateSmsSenderSubscriber()
         }
     }
 
@@ -67,21 +62,6 @@ class FirebaseMessagingServiceInstance : FirebaseMessagingService() {
             val subscriber = GetSmsMessagesFcmSubscriber(
                 this.applicationContext,
                 getSmsMessagesService!!,
-                publisher
-            )
-
-            subscriptionService?.addSubscriber(subscriber)
-        }
-    }
-
-    private fun checkAndCreateSmsSenderSubscriber() {
-        if (sendSmsService == null && checkPermissions(SendSmsServiceImpl.getRequiredPermissions())) {
-            sendSmsService = SendSmsServiceImpl()
-
-            val publisher = SendSmsResultsWebPublisher(this.applicationContext)
-            val subscriber = SendSmsFcmSubscriber(
-                this.applicationContext,
-                sendSmsService!!,
                 publisher
             )
 
