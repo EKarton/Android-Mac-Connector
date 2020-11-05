@@ -39,7 +39,9 @@ class DeviceRegistrationActivity : AppCompatActivity() {
     }
 
     fun onYesButtonClickedHandler(view: View) {
-        val requiredPermissions = GetSmsMessagesServiceImpl.getRequiredPermissions() + ReceivedSmsBroadcastReceiver.getRequiredPermissions()
+        val requiredPermissions = GetSmsMessagesServiceImpl.getRequiredPermissions() +
+                ReceivedSmsBroadcastReceiver.getRequiredPermissions() +
+                listOf(Manifest.permission.SEND_SMS)
 
         val permsListener = object : MultiplePermissionsListener {
             override fun onPermissionsChecked(report: MultiplePermissionsReport) {

@@ -17,7 +17,7 @@ class MqttService: Service() {
 
     companion object {
         private const val LOG_TAG = "MqttClientService"
-        private const val SERVER_URL = "tcp://192.168.0.102:1883"
+        private const val SERVER_URL = "ws://192.168.0.102:8888"
         const val PUBLISH_INTENT_ACTION = "com.androidmacconnector.androidapp.mqtt.intent.action.PUBLISH"
         const val SUBSCRIBE_INTENT_ACTION = "com.androidmacconnector.androidapp.mqtt.intent.action.SUBSCRIBE"
     }
@@ -34,6 +34,8 @@ class MqttService: Service() {
 
         this.client = MqttAsyncClient(SERVER_URL, deviceId, MemoryPersistence())
         this.client.setCallback(MqttClientListener(this))
+
+        Log.d(LOG_TAG, "Client created")
 
         // Set up the disconnected buffer
         val disconnectedBufferOptions = DisconnectedBufferOptions()

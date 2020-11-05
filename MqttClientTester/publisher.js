@@ -1,6 +1,6 @@
 var mqtt = require('mqtt')
 
-var client  = mqtt.connect('tcp://localhost:1883', {
+var client  = mqtt.connect('ws://192.168.0.102:8888', {
   clientId: '',
   username: '',
   password: ''
@@ -12,7 +12,12 @@ client.on('connect', function () {
     retain: true
   }
   console.log("Publishing message")
-  client.publish('f8Ji049ES6RCY25yFPqq/receive_sms', 'From node js: testing', publishOptions, (error, packet) => {
+  const message = {
+    "phone_number": "647-607-6358",
+    "message": "Testing message",
+    "message_id": "3",
+  }
+  client.publish('gw8ynRwjXqKHYmkebLs5/send-sms-request', JSON.stringify(message), publishOptions, (error, packet) => {
     if (error) {
       console.error(error)
     }

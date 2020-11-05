@@ -59,26 +59,27 @@ class LoginActivity : AppCompatActivity() {
 
         val user = FirebaseAuth.getInstance().currentUser
         user?.getIdToken(false)?.addOnCompleteListener { task ->
-            if (task.isSuccessful && task.result?.token != null) {
-                val accessToken = task.result?.token!!
-
-                Log.d(LOG_TAG, "Access token: $accessToken")
-
-                // If the device is registered, then go to the main activity; else register the device
-                deviceService.isDeviceRegistered(accessToken, deviceId, object : IsDeviceRegisteredHandler() {
-                    override fun onSuccess(isRegistered: Boolean) {
-                        if (isRegistered) {
-                            goToMainActivity()
-                        } else {
-                            goToDeviceRegistrationActivity()
-                        }
-                    }
-
-                    override fun onError(exception: Exception) {
-                        TODO("Not yet implemented")
-                    }
-                })
+            if (!task.isSuccessful || task.result?.token == null) {
+                throw Exception("Cannot get token")
             }
+            val accessToken = task.result?.token!!
+
+            Log.d(LOG_TAG, "Access token: $accessToken")
+
+            // If the device is registered, then go to the main activity; else register the device
+            deviceService.isDeviceRegistered(accessToken, deviceId, object : IsDeviceRegisteredHandler() {
+                override fun onSuccess(isRegistered: Boolean) {
+                    if (isRegistered) {
+                        goToMainActivity()
+                    } else {
+                        goToDeviceRegistrationActivity()
+                    }
+                }
+
+                override fun onError(exception: Exception) {
+                    TODO("Not yet implemented")
+                }
+            })
         }
     }
 

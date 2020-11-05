@@ -1,6 +1,6 @@
 var mqtt = require('mqtt')
 
-var client  = mqtt.connect('tcp://localhost:1883', {
+var client  = mqtt.connect('ws://192.168.0.102:8888', {
   clientId: '',
   username: '',
   password: ''
@@ -10,7 +10,12 @@ client.on('connect', function () {
   const subscribeOptions = {
     qos: 2,
   }
-  client.subscribe('f8Ji049ES6RCY25yFPqq/receive_sms', subscribeOptions, function (err) {
+  client.subscribe('gw8ynRwjXqKHYmkebLs5/receive_sms', subscribeOptions, function (err) {
+    if (err) {
+      console.error(err)
+    }
+  })
+  client.subscribe('gw8ynRwjXqKHYmkebLs5/send-sms-results', subscribeOptions, function (err) {
     if (err) {
       console.error(err)
     }

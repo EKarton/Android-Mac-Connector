@@ -1,5 +1,5 @@
 import aedes, { Aedes, AedesOptions, AuthenticateError, Client, PublishPacket, Subscription } from 'aedes'
-import { createServer, Server } from 'net'
+import { createServer, Server } from 'http'
 import { Authenticator, FirebaseAuthenticator } from './authenticator'
 import { Authorizer, FirebaseAuthorizer } from './authorizer'
 
@@ -13,7 +13,7 @@ export interface MqttServerAppOptions {
 
 export class MqttServerApp implements App {
   private readonly opts?: MqttServerAppOptions = null
-  private readonly serverPort = 1883 
+  private readonly serverPort = 8888 
   private readonly server: Server = null
 
   /**
@@ -30,7 +30,9 @@ export class MqttServerApp implements App {
     const authorizer = new FirebaseAuthorizer(firestore)
 
     const mqttServer = this.createMqttServer(authenticator, authorizer)
-    this.server = createServer(mqttServer.handle)
+
+    this.server = createServer()
+    require('websocket-stream').createServer({ server: this.server }, mqttServer.handle)
   }
 
   private createMqttServer(authenticator: Authenticator, authorizer: Authorizer): Aedes {
