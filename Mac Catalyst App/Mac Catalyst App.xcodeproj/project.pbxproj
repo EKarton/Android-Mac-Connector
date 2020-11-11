@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 50;
+	objectVersion = 51;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -73,9 +73,8 @@
 			isa = PBXGroup;
 			children = (
 				130189A7255B9277001BD60D /* Mac Catalyst App.entitlements */,
-				13018993255B9246001BD60D /* AppDelegate.swift */,
-				13018995255B9246001BD60D /* SceneDelegate.swift */,
-				13018997255B9246001BD60D /* ContentView.swift */,
+				139CF2FA255B954100F9EA05 /* App */,
+				139CF2FB255B954800F9EA05 /* Views */,
 				13018999255B924A001BD60D /* Assets.xcassets */,
 				1301899E255B924A001BD60D /* LaunchScreen.storyboard */,
 				130189A1255B924A001BD60D /* Info.plist */,
@@ -92,13 +91,29 @@
 			path = "Preview Content";
 			sourceTree = "<group>";
 		};
+		139CF2FA255B954100F9EA05 /* App */ = {
+			isa = PBXGroup;
+			children = (
+				13018993255B9246001BD60D /* AppDelegate.swift */,
+				13018995255B9246001BD60D /* SceneDelegate.swift */,
+			);
+			path = App;
+			sourceTree = "<group>";
+		};
+		139CF2FB255B954800F9EA05 /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				13018997255B9246001BD60D /* ContentView.swift */,
+			);
+			path = Views;
+			sourceTree = "<group>";
+		};
 		F4442BA6FF33F7C858BBE2E1 /* Pods */ = {
 			isa = PBXGroup;
 			children = (
 				720D4BFC4F6479686F943906 /* Pods-Mac Catalyst App.debug.xcconfig */,
 				65F5BC7775227A7A85D48AEC /* Pods-Mac Catalyst App.release.xcconfig */,
 			);
-			name = Pods;
 			path = Pods;
 			sourceTree = "<group>";
 		};
