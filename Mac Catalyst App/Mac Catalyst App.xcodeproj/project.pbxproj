@@ -24,6 +24,7 @@
 		1301899C255B924A001BD60D /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
 		1301899F255B924A001BD60D /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		130189A1255B924A001BD60D /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		130189A7255B9277001BD60D /* Mac Catalyst App.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = "Mac Catalyst App.entitlements"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -56,6 +57,7 @@
 		13018992255B9246001BD60D /* Mac Catalyst App */ = {
 			isa = PBXGroup;
 			children = (
+				130189A7255B9277001BD60D /* Mac Catalyst App.entitlements */,
 				13018993255B9246001BD60D /* AppDelegate.swift */,
 				13018995255B9246001BD60D /* SceneDelegate.swift */,
 				13018997255B9246001BD60D /* ContentView.swift */,
@@ -284,6 +286,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = "Mac Catalyst App/Mac Catalyst App.entitlements";
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_ASSET_PATHS = "\"Mac Catalyst App/Preview Content\"";
 				DEVELOPMENT_TEAM = 7MJ96PDSV2;
@@ -295,6 +298,7 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = "com.androidmacconnector.Mac-Catalyst-App";
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTS_MACCATALYST = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
@@ -304,6 +308,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = "Mac Catalyst App/Mac Catalyst App.entitlements";
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_ASSET_PATHS = "\"Mac Catalyst App/Preview Content\"";
 				DEVELOPMENT_TEAM = 7MJ96PDSV2;
@@ -315,6 +320,7 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = "com.androidmacconnector.Mac-Catalyst-App";
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTS_MACCATALYST = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
