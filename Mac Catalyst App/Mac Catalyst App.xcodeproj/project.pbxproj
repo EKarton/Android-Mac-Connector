@@ -113,6 +113,7 @@
 			isa = PBXGroup;
 			children = (
 				139CF2FA255B954100F9EA05 /* App */,
+				139CF32C255B9E7700F9EA05 /* Model */,
 				139CF2FB255B954800F9EA05 /* Views */,
 				13018999255B924A001BD60D /* Assets.xcassets */,
 				1301899E255B924A001BD60D /* LaunchScreen.storyboard */,
@@ -120,7 +121,6 @@
 				130189A1255B924A001BD60D /* Info.plist */,
 				139CF300255B96D800F9EA05 /* GoogleService-Info.plist */,
 				1301899B255B924A001BD60D /* Preview Content */,
-				139CF32C255B9E7700F9EA05 /* Model */,
 			);
 			path = "Mac Catalyst App";
 			sourceTree = "<group>";
@@ -148,12 +148,7 @@
 				13018997255B9246001BD60D /* ContentView.swift */,
 				139CF32A255B9E6500F9EA05 /* Auth */,
 				139CF32B255B9E6A00F9EA05 /* Devices */,
-				139CF32D255B9E9600F9EA05 /* SmsThreadsList.swift */,
-				139CF32F255B9EC200F9EA05 /* SmsThreadsRow.swift */,
-				139CF33D255BA14B00F9EA05 /* NewSmsMessage.swift */,
-				139CF33F255BA16B00F9EA05 /* SmsMessageBubble.swift */,
-				139CF341255BA18200F9EA05 /* SmsMessagesView.swift */,
-				139CF343255BA27200F9EA05 /* NewSmsMessageView.swift */,
+				139CF345255BA32C00F9EA05 /* SMS */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -179,17 +174,62 @@
 		139CF32C255B9E7700F9EA05 /* Model */ = {
 			isa = PBXGroup;
 			children = (
-				139CF302255B97D100F9EA05 /* SessionStore.swift */,
+				139CF347255BA33A00F9EA05 /* Auth */,
+				139CF346255BA33400F9EA05 /* Devices */,
+				139CF348255BA34000F9EA05 /* MQTT */,
+				139CF349255BA34700F9EA05 /* SMS */,
+			);
+			path = Model;
+			sourceTree = "<group>";
+		};
+		139CF345255BA32C00F9EA05 /* SMS */ = {
+			isa = PBXGroup;
+			children = (
+				139CF32D255B9E9600F9EA05 /* SmsThreadsList.swift */,
+				139CF32F255B9EC200F9EA05 /* SmsThreadsRow.swift */,
+				139CF33D255BA14B00F9EA05 /* NewSmsMessage.swift */,
+				139CF33F255BA16B00F9EA05 /* SmsMessageBubble.swift */,
+				139CF341255BA18200F9EA05 /* SmsMessagesView.swift */,
+				139CF343255BA27200F9EA05 /* NewSmsMessageView.swift */,
+			);
+			path = SMS;
+			sourceTree = "<group>";
+		};
+		139CF346255BA33400F9EA05 /* Devices */ = {
+			isa = PBXGroup;
+			children = (
 				139CF30C255B99E800F9EA05 /* Device.swift */,
 				139CF30E255B9A0800F9EA05 /* DeviceService.swift */,
+			);
+			path = Devices;
+			sourceTree = "<group>";
+		};
+		139CF347255BA33A00F9EA05 /* Auth */ = {
+			isa = PBXGroup;
+			children = (
+				139CF302255B97D100F9EA05 /* SessionStore.swift */,
+			);
+			path = Auth;
+			sourceTree = "<group>";
+		};
+		139CF348255BA34000F9EA05 /* MQTT */ = {
+			isa = PBXGroup;
+			children = (
 				139CF339255BA0F000F9EA05 /* MQTTClient.swift */,
+			);
+			path = MQTT;
+			sourceTree = "<group>";
+		};
+		139CF349255BA34700F9EA05 /* SMS */ = {
+			isa = PBXGroup;
+			children = (
 				139CF333255B9F1D00F9EA05 /* SmsThread.swift */,
 				139CF335255B9F6200F9EA05 /* SmsMessage.swift */,
 				139CF33B255BA11500F9EA05 /* ReceivedSmsMessage.swift */,
 				139CF331255B9EFE00F9EA05 /* SmsReaderService.swift */,
 				139CF337255BA0CB00F9EA05 /* SmsSenderService.swift */,
 			);
-			path = Model;
+			path = SMS;
 			sourceTree = "<group>";
 		};
 		F4442BA6FF33F7C858BBE2E1 /* Pods */ = {
