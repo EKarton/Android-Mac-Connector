@@ -1,10 +1,18 @@
 export interface DeviceService {
   doesDeviceExist(userId: string, deviceType: string, hardwareId: string): Promise<boolean>
   registerDevice(userId: string, deviceType: string, hardwareId: string, capabilities: String[]): Promise<string>
+  getDevices(userId: string): Promise<Device[]>
 	updateDeviceCapabilities(deviceId: string, capabilities: string[])
-	getDeviceCapabilities(deviceId: string): Promise<string[]>
-	updatePushNotificationToken(deviceId: string, newToken: string)
+  getDeviceCapabilities(deviceId: string): Promise<string[]>
+  updatePushNotificationToken(deviceId: string, newToken: string)
 	getPushNotificationToken(deviceId: string): Promise<string>
+}
+
+export interface Device {
+  id: string,
+  type: string,
+  name: string,
+  capabilities: string[],
 }
 
 export class FirebaseDeviceService implements DeviceService {
@@ -60,6 +68,22 @@ export class FirebaseDeviceService implements DeviceService {
     const doc = await devicesCollection.doc(deviceId).get()
 
     return doc.exists
+  }
+
+  async getDevices(userId: string): Promise<Device[]> {
+    const devicesCollection = this.firestoreClient.collection("devices")
+    const query = devicesCollection.where("user_id", "==", userId)
+
+    const results = await query.get()
+
+    return results.docs.map(doc => {
+      return {
+        id: doc.id,
+        type: <string> doc.data()["device_type"],
+        name: "My Phone",
+        capabilities: <string[]> doc.data()["capabilities"],
+      }
+    })
   }
 
   async getDeviceCapabilities(deviceId: string): Promise<string[]> {

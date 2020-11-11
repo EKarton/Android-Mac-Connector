@@ -38,7 +38,7 @@ export class MqttServerApp implements App {
   private createMqttServer(authenticator: Authenticator, authorizer: Authorizer): Aedes {
     const mqttServerOpts: AedesOptions = {
       authenticate: (client: Client, username: string, password: Buffer, done: (error: AuthenticateError | null, success: boolean | null) => void) => {
-        
+        console.log(`On authenticate: ${client.id}`)
         if (!(this.opts?.verifyAuthentication)) {
           done(null, true)
           return

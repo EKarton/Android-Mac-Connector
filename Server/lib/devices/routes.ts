@@ -23,6 +23,7 @@ export const createDeviceRouter = (service: DeviceService, authService: Authenti
     }
 
     const accessToken = authHeaderValue.substring(7)
+    console.log(accessToken)
     const userId = await authService.getUserIdFromToken(accessToken)
 
     req.headers.user_id = userId
@@ -74,6 +75,16 @@ export const createDeviceRouter = (service: DeviceService, authService: Authenti
       "device_id": deviceId
     })
   });
+
+  router.get("/", async (req, res) => {
+    const userId = req.header("user_id")
+
+    const devices = await service.getDevices(userId)
+    res.setHeader('Content-Type', 'application/json');
+    res.status(200).json({
+      "devices": devices
+    })
+  })
 
   router.get("/:deviceId/capabilities", async (req, res) => {
     const deviceId = req.params.deviceId
