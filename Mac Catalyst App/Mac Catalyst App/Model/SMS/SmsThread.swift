@@ -6,10 +6,12 @@
 //  Copyright © 2020 Emilio Kartono. All rights reserved.
 //
 
-struct SmsThread {
+struct SmsThread: Codable {
     var threadId: String
     var phoneNumber: String
-    var contactName: String
+    var contactName: String?
+    var numUnreadMessages: Int
+    var numMessages: Int
     var lastMessageSent: String
     var timeLastMessageSent: Int
 }

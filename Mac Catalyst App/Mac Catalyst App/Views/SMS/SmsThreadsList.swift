@@ -23,12 +23,12 @@ struct SmsThreadsList: View {
                     destination: SmsMessagesView(
                         device: self.device,
                         threadId: thread.threadId,
-                        contactName: thread.contactName
+                        contactName: thread.contactName ?? thread.phoneNumber
                     )
                 ) {
                     SmsThreadsRow(
                         image: Image(systemName: "cloud.heavyrain.fill"),
-                        name: thread.contactName,
+                        name: thread.contactName ?? thread.phoneNumber,
                         lastMessage: thread.lastMessageSent,
                         timeLastMessageSent: self.formatReadableTime(thread.timeLastMessageSent)
                     )
@@ -50,7 +50,12 @@ struct SmsThreadsList: View {
     }
     
     private func onAppearHandler() {
-        self.smsReader.fetchSmsThreads(self.device) { smsThreads in
+        self.smsReader.fetchSmsThreads(self.device, 10000, 0) { (smsThreads, error) in
+            guard error == nil else {
+                print("Error encountered: \(error.debugDescription)")
+                return
+            }
+            
             self.smsThreads = smsThreads
         }
     }

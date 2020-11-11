@@ -6,9 +6,9 @@
 //  Copyright © 2020 Emilio Kartono. All rights reserved.
 //
 
-struct SmsMessage {
+struct SmsMessage: Codable {
     var messageId: String
-    var address: String
+    var phoneNumber: String
     var person: String
     var body: String
     var time: Int

@@ -25,7 +25,7 @@ struct SmsMessagesView: View {
             VStack {
                 ForEach(self.messages, id: \.messageId) { (message: SmsMessage) in
                     HStack {
-                        if (message.address == self.device.phoneNumber) {
+                        if (message.phoneNumber == self.device.phoneNumber) {
                             Spacer()
                             SmsMessageBubble(isCurrentUser: true, message: message.body)
                             

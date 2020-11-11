@@ -31,8 +31,32 @@ class MQTTSubscriber: Hashable {
     }
 }
 
+class MQTTEventHandler: Hashable {
+    var id = UUID()
+    var handler: (Error?) -> Void
+    
+    init(_ handler: @escaping (Error?) -> Void) {
+        self.handler = handler
+    }
+    
+    func hash(into hasher: inout Hasher) {
+        hasher.combine(self.id)
+    }
+    
+    static func == (lhs: MQTTEventHandler, rhs: MQTTEventHandler) -> Bool {
+        return lhs.id == rhs.id
+    }
+}
+
+enum MQTTClientErrors: Error {
+    case SubscriptionFailed(topic: String)
+}
+
 class MQTTClient: CocoaMQTTDelegate, ObservableObject {
     private var topicToSubscribers = Dictionary<String, Set<MQTTSubscriber>>()
+    private var topicToOnSubscribeHandlers = Dictionary<String, Set<MQTTEventHandler>>()
+    private var topicToOnUnsubscribeHandlers = Dictionary<String, Set<MQTTEventHandler>>()
+    
     private var mqtt: CocoaMQTT
     
     init(_ host: String, _ port: UInt16, _ clientId: String, _ username: String, _ password: String) {
@@ -62,24 +86,31 @@ class MQTTClient: CocoaMQTTDelegate, ObservableObject {
         self.mqtt.disconnect()
     }
     
-    func subscribe(_ subscriber: MQTTSubscriber) {
-        if self.topicToSubscribers[subscriber.topic] != nil {
+    func subscribe(_ subscriber: MQTTSubscriber, _ handler: @escaping (Error?) -> Void) {
+        if self.topicToSubscribers[subscriber.topic] == nil {
+            print("Subscribing to \(subscriber.topic)")
+            
             self.mqtt.subscribe(subscriber.topic)
+            self.topicToOnSubscribeHandlers[subscriber.topic] = Set<MQTTEventHandler>()
             self.topicToSubscribers[subscriber.topic] = Set<MQTTSubscriber>()
         }
         
         self.topicToSubscribers[subscriber.topic]?.insert(subscriber)
+        self.topicToOnSubscribeHandlers[subscriber.topic]?.insert(MQTTEventHandler(handler))
     }
     
     func unsubscribe(_ subscriber: MQTTSubscriber) {
-        guard var subscribers = self.topicToSubscribers[subscriber.topic] else {
+        guard let subscribers = self.topicToSubscribers[subscriber.topic] else {
             fatalError("Topic \(subscriber.topic) was never subscribed to before!")
         }
-        
+                
         if subscribers.count == 1 {
             self.mqtt.unsubscribe(subscriber.topic)
+            self.topicToSubscribers.removeValue(forKey: subscriber.topic)
+            
+        } else {
+            self.topicToSubscribers[subscriber.topic]?.remove(subscriber)
         }
-        subscribers.remove(subscriber)
     }
     
     func publish(_ topic: String, _ message: String) {
@@ -101,17 +132,46 @@ class MQTTClient: CocoaMQTTDelegate, ObservableObject {
     internal func mqtt(_ mqtt: CocoaMQTT, didReceiveMessage message: CocoaMQTTMessage, id: UInt16) {
         print("didReceiveMessage: \(message)")
         
-        guard let subscribers = topicToSubscribers[message.topic] else {
+        guard let payload = String(bytes: message.payload, encoding: .utf8) else {
+            print("Not a valid UTF-8 sequence")
             return
+        }
+        
+        guard let subscribers = topicToSubscribers[message.topic] else {
+            fatalError("No subscribers!")
         }
                 
         subscribers.forEach { subscriber in
-            subscriber.handler?(message.description)
+            subscriber.handler?(payload)
         }
     }
     
     internal func mqtt(_ mqtt: CocoaMQTT, didSubscribeTopics success: NSDictionary, failed: [String]) {
         print("didSubscribeTopics: \(success), \(failed)")
+        
+        for (topic, _) in success {
+            if let subscribers = self.topicToOnSubscribeHandlers[topic as! String] {
+                subscribers.forEach { subscriber in
+                    subscriber.handler(nil)
+                }
+            }
+            
+            self.topicToOnSubscribeHandlers[topic as! String]?.removeAll()
+            self.topicToOnSubscribeHandlers.removeValue(forKey: topic as! String)
+        }
+        
+        for failedTopic in failed {
+            guard let subscribers = self.topicToOnSubscribeHandlers[failedTopic] else {
+                return
+            }
+
+            subscribers.forEach { subscriber in
+                subscriber.handler(MQTTClientErrors.SubscriptionFailed(topic: failedTopic))
+            }
+            
+            self.topicToOnSubscribeHandlers[failedTopic]?.removeAll()
+            self.topicToOnSubscribeHandlers.removeValue(forKey: failedTopic)
+        }
     }
     
     internal func mqtt(_ mqtt: CocoaMQTT, didUnsubscribeTopics topics: [String]) {
