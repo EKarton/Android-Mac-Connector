@@ -50,11 +50,13 @@ class SmsReaderService: ObservableObject {
                         return
                     }
 
-                    self.mqttClient.unsubscribe(subscriber)
-                    handler(payload.threads, nil)
+                    self.mqttClient.unsubscribe(subscriber) { _ in
+                        handler(payload.threads, nil)
+                    }
                 } catch {
-                    self.mqttClient.unsubscribe(subscriber)
-                    handler([SmsThread](), error)
+                    self.mqttClient.unsubscribe(subscriber) { _ in
+                        handler([SmsThread](), error)
+                    }
                 }
             }
             

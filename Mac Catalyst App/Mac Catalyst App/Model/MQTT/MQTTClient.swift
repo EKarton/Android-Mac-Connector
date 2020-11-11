@@ -99,7 +99,7 @@ class MQTTClient: CocoaMQTTDelegate, ObservableObject {
         self.topicToOnSubscribeHandlers[subscriber.topic]?.insert(MQTTEventHandler(handler))
     }
     
-    func unsubscribe(_ subscriber: MQTTSubscriber) {
+    func unsubscribe(_ subscriber: MQTTSubscriber, _ handler: @escaping (Error?) -> Void) {
         guard let subscribers = self.topicToSubscribers[subscriber.topic] else {
             fatalError("Topic \(subscriber.topic) was never subscribed to before!")
         }
@@ -111,6 +111,11 @@ class MQTTClient: CocoaMQTTDelegate, ObservableObject {
         } else {
             self.topicToSubscribers[subscriber.topic]?.remove(subscriber)
         }
+        
+        if self.topicToOnUnsubscribeHandlers[subscriber.topic] == nil {
+            self.topicToOnUnsubscribeHandlers[subscriber.topic] = Set<MQTTEventHandler>()
+        }
+        self.topicToOnUnsubscribeHandlers[subscriber.topic]?.insert(MQTTEventHandler(handler))
     }
     
     func publish(_ topic: String, _ message: String) {
@@ -176,6 +181,17 @@ class MQTTClient: CocoaMQTTDelegate, ObservableObject {
     
     internal func mqtt(_ mqtt: CocoaMQTT, didUnsubscribeTopics topics: [String]) {
         print("didUnsubscribeTopics: \(topics)")
+        
+        for topic in topics {
+            if let eventListeners = self.topicToOnUnsubscribeHandlers[topic] {
+                eventListeners.forEach { eventListener in
+                    eventListener.handler(nil)
+                }
+            }
+            
+            self.topicToOnUnsubscribeHandlers[topic]?.removeAll()
+            self.topicToOnUnsubscribeHandlers.removeValue(forKey: topic)
+        }
     }
     
     internal func mqttDidPing(_ mqtt: CocoaMQTT) {
