@@ -14,7 +14,7 @@ struct ContentView: View {
     var body: some View {
         VStack {
             NavigationView {
-                if (!self.sessionStore.isSignedIn) {
+                if (!self.sessionStore.currentSession.isSignedIn) {
                     SignInView()
                 } else {
                     DevicesListView()

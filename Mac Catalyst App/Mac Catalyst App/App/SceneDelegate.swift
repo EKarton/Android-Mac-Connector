@@ -21,10 +21,12 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
         // Use a UIHostingController as window root view controller.
         if let windowScene = scene as? UIWindowScene {
-            let mqttClient = (UIApplication.shared.delegate as! AppDelegate).mqttClient
+            let sessionStore = SessionStore()
+            let mqttClient = MQTTAuthObserverClient("192.168.0.102", 8888, "client", "username", "password")
+            sessionStore.addSessionChangedListener(mqttClient)
             
             let contentView = ContentView()
-                .environmentObject(SessionStore())
+                .environmentObject(sessionStore)
                 .environmentObject(DeviceService())
                 .environmentObject(SmsReaderService())
                 .environmentObject(SmsSenderService(mqttClient))
@@ -64,7 +66,5 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         // Use this method to save data, release shared resources, and store enough scene-specific state information
         // to restore the scene back to its current state.
     }
-
-
 }
 

@@ -130,3 +130,15 @@ class MQTTClient: CocoaMQTTDelegate, ObservableObject {
         print("mqttDidDisconnect: \(String(describing: err?.localizedDescription))")
     }
 }
+
+class MQTTAuthObserverClient: MQTTClient, SessionChangedListener {
+    func handler(_ oldSession: Session, _ newSession: Session) {
+        print("MQTTAuthObserverClient(): Old: \(oldSession) vs \(newSession)")
+        super.disconnect()
+        super.setPassword(newSession.accessToken)
+        
+        if (newSession.isSignedIn) {
+            super.connect()
+        }
+    }
+}

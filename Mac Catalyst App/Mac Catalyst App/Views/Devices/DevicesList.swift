@@ -16,7 +16,7 @@ struct DevicesListView: View {
     
     var body: some View {
         VStack {
-            Text("Access token: \(sessionStore.accessToken)")
+            Text("Access token: \(sessionStore.currentSession.accessToken)")
             List(self.devicesList, id: \.id) { device in
                 NavigationLink(destination: DeviceActionsList(device: device)) {
                     HStack {
@@ -30,7 +30,7 @@ struct DevicesListView: View {
     }
     
     private func onAppearHandler() {
-        self.deviceService.getDevices(sessionStore.accessToken) { (devices: [Device], error: Error?) in
+        self.deviceService.getDevices(sessionStore.currentSession.accessToken) { (devices: [Device], error: Error?) in
             self.devicesList = devices
             print("Error: \(String(describing: error?.localizedDescription))")
         }

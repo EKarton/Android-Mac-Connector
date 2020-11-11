@@ -10,7 +10,7 @@ client.on('connect', function () {
   const subscribeOptions = {
     qos: 2,
   }
-  client.subscribe('gw8ynRwjXqKHYmkebLs5/send-sms-request', subscribeOptions, function (err) {
+  client.subscribe('5BEiGAB54yfecW4DXGPt/send-sms-request', subscribeOptions, function (err) {
     if (err) {
       console.error(err)
     }

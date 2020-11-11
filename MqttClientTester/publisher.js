@@ -17,7 +17,7 @@ client.on('connect', function () {
     "message": "Testing message",
     "message_id": "3",
   }
-  client.publish('gw8ynRwjXqKHYmkebLs5/send-sms-request', JSON.stringify(message), publishOptions, (error, packet) => {
+  client.publish('5BEiGAB54yfecW4DXGPt/send-sms-request', JSON.stringify(message), publishOptions, (error, packet) => {
     if (error) {
       console.error(error)
     }
