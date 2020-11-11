@@ -1,13 +1,15 @@
 package com.androidmacconnector.androidapp.fcm
 
+import android.Manifest
 import android.content.pm.PackageManager
 import android.util.Log
 import androidx.core.content.ContextCompat
-import com.androidmacconnector.androidapp.sms.messages.*
-import com.androidmacconnector.androidapp.sms.threads.*
+import com.androidmacconnector.androidapp.sms.messages.GetSmsMessagesFcmSubscriber
+import com.androidmacconnector.androidapp.sms.messages.GetSmsMessagesService
+import com.androidmacconnector.androidapp.sms.messages.GetSmsMessagesServiceImpl
+import com.androidmacconnector.androidapp.sms.messages.GetSmsMessegesResultsWebPublisher
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
-import android.Manifest
 
 class FirebaseMessagingServiceInstance : FirebaseMessagingService() {
     companion object {
@@ -15,8 +17,6 @@ class FirebaseMessagingServiceInstance : FirebaseMessagingService() {
     }
 
     private var subscriptionService: FcmSubscriptionServiceImpl? = null
-
-    private var getGetSmsThreadsService: GetSmsThreadsService? = null
     private var getSmsMessagesService: GetSmsMessagesService? = null
 
     override fun onCreate() {
@@ -34,23 +34,7 @@ class FirebaseMessagingServiceInstance : FirebaseMessagingService() {
 
     private fun checkAndCreateSubscribers() {
         if (checkPermission(Manifest.permission.INTERNET)) {
-            checkAndCreateSmsThreadsService()
             checkAndCreateSmsQueryService()
-        }
-    }
-
-    private fun checkAndCreateSmsThreadsService() {
-        if (getGetSmsThreadsService == null && checkPermissions(GetSmsThreadsServiceImpl.getRequiredPermissions())) {
-            getGetSmsThreadsService = GetSmsThreadsServiceImpl(this.contentResolver)
-
-            val publisher = GetSmsThreadsResultWebPublisher(this.applicationContext)
-            val subscriber = GetSmsThreadsFcmSubscriber(
-                this.applicationContext,
-                getGetSmsThreadsService!!,
-                publisher
-            )
-
-            subscriptionService?.addSubscriber(subscriber)
         }
     }
 

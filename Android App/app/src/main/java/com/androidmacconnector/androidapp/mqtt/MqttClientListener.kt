@@ -1,10 +1,10 @@
 package com.androidmacconnector.androidapp.mqtt
 
-import android.Manifest
 import android.content.Context
 import android.content.Intent
 import android.util.Log
 import com.androidmacconnector.androidapp.sms.sender.SendSmsBroadcastReceiver
+import com.androidmacconnector.androidapp.sms.threads.GetSmsThreadsBroadcastReceiver
 import com.androidmacconnector.androidapp.utils.getDeviceId
 import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken
 import org.eclipse.paho.client.mqttv3.MqttCallbackExtended
@@ -13,9 +13,6 @@ import org.eclipse.paho.client.mqttv3.MqttMessage
 class MqttClientListener(private val context: Context) : MqttCallbackExtended {
     companion object {
         private const val LOG_TAG = "MqttClientListener"
-
-        const val SEND_SMS_REQUEST_INTENT = "com.androidmacconnector.androidapp.mqtt.intent.action.SEND_SMS_REQUEST"
-        const val SEND_SMS_RESULT_INTENT = "com.androidmacconnector.androidapp.mqtt.intent.action.SEND_SMS_RESULT"
     }
 
     /**
@@ -33,29 +30,43 @@ class MqttClientListener(private val context: Context) : MqttCallbackExtended {
     }
 
     /**
-     * Called when our app / service successfully published a message
+     * Called when our client successfully published a message
      */
     override fun deliveryComplete(token: IMqttDeliveryToken?) {
         Log.d(LOG_TAG, "Delivery complete $token")
     }
 
+    /**
+     * Called when our client receives a message from a subscription
+     */
     override fun messageArrived(topic: String?, message: MqttMessage?) {
         Log.d(LOG_TAG, "Message arrived from $topic with message $message")
         if (topic == null || message == null) {
             return
         }
 
-        when(topic) {
-            "${getDeviceId(context)}/send-sms-request" -> {
-                val intent = Intent(context, SendSmsBroadcastReceiver::class.java).also { intent ->
-                    intent.putExtra("payload", String(message.payload))
-                    intent.putExtra("id", message.id)
-                    intent.putExtra("is_duplicate", message.isDuplicate)
-                    intent.putExtra("is_retained", message.isRetained)
-                    intent.putExtra("qos", message.qos)
-                }
-                context.sendBroadcast(intent)
+        val deviceId = getDeviceId(context)
+        val intent: Intent = when(topic) {
+            "$deviceId/send-sms-request" -> {
+                createBroadcastIntent(SendSmsBroadcastReceiver::class.java, message)
             }
+            "${deviceId}/sms/threads/query-requests" -> {
+                createBroadcastIntent(GetSmsThreadsBroadcastReceiver::class.java, message)
+            }
+            else -> {
+                throw IllegalArgumentException("Did not handle topic $topic")
+            }
+        }
+        context.sendBroadcast(intent)
+    }
+
+    private fun createBroadcastIntent(cls: Class<*>, message: MqttMessage): Intent {
+        return Intent(context, cls).also { intent ->
+            intent.putExtra("payload", String(message.payload))
+            intent.putExtra("id", message.id)
+            intent.putExtra("is_duplicate", message.isDuplicate)
+            intent.putExtra("is_retained", message.isRetained)
+            intent.putExtra("qos", message.qos)
         }
     }
 }

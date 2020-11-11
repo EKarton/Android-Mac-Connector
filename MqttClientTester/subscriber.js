@@ -10,7 +10,13 @@ client.on('connect', function () {
   const subscribeOptions = {
     qos: 2,
   }
-  client.subscribe('5BEiGAB54yfecW4DXGPt/send-sms-request', subscribeOptions, function (err) {
+  client.subscribe('5BEiGAB54yfecW4DXGPt/sms/threads/query-results', subscribeOptions, function (err) {
+    if (err) {
+      console.error(err)
+    }
+  })
+
+  client.subscribe('5BEiGAB54yfecW4DXGPt/send-sms-results', subscribeOptions, function (err) {
     if (err) {
       console.error(err)
     }

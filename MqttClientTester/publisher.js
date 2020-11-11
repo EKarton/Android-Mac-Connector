@@ -12,12 +12,23 @@ client.on('connect', function () {
     retain: true
   }
   console.log("Publishing message")
-  const message = {
-    "phone_number": "647-607-6358",
-    "message": "Testing message",
-    "message_id": "3",
+  // const sendSmsMessage = {
+  //   "phone_number": "647-607-6358 647-666-9090 324-234-2344",
+  //   "message": "Testing message",
+  //   "message_id": "3",
+  // }
+  // client.publish('5BEiGAB54yfecW4DXGPt/send-sms-request', JSON.stringify(sendSmsMessage), publishOptions, (error, packet) => {
+  //   if (error) {
+  //     console.error(error)
+  //   }
+  //   client.end()
+  // })
+
+  const queryThreads = {
+    "limit": 10,
+    "start": 0,
   }
-  client.publish('5BEiGAB54yfecW4DXGPt/send-sms-request', JSON.stringify(message), publishOptions, (error, packet) => {
+  client.publish('5BEiGAB54yfecW4DXGPt/sms/threads/query-requests', JSON.stringify(queryThreads), publishOptions, (error, packet) => {
     if (error) {
       console.error(error)
     }

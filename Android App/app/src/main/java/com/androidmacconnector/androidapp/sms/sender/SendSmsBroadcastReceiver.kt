@@ -19,10 +19,14 @@ import org.json.JSONObject
  */
 class SendSmsBroadcastReceiver: BroadcastReceiver() {
     companion object {
-        private const val LOG_TAG = "SendSmsBcReceiver"
+        private const val LOG_TAG = "SendSmsBR"
     }
 
-    override fun onReceive(context: Context, intent: Intent) {
+    override fun onReceive(context: Context?, intent: Intent?) {
+        if (context == null || intent == null) {
+            return
+        }
+
         Log.d(LOG_TAG, "Received send sms intent: $intent")
         val payload = intent.getStringExtra("payload")
         Log.d(LOG_TAG, "Payload: ${payload.toString()}")
@@ -50,7 +54,7 @@ class SendSmsBroadcastReceiver: BroadcastReceiver() {
             val messageId = inputData.getString("message_id")
             val publishSmsResults = messageId != null
 
-            sendSMS(phoneNumber, message, messageId ?: "", publishSmsResults)
+            this.sendSMS(phoneNumber, message, messageId ?: "", publishSmsResults)
             return Result.success()
         }
 
