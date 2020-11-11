@@ -14,7 +14,9 @@ struct DeviceActionsList: View {
     var body: some View {
         List {
             if device.hasSmsCapability {
-                Text("Send / Read SMS")
+                NavigationLink(destination: SmsThreadsList(device: device)) {
+                    Text("Send / Read SMS")
+                }
             }
         }
         .navigationBarTitle("\(self.device.name)", displayMode: .inline)

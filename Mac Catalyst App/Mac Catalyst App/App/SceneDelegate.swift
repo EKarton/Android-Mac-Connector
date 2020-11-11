@@ -24,6 +24,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
             let contentView = ContentView()
                 .environmentObject(SessionStore())
                 .environmentObject(DeviceService())
+                .environmentObject(SmsReaderService())
             
             let window = UIWindow(windowScene: windowScene)
             window.rootViewController = UIHostingController(rootView: contentView)

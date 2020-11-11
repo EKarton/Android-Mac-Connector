@@ -21,6 +21,11 @@
 		139CF30B255B99C000F9EA05 /* DeviceActionsList.swift in Sources */ = {isa = PBXBuildFile; fileRef = 139CF30A255B99C000F9EA05 /* DeviceActionsList.swift */; };
 		139CF30D255B99E800F9EA05 /* Device.swift in Sources */ = {isa = PBXBuildFile; fileRef = 139CF30C255B99E800F9EA05 /* Device.swift */; };
 		139CF30F255B9A0800F9EA05 /* DeviceService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 139CF30E255B9A0800F9EA05 /* DeviceService.swift */; };
+		139CF32E255B9E9600F9EA05 /* SmsThreadsList.swift in Sources */ = {isa = PBXBuildFile; fileRef = 139CF32D255B9E9600F9EA05 /* SmsThreadsList.swift */; };
+		139CF330255B9EC200F9EA05 /* SmsThreadsRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 139CF32F255B9EC200F9EA05 /* SmsThreadsRow.swift */; };
+		139CF332255B9EFE00F9EA05 /* SmsReaderService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 139CF331255B9EFE00F9EA05 /* SmsReaderService.swift */; };
+		139CF334255B9F1D00F9EA05 /* SmsThread.swift in Sources */ = {isa = PBXBuildFile; fileRef = 139CF333255B9F1D00F9EA05 /* SmsThread.swift */; };
+		139CF336255B9F6200F9EA05 /* SmsMessage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 139CF335255B9F6200F9EA05 /* SmsMessage.swift */; };
 		851BC03AEA0E46F85139CE76 /* Pods_Mac_Catalyst_App.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7BCC7CACC89295CB3092844A /* Pods_Mac_Catalyst_App.framework */; };
 /* End PBXBuildFile section */
 
@@ -42,6 +47,11 @@
 		139CF30A255B99C000F9EA05 /* DeviceActionsList.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeviceActionsList.swift; sourceTree = "<group>"; };
 		139CF30C255B99E800F9EA05 /* Device.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Device.swift; sourceTree = "<group>"; };
 		139CF30E255B9A0800F9EA05 /* DeviceService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeviceService.swift; sourceTree = "<group>"; };
+		139CF32D255B9E9600F9EA05 /* SmsThreadsList.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SmsThreadsList.swift; sourceTree = "<group>"; };
+		139CF32F255B9EC200F9EA05 /* SmsThreadsRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SmsThreadsRow.swift; sourceTree = "<group>"; };
+		139CF331255B9EFE00F9EA05 /* SmsReaderService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SmsReaderService.swift; sourceTree = "<group>"; };
+		139CF333255B9F1D00F9EA05 /* SmsThread.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SmsThread.swift; sourceTree = "<group>"; };
+		139CF335255B9F6200F9EA05 /* SmsMessage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SmsMessage.swift; sourceTree = "<group>"; };
 		65F5BC7775227A7A85D48AEC /* Pods-Mac Catalyst App.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Mac Catalyst App.release.xcconfig"; path = "Target Support Files/Pods-Mac Catalyst App/Pods-Mac Catalyst App.release.xcconfig"; sourceTree = "<group>"; };
 		720D4BFC4F6479686F943906 /* Pods-Mac Catalyst App.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Mac Catalyst App.debug.xcconfig"; path = "Target Support Files/Pods-Mac Catalyst App/Pods-Mac Catalyst App.debug.xcconfig"; sourceTree = "<group>"; };
 		7BCC7CACC89295CB3092844A /* Pods_Mac_Catalyst_App.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_Mac_Catalyst_App.framework; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -96,9 +106,7 @@
 				130189A1255B924A001BD60D /* Info.plist */,
 				139CF300255B96D800F9EA05 /* GoogleService-Info.plist */,
 				1301899B255B924A001BD60D /* Preview Content */,
-				139CF302255B97D100F9EA05 /* SessionStore.swift */,
-				139CF30C255B99E800F9EA05 /* Device.swift */,
-				139CF30E255B9A0800F9EA05 /* DeviceService.swift */,
+				139CF32C255B9E7700F9EA05 /* Model */,
 			);
 			path = "Mac Catalyst App";
 			sourceTree = "<group>";
@@ -124,12 +132,43 @@
 			isa = PBXGroup;
 			children = (
 				13018997255B9246001BD60D /* ContentView.swift */,
+				139CF32A255B9E6500F9EA05 /* Auth */,
+				139CF32B255B9E6A00F9EA05 /* Devices */,
+				139CF32D255B9E9600F9EA05 /* SmsThreadsList.swift */,
+				139CF32F255B9EC200F9EA05 /* SmsThreadsRow.swift */,
+			);
+			path = Views;
+			sourceTree = "<group>";
+		};
+		139CF32A255B9E6500F9EA05 /* Auth */ = {
+			isa = PBXGroup;
+			children = (
 				139CF304255B980200F9EA05 /* SignInView.swift */,
 				139CF306255B981000F9EA05 /* SignUpView.swift */,
+			);
+			path = Auth;
+			sourceTree = "<group>";
+		};
+		139CF32B255B9E6A00F9EA05 /* Devices */ = {
+			isa = PBXGroup;
+			children = (
 				139CF308255B999200F9EA05 /* DevicesList.swift */,
 				139CF30A255B99C000F9EA05 /* DeviceActionsList.swift */,
 			);
-			path = Views;
+			path = Devices;
+			sourceTree = "<group>";
+		};
+		139CF32C255B9E7700F9EA05 /* Model */ = {
+			isa = PBXGroup;
+			children = (
+				139CF302255B97D100F9EA05 /* SessionStore.swift */,
+				139CF30C255B99E800F9EA05 /* Device.swift */,
+				139CF30E255B9A0800F9EA05 /* DeviceService.swift */,
+				139CF331255B9EFE00F9EA05 /* SmsReaderService.swift */,
+				139CF333255B9F1D00F9EA05 /* SmsThread.swift */,
+				139CF335255B9F6200F9EA05 /* SmsMessage.swift */,
+			);
+			path = Model;
 			sourceTree = "<group>";
 		};
 		F4442BA6FF33F7C858BBE2E1 /* Pods */ = {
@@ -257,13 +296,18 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				139CF330255B9EC200F9EA05 /* SmsThreadsRow.swift in Sources */,
 				13018994255B9246001BD60D /* AppDelegate.swift in Sources */,
 				13018996255B9246001BD60D /* SceneDelegate.swift in Sources */,
+				139CF334255B9F1D00F9EA05 /* SmsThread.swift in Sources */,
 				139CF303255B97D100F9EA05 /* SessionStore.swift in Sources */,
+				139CF32E255B9E9600F9EA05 /* SmsThreadsList.swift in Sources */,
+				139CF332255B9EFE00F9EA05 /* SmsReaderService.swift in Sources */,
 				139CF30D255B99E800F9EA05 /* Device.swift in Sources */,
 				13018998255B9246001BD60D /* ContentView.swift in Sources */,
 				139CF307255B981000F9EA05 /* SignUpView.swift in Sources */,
 				139CF305255B980200F9EA05 /* SignInView.swift in Sources */,
+				139CF336255B9F6200F9EA05 /* SmsMessage.swift in Sources */,
 				139CF309255B999200F9EA05 /* DevicesList.swift in Sources */,
 				139CF30B255B99C000F9EA05 /* DeviceActionsList.swift in Sources */,
 				139CF30F255B9A0800F9EA05 /* DeviceService.swift in Sources */,
