@@ -20,7 +20,11 @@ struct SmsThreadsList: View {
         VStack {
             List(smsThreads, id: \.threadId) { (thread: SmsThread) in
                 NavigationLink(
-                    destination: Text("SMS Messages view")
+                    destination: SmsMessagesView(
+                        device: self.device,
+                        threadId: thread.threadId,
+                        contactName: thread.contactName
+                    )
                 ) {
                     SmsThreadsRow(
                         image: Image(systemName: "cloud.heavyrain.fill"),

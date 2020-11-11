@@ -21,10 +21,14 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
         // Use a UIHostingController as window root view controller.
         if let windowScene = scene as? UIWindowScene {
+            let mqttClient = (UIApplication.shared.delegate as! AppDelegate).mqttClient
+            
             let contentView = ContentView()
                 .environmentObject(SessionStore())
                 .environmentObject(DeviceService())
                 .environmentObject(SmsReaderService())
+                .environmentObject(SmsSenderService(mqttClient))
+                .environmentObject(mqttClient)
             
             let window = UIWindow(windowScene: windowScene)
             window.rootViewController = UIHostingController(rootView: contentView)

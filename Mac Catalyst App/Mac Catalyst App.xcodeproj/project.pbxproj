@@ -26,6 +26,12 @@
 		139CF332255B9EFE00F9EA05 /* SmsReaderService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 139CF331255B9EFE00F9EA05 /* SmsReaderService.swift */; };
 		139CF334255B9F1D00F9EA05 /* SmsThread.swift in Sources */ = {isa = PBXBuildFile; fileRef = 139CF333255B9F1D00F9EA05 /* SmsThread.swift */; };
 		139CF336255B9F6200F9EA05 /* SmsMessage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 139CF335255B9F6200F9EA05 /* SmsMessage.swift */; };
+		139CF338255BA0CB00F9EA05 /* SmsSenderService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 139CF337255BA0CB00F9EA05 /* SmsSenderService.swift */; };
+		139CF33A255BA0F000F9EA05 /* MQTTClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 139CF339255BA0F000F9EA05 /* MQTTClient.swift */; };
+		139CF33C255BA11500F9EA05 /* ReceivedSmsMessage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 139CF33B255BA11500F9EA05 /* ReceivedSmsMessage.swift */; };
+		139CF33E255BA14B00F9EA05 /* NewSmsMessage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 139CF33D255BA14B00F9EA05 /* NewSmsMessage.swift */; };
+		139CF340255BA16B00F9EA05 /* SmsMessageBubble.swift in Sources */ = {isa = PBXBuildFile; fileRef = 139CF33F255BA16B00F9EA05 /* SmsMessageBubble.swift */; };
+		139CF342255BA18200F9EA05 /* SmsMessagesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 139CF341255BA18200F9EA05 /* SmsMessagesView.swift */; };
 		851BC03AEA0E46F85139CE76 /* Pods_Mac_Catalyst_App.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7BCC7CACC89295CB3092844A /* Pods_Mac_Catalyst_App.framework */; };
 /* End PBXBuildFile section */
 
@@ -52,6 +58,12 @@
 		139CF331255B9EFE00F9EA05 /* SmsReaderService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SmsReaderService.swift; sourceTree = "<group>"; };
 		139CF333255B9F1D00F9EA05 /* SmsThread.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SmsThread.swift; sourceTree = "<group>"; };
 		139CF335255B9F6200F9EA05 /* SmsMessage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SmsMessage.swift; sourceTree = "<group>"; };
+		139CF337255BA0CB00F9EA05 /* SmsSenderService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SmsSenderService.swift; sourceTree = "<group>"; };
+		139CF339255BA0F000F9EA05 /* MQTTClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MQTTClient.swift; sourceTree = "<group>"; };
+		139CF33B255BA11500F9EA05 /* ReceivedSmsMessage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReceivedSmsMessage.swift; sourceTree = "<group>"; };
+		139CF33D255BA14B00F9EA05 /* NewSmsMessage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NewSmsMessage.swift; sourceTree = "<group>"; };
+		139CF33F255BA16B00F9EA05 /* SmsMessageBubble.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SmsMessageBubble.swift; sourceTree = "<group>"; };
+		139CF341255BA18200F9EA05 /* SmsMessagesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SmsMessagesView.swift; sourceTree = "<group>"; };
 		65F5BC7775227A7A85D48AEC /* Pods-Mac Catalyst App.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Mac Catalyst App.release.xcconfig"; path = "Target Support Files/Pods-Mac Catalyst App/Pods-Mac Catalyst App.release.xcconfig"; sourceTree = "<group>"; };
 		720D4BFC4F6479686F943906 /* Pods-Mac Catalyst App.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Mac Catalyst App.debug.xcconfig"; path = "Target Support Files/Pods-Mac Catalyst App/Pods-Mac Catalyst App.debug.xcconfig"; sourceTree = "<group>"; };
 		7BCC7CACC89295CB3092844A /* Pods_Mac_Catalyst_App.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_Mac_Catalyst_App.framework; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -136,6 +148,9 @@
 				139CF32B255B9E6A00F9EA05 /* Devices */,
 				139CF32D255B9E9600F9EA05 /* SmsThreadsList.swift */,
 				139CF32F255B9EC200F9EA05 /* SmsThreadsRow.swift */,
+				139CF33D255BA14B00F9EA05 /* NewSmsMessage.swift */,
+				139CF33F255BA16B00F9EA05 /* SmsMessageBubble.swift */,
+				139CF341255BA18200F9EA05 /* SmsMessagesView.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -164,9 +179,12 @@
 				139CF302255B97D100F9EA05 /* SessionStore.swift */,
 				139CF30C255B99E800F9EA05 /* Device.swift */,
 				139CF30E255B9A0800F9EA05 /* DeviceService.swift */,
-				139CF331255B9EFE00F9EA05 /* SmsReaderService.swift */,
+				139CF339255BA0F000F9EA05 /* MQTTClient.swift */,
 				139CF333255B9F1D00F9EA05 /* SmsThread.swift */,
 				139CF335255B9F6200F9EA05 /* SmsMessage.swift */,
+				139CF33B255BA11500F9EA05 /* ReceivedSmsMessage.swift */,
+				139CF331255B9EFE00F9EA05 /* SmsReaderService.swift */,
+				139CF337255BA0CB00F9EA05 /* SmsSenderService.swift */,
 			);
 			path = Model;
 			sourceTree = "<group>";
@@ -300,17 +318,23 @@
 				13018994255B9246001BD60D /* AppDelegate.swift in Sources */,
 				13018996255B9246001BD60D /* SceneDelegate.swift in Sources */,
 				139CF334255B9F1D00F9EA05 /* SmsThread.swift in Sources */,
+				139CF33C255BA11500F9EA05 /* ReceivedSmsMessage.swift in Sources */,
 				139CF303255B97D100F9EA05 /* SessionStore.swift in Sources */,
 				139CF32E255B9E9600F9EA05 /* SmsThreadsList.swift in Sources */,
+				139CF338255BA0CB00F9EA05 /* SmsSenderService.swift in Sources */,
 				139CF332255B9EFE00F9EA05 /* SmsReaderService.swift in Sources */,
+				139CF33A255BA0F000F9EA05 /* MQTTClient.swift in Sources */,
 				139CF30D255B99E800F9EA05 /* Device.swift in Sources */,
 				13018998255B9246001BD60D /* ContentView.swift in Sources */,
 				139CF307255B981000F9EA05 /* SignUpView.swift in Sources */,
+				139CF340255BA16B00F9EA05 /* SmsMessageBubble.swift in Sources */,
 				139CF305255B980200F9EA05 /* SignInView.swift in Sources */,
 				139CF336255B9F6200F9EA05 /* SmsMessage.swift in Sources */,
 				139CF309255B999200F9EA05 /* DevicesList.swift in Sources */,
 				139CF30B255B99C000F9EA05 /* DeviceActionsList.swift in Sources */,
 				139CF30F255B9A0800F9EA05 /* DeviceService.swift in Sources */,
+				139CF33E255BA14B00F9EA05 /* NewSmsMessage.swift in Sources */,
+				139CF342255BA18200F9EA05 /* SmsMessagesView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
