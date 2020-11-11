@@ -13,6 +13,7 @@
 		1301899A255B924A001BD60D /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 13018999255B924A001BD60D /* Assets.xcassets */; };
 		1301899D255B924A001BD60D /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 1301899C255B924A001BD60D /* Preview Assets.xcassets */; };
 		130189A0255B924A001BD60D /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 1301899E255B924A001BD60D /* LaunchScreen.storyboard */; };
+		851BC03AEA0E46F85139CE76 /* Pods_Mac_Catalyst_App.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7BCC7CACC89295CB3092844A /* Pods_Mac_Catalyst_App.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -25,6 +26,9 @@
 		1301899F255B924A001BD60D /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		130189A1255B924A001BD60D /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		130189A7255B9277001BD60D /* Mac Catalyst App.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = "Mac Catalyst App.entitlements"; sourceTree = "<group>"; };
+		65F5BC7775227A7A85D48AEC /* Pods-Mac Catalyst App.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Mac Catalyst App.release.xcconfig"; path = "Target Support Files/Pods-Mac Catalyst App/Pods-Mac Catalyst App.release.xcconfig"; sourceTree = "<group>"; };
+		720D4BFC4F6479686F943906 /* Pods-Mac Catalyst App.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Mac Catalyst App.debug.xcconfig"; path = "Target Support Files/Pods-Mac Catalyst App/Pods-Mac Catalyst App.debug.xcconfig"; sourceTree = "<group>"; };
+		7BCC7CACC89295CB3092844A /* Pods_Mac_Catalyst_App.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_Mac_Catalyst_App.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -32,17 +36,28 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				851BC03AEA0E46F85139CE76 /* Pods_Mac_Catalyst_App.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		033275DA405D73DEDF78DDA5 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				7BCC7CACC89295CB3092844A /* Pods_Mac_Catalyst_App.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
 		13018987255B9246001BD60D = {
 			isa = PBXGroup;
 			children = (
 				13018992255B9246001BD60D /* Mac Catalyst App */,
 				13018991255B9246001BD60D /* Products */,
+				F4442BA6FF33F7C858BBE2E1 /* Pods */,
+				033275DA405D73DEDF78DDA5 /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -77,6 +92,16 @@
 			path = "Preview Content";
 			sourceTree = "<group>";
 		};
+		F4442BA6FF33F7C858BBE2E1 /* Pods */ = {
+			isa = PBXGroup;
+			children = (
+				720D4BFC4F6479686F943906 /* Pods-Mac Catalyst App.debug.xcconfig */,
+				65F5BC7775227A7A85D48AEC /* Pods-Mac Catalyst App.release.xcconfig */,
+			);
+			name = Pods;
+			path = Pods;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -84,9 +109,11 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 130189A4255B924A001BD60D /* Build configuration list for PBXNativeTarget "Mac Catalyst App" */;
 			buildPhases = (
+				5C246DD65162CD7A318DD57A /* [CP] Check Pods Manifest.lock */,
 				1301898C255B9246001BD60D /* Sources */,
 				1301898D255B9246001BD60D /* Frameworks */,
 				1301898E255B9246001BD60D /* Resources */,
+				4741695861CA751C5579E5B1 /* [CP] Embed Pods Frameworks */,
 			);
 			buildRules = (
 			);
@@ -142,6 +169,48 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		4741695861CA751C5579E5B1 /* [CP] Embed Pods Frameworks */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-Mac Catalyst App/Pods-Mac Catalyst App-frameworks-${CONFIGURATION}-input-files.xcfilelist",
+			);
+			name = "[CP] Embed Pods Frameworks";
+			outputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-Mac Catalyst App/Pods-Mac Catalyst App-frameworks-${CONFIGURATION}-output-files.xcfilelist",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-Mac Catalyst App/Pods-Mac Catalyst App-frameworks.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+		5C246DD65162CD7A318DD57A /* [CP] Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
+				"${PODS_ROOT}/Manifest.lock",
+			);
+			name = "[CP] Check Pods Manifest.lock";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+				"$(DERIVED_FILE_DIR)/Pods-Mac Catalyst App-checkManifestLockResult.txt",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
+			showEnvVarsInLog = 0;
+		};
+/* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		1301898C255B9246001BD60D /* Sources */ = {
@@ -284,6 +353,7 @@
 		};
 		130189A5255B924A001BD60D /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 720D4BFC4F6479686F943906 /* Pods-Mac Catalyst App.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_ENTITLEMENTS = "Mac Catalyst App/Mac Catalyst App.entitlements";
@@ -306,6 +376,7 @@
 		};
 		130189A6255B924A001BD60D /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 65F5BC7775227A7A85D48AEC /* Pods-Mac Catalyst App.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_ENTITLEMENTS = "Mac Catalyst App/Mac Catalyst App.entitlements";
