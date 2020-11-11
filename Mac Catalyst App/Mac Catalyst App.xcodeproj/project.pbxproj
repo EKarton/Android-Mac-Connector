@@ -32,6 +32,7 @@
 		139CF33E255BA14B00F9EA05 /* NewSmsMessage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 139CF33D255BA14B00F9EA05 /* NewSmsMessage.swift */; };
 		139CF340255BA16B00F9EA05 /* SmsMessageBubble.swift in Sources */ = {isa = PBXBuildFile; fileRef = 139CF33F255BA16B00F9EA05 /* SmsMessageBubble.swift */; };
 		139CF342255BA18200F9EA05 /* SmsMessagesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 139CF341255BA18200F9EA05 /* SmsMessagesView.swift */; };
+		139CF344255BA27200F9EA05 /* NewSmsMessageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 139CF343255BA27200F9EA05 /* NewSmsMessageView.swift */; };
 		851BC03AEA0E46F85139CE76 /* Pods_Mac_Catalyst_App.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7BCC7CACC89295CB3092844A /* Pods_Mac_Catalyst_App.framework */; };
 /* End PBXBuildFile section */
 
@@ -64,6 +65,7 @@
 		139CF33D255BA14B00F9EA05 /* NewSmsMessage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NewSmsMessage.swift; sourceTree = "<group>"; };
 		139CF33F255BA16B00F9EA05 /* SmsMessageBubble.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SmsMessageBubble.swift; sourceTree = "<group>"; };
 		139CF341255BA18200F9EA05 /* SmsMessagesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SmsMessagesView.swift; sourceTree = "<group>"; };
+		139CF343255BA27200F9EA05 /* NewSmsMessageView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NewSmsMessageView.swift; sourceTree = "<group>"; };
 		65F5BC7775227A7A85D48AEC /* Pods-Mac Catalyst App.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Mac Catalyst App.release.xcconfig"; path = "Target Support Files/Pods-Mac Catalyst App/Pods-Mac Catalyst App.release.xcconfig"; sourceTree = "<group>"; };
 		720D4BFC4F6479686F943906 /* Pods-Mac Catalyst App.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Mac Catalyst App.debug.xcconfig"; path = "Target Support Files/Pods-Mac Catalyst App/Pods-Mac Catalyst App.debug.xcconfig"; sourceTree = "<group>"; };
 		7BCC7CACC89295CB3092844A /* Pods_Mac_Catalyst_App.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_Mac_Catalyst_App.framework; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -151,6 +153,7 @@
 				139CF33D255BA14B00F9EA05 /* NewSmsMessage.swift */,
 				139CF33F255BA16B00F9EA05 /* SmsMessageBubble.swift */,
 				139CF341255BA18200F9EA05 /* SmsMessagesView.swift */,
+				139CF343255BA27200F9EA05 /* NewSmsMessageView.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -333,6 +336,7 @@
 				139CF309255B999200F9EA05 /* DevicesList.swift in Sources */,
 				139CF30B255B99C000F9EA05 /* DeviceActionsList.swift in Sources */,
 				139CF30F255B9A0800F9EA05 /* DeviceService.swift in Sources */,
+				139CF344255BA27200F9EA05 /* NewSmsMessageView.swift in Sources */,
 				139CF33E255BA14B00F9EA05 /* NewSmsMessage.swift in Sources */,
 				139CF342255BA18200F9EA05 /* SmsMessagesView.swift in Sources */,
 			);

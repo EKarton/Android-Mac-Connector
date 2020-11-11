@@ -37,7 +37,7 @@ struct SmsThreadsList: View {
         }
         .onAppear(perform: self.onAppearHandler)
         .sheet(isPresented: $showingNewSmsMessageSheet) {
-            Text("New message")
+            NewSmsMessageView()
         }
         .navigationBarTitle("SMS via \(device.name)", displayMode: .inline)
         .navigationBarItems(trailing:
