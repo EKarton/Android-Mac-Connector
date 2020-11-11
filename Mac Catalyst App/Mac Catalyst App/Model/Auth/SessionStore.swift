@@ -97,6 +97,7 @@ class SessionStore: ObservableObject {
     func signOut() {
         do {
             try Auth.auth().signOut()
+            self.currentSession = Session(isSignedIn: false, accessToken: "")
         } catch {
             print("Error signing out")
         }
