@@ -29,6 +29,7 @@ class SmsSenderService: ObservableObject {
     }
     
     func sendSms(_ device: Device, _ phoneNumber: String, _ message: String, _ handler: @escaping (Error?) -> Void) {
+        print(phoneNumber)
         do {
             let publishTopic = "\(device.id)/send-sms-request"
             let publishPayload = SendSmsRequestPayload(phone_number: phoneNumber, message: message)

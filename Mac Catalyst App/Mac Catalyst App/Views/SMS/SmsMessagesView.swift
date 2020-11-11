@@ -15,6 +15,7 @@ struct SmsMessagesView: View {
     var device: Device
     var threadId: String
     var contactName: String
+    var phoneNumber: String
     
     @State var messages = [SmsMessage]()
     @State private var messageToSend: String = ""
@@ -62,7 +63,7 @@ struct SmsMessagesView: View {
     }
     
     func onSendSmsButtonClickHandler() {
-        self.smsSender.sendSms(self.device, "444-232-2323", self.messageToSend) { (error: Error?) in
+        self.smsSender.sendSms(self.device, self.phoneNumber, self.messageToSend) { (error: Error?) in
             self.messageToSend = ""
             self.refreshMessages()
         }
@@ -78,7 +79,7 @@ struct SmsMessagesView: View {
 #if DEBUG
 struct SmsMessagesView_Previews: PreviewProvider {
     static var previews: some View {
-        SmsMessagesView(device: devicesList[0], threadId: "1", contactName: "Bob Smith")
+        SmsMessagesView(device: devicesList[0], threadId: "1", contactName: "Bob Smith", phoneNumber: "123-456-7890")
     }
 }
 #endif

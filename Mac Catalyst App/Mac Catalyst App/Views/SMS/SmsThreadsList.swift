@@ -23,7 +23,8 @@ struct SmsThreadsList: View {
                     destination: SmsMessagesView(
                         device: self.device,
                         threadId: thread.threadId,
-                        contactName: thread.contactName ?? thread.phoneNumber
+                        contactName: thread.contactName ?? thread.phoneNumber,
+                        phoneNumber: thread.phoneNumber
                     )
                 ) {
                     SmsThreadsRow(
