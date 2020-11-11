@@ -7,16 +7,23 @@ var client  = mqtt.connect('ws://192.168.0.102:8888', {
 })
  
 client.on('connect', function () {
+  const deviceId = '5BEiGAB54yfecW4DXGPt'
   const subscribeOptions = {
     qos: 2,
   }
-  client.subscribe('5BEiGAB54yfecW4DXGPt/sms/threads/query-results', subscribeOptions, function (err) {
+  client.subscribe(`${deviceId}/sms/threads/query-results`, subscribeOptions, function (err) {
     if (err) {
       console.error(err)
     }
   })
 
-  client.subscribe('5BEiGAB54yfecW4DXGPt/send-sms-results', subscribeOptions, function (err) {
+  client.subscribe(`${deviceId}/sms/messages/query-results`, subscribeOptions, function (err) {
+    if (err) {
+      console.error(err)
+    }
+  })
+
+  client.subscribe(`${deviceId}/send-sms-results`, subscribeOptions, function (err) {
     if (err) {
       console.error(err)
     }
@@ -28,5 +35,5 @@ client.on('error', (error) => {
 });
  
 client.on('message', function (topic, payload, packet) {
-  console.log(topic, '->', payload.toString(), packet.cmd, client.getLastMessageId())
+  console.log(topic, '->', payload.toString(), packet.cmd, client.getLastMessageId(), '\n')
 })

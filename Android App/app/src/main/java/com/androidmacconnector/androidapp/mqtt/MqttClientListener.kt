@@ -3,6 +3,7 @@ package com.androidmacconnector.androidapp.mqtt
 import android.content.Context
 import android.content.Intent
 import android.util.Log
+import com.androidmacconnector.androidapp.sms.messages.GetSmsMessagesBroadcastReceiver
 import com.androidmacconnector.androidapp.sms.sender.SendSmsBroadcastReceiver
 import com.androidmacconnector.androidapp.sms.threads.GetSmsThreadsBroadcastReceiver
 import com.androidmacconnector.androidapp.utils.getDeviceId
@@ -52,6 +53,9 @@ class MqttClientListener(private val context: Context) : MqttCallbackExtended {
             }
             "${deviceId}/sms/threads/query-requests" -> {
                 createBroadcastIntent(GetSmsThreadsBroadcastReceiver::class.java, message)
+            }
+            "${deviceId}/sms/messages/query-requests" -> {
+                createBroadcastIntent(GetSmsMessagesBroadcastReceiver::class.java, message)
             }
             else -> {
                 throw IllegalArgumentException("Did not handle topic $topic")

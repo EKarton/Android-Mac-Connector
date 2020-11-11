@@ -1,6 +1,5 @@
 package com.androidmacconnector.androidapp.sms.messages
 
-import android.Manifest
 import android.content.ContentResolver
 import android.provider.Telephony
 
@@ -15,23 +14,28 @@ data class SmsMessage(
 )
 
 interface GetSmsMessagesService {
-    fun getSmsMessagesFromThread(threadId: String, limit: Int, start: Int): List<SmsMessage>
+    fun getSmsMessagesFromThread(
+        contentResolver: ContentResolver,
+        threadId: String,
+        limit: Int,
+        start: Int
+    ): List<SmsMessage>
 }
 
 /**
  * A class used to handle all types of SMS-related tasks
  */
-class GetSmsMessagesServiceImpl(private val contentResolver: ContentResolver) : GetSmsMessagesService {
-    companion object {
-        fun getRequiredPermissions(): List<String> {
-            return arrayListOf(Manifest.permission.READ_SMS, Manifest.permission.READ_CONTACTS)
-        }
-    }
-
+class GetSmsMessagesServiceImpl : GetSmsMessagesService {
     /**
      * Returns a list of SMS messages from a particular thread
      */
-    override fun getSmsMessagesFromThread(threadId: String, limit: Int, start: Int): List<SmsMessage> {
+    override fun getSmsMessagesFromThread(
+        contentResolver: ContentResolver,
+        threadId: String,
+        limit: Int,
+        start: Int
+    ): List<SmsMessage> {
+
         val projection =
             arrayOf("_id", "address", "person", "date", "body", "read", "date", "type");
         val selection = "thread_id = ?";

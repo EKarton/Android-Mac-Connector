@@ -63,6 +63,10 @@
             android:name=".sms.threads.GetSmsThreadsBroadcastReceiver"
             android:enabled="true"
             android:exported="true"/>
+        <receiver
+            android:name=".sms.messages.GetSmsMessagesBroadcastReceiver"
+            android:enabled="true"
+            android:exported="true"/>
     </application>
 
 </manifest>

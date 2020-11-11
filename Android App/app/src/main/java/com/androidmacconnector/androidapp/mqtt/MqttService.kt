@@ -68,8 +68,9 @@ class MqttService: Service() {
 
         latch.await()
 
-        this.client.subscribe("${getDeviceId(this)}/send-sms-request", 1)
-        this.client.subscribe("${getDeviceId(this)}/sms/threads/query-requests", 1)
+        this.client.subscribe("${getDeviceId(this)}/send-sms-request", 2)
+        this.client.subscribe("${getDeviceId(this)}/sms/threads/query-requests", 2)
+        this.client.subscribe("${getDeviceId(this)}/sms/messages/query-requests", 2)
     }
 
     private fun getAccessToken(): String? {
