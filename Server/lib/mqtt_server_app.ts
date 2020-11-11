@@ -62,6 +62,8 @@ export class MqttServerApp implements App {
           })
       },
       authorizePublish: (client: Client, packet: PublishPacket, callback: (error?: Error | null) => void) => {
+        console.log(`On authorize publish: ${client.id} at ${packet.topic}`)
+
         if (!(this.opts?.verifyAuthorization)) {
           callback(null)
           return
@@ -76,6 +78,8 @@ export class MqttServerApp implements App {
           })
       },
       authorizeSubscribe: (client: Client, subscription: Subscription, callback: (error: Error | null, subscription?: Subscription | null) => void) => {
+        console.log(`On authorize subscribe ${client.id} at ${subscription.topic}`)
+
         if (!(this.opts.verifyAuthorization)) {
           callback(null, subscription)
           return
