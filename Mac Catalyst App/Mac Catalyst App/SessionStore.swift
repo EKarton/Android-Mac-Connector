@@ -34,9 +34,7 @@ class SessionStore: ObservableObject {
         }
         
         handle = Auth.auth().addStateDidChangeListener { (auth: Auth, user: User?) in
-            print("Updated user state: \(user)")
-            self.isSignedIn = user != nil
-
+            print("Updated user state: \(String(describing: user))")
             if let curUser = user {
                 self.updateAccessToken(curUser)
             }
@@ -48,8 +46,6 @@ class SessionStore: ObservableObject {
             if let user = result?.user {
                 self.updateAccessToken(user)
             }
-            
-            self.isSignedIn = error == nil
             handler(error)
         }
     }
@@ -60,7 +56,6 @@ class SessionStore: ObservableObject {
                 self.updateAccessToken(user)
             }
             
-            self.isSignedIn = error == nil
             handler(error)
         }
     }
@@ -73,6 +68,7 @@ class SessionStore: ObservableObject {
             
             if let accessToken = accessToken {
                 self.accessToken = accessToken
+                self.isSignedIn = true
             }
         }
     }

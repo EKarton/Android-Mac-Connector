@@ -17,7 +17,7 @@ struct ContentView: View {
                 if (!self.sessionStore.isSignedIn) {
                     SignInView()
                 } else {
-                    Text("Hello world!")
+                    DevicesListView()
                 }
             }
             .navigationViewStyle(StackNavigationViewStyle())
