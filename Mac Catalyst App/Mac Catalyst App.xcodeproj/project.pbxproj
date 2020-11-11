@@ -14,6 +14,9 @@
 		1301899D255B924A001BD60D /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 1301899C255B924A001BD60D /* Preview Assets.xcassets */; };
 		130189A0255B924A001BD60D /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 1301899E255B924A001BD60D /* LaunchScreen.storyboard */; };
 		139CF301255B96D800F9EA05 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 139CF300255B96D800F9EA05 /* GoogleService-Info.plist */; };
+		139CF303255B97D100F9EA05 /* SessionStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 139CF302255B97D100F9EA05 /* SessionStore.swift */; };
+		139CF305255B980200F9EA05 /* SignInView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 139CF304255B980200F9EA05 /* SignInView.swift */; };
+		139CF307255B981000F9EA05 /* SignUpView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 139CF306255B981000F9EA05 /* SignUpView.swift */; };
 		851BC03AEA0E46F85139CE76 /* Pods_Mac_Catalyst_App.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7BCC7CACC89295CB3092844A /* Pods_Mac_Catalyst_App.framework */; };
 /* End PBXBuildFile section */
 
@@ -28,6 +31,9 @@
 		130189A1255B924A001BD60D /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		130189A7255B9277001BD60D /* Mac Catalyst App.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = "Mac Catalyst App.entitlements"; sourceTree = "<group>"; };
 		139CF300255B96D800F9EA05 /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
+		139CF302255B97D100F9EA05 /* SessionStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionStore.swift; sourceTree = "<group>"; };
+		139CF304255B980200F9EA05 /* SignInView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SignInView.swift; sourceTree = "<group>"; };
+		139CF306255B981000F9EA05 /* SignUpView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SignUpView.swift; sourceTree = "<group>"; };
 		65F5BC7775227A7A85D48AEC /* Pods-Mac Catalyst App.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Mac Catalyst App.release.xcconfig"; path = "Target Support Files/Pods-Mac Catalyst App/Pods-Mac Catalyst App.release.xcconfig"; sourceTree = "<group>"; };
 		720D4BFC4F6479686F943906 /* Pods-Mac Catalyst App.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Mac Catalyst App.debug.xcconfig"; path = "Target Support Files/Pods-Mac Catalyst App/Pods-Mac Catalyst App.debug.xcconfig"; sourceTree = "<group>"; };
 		7BCC7CACC89295CB3092844A /* Pods_Mac_Catalyst_App.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_Mac_Catalyst_App.framework; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -82,6 +88,7 @@
 				130189A1255B924A001BD60D /* Info.plist */,
 				139CF300255B96D800F9EA05 /* GoogleService-Info.plist */,
 				1301899B255B924A001BD60D /* Preview Content */,
+				139CF302255B97D100F9EA05 /* SessionStore.swift */,
 			);
 			path = "Mac Catalyst App";
 			sourceTree = "<group>";
@@ -107,6 +114,8 @@
 			isa = PBXGroup;
 			children = (
 				13018997255B9246001BD60D /* ContentView.swift */,
+				139CF304255B980200F9EA05 /* SignInView.swift */,
+				139CF306255B981000F9EA05 /* SignUpView.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -238,7 +247,10 @@
 			files = (
 				13018994255B9246001BD60D /* AppDelegate.swift in Sources */,
 				13018996255B9246001BD60D /* SceneDelegate.swift in Sources */,
+				139CF303255B97D100F9EA05 /* SessionStore.swift in Sources */,
 				13018998255B9246001BD60D /* ContentView.swift in Sources */,
+				139CF307255B981000F9EA05 /* SignUpView.swift in Sources */,
+				139CF305255B980200F9EA05 /* SignInView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

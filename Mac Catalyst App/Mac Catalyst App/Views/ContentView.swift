@@ -9,8 +9,22 @@
 import SwiftUI
 
 struct ContentView: View {
+    @EnvironmentObject var sessionStore: SessionStore
+        
     var body: some View {
-        Text("Hello, World!")
+        VStack {
+            NavigationView {
+                if (!self.sessionStore.isSignedIn) {
+                    SignInView()
+                } else {
+                    Text("Hello world!")
+                }
+            }
+            .navigationViewStyle(StackNavigationViewStyle())
+        }
+        .onAppear {
+            self.sessionStore.bindListeners()
+        }
     }
 }
 
@@ -19,3 +33,4 @@ struct ContentView_Previews: PreviewProvider {
         ContentView()
     }
 }
+
