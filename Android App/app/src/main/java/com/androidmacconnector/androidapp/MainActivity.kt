@@ -93,8 +93,7 @@ class MainActivity : AppCompatActivity() {
         Intent(this, MqttService::class.java).also {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 Log.d(LOG_TAG, "Starting the service in >=26 Mode")
-//                startForegroundService(it)
-                startService(it)
+                startForegroundService(it)
                 return
             }
             Log.d(LOG_TAG, "Starting the service in < 26 Mode")

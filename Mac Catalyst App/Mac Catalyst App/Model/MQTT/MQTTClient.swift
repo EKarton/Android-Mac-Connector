@@ -136,13 +136,12 @@ class MQTTClient: CocoaMQTTDelegate, ObservableObject {
     }
     
     internal func mqtt(_ mqtt: CocoaMQTT, didReceiveMessage message: CocoaMQTTMessage, id: UInt16) {
+        print("didReceiveMessage: \(String(bytes: message.payload, encoding: .utf8) ?? "no data")")
+        
         guard let payload = String(bytes: message.payload, encoding: .utf8) else {
             print("Not a valid UTF-8 sequence")
             return
         }
-        
-        print("didReceiveMessage: \(payload)")
-
         
         guard let subscribers = topicToSubscribers[message.topic] else {
             fatalError("No subscribers!")

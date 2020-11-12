@@ -17,9 +17,10 @@ struct SmsMessagesView: View {
     var contactName: String
     var phoneNumber: String
     
-    @State var messages = [SmsMessage]()
+    @State private var messages = [SmsMessage]()
+    @State private var sendingMessages = [String]()
     @State private var messageToSend: String = ""
-    @State var isLoadingMessages = false
+    @State private var isLoadingMessages = false
     
     init(device: Device, threadId: String, contactName: String, phoneNumber: String) {
         self.device = device
@@ -36,18 +37,20 @@ struct SmsMessagesView: View {
         VStack {
             VStack {
                 List {
+                    // Note: the contents here are in reversed order
+                    ForEach(self.sendingMessages, id: \.self) { (sendingMsg: String) in
+                        SmsMessageRow(
+                            isCurrentUser: true,
+                            message: sendingMsg
+                        )
+                    }
+                    .scaleEffect(x: 1, y: -1, anchor: .center)
+                    
                     ForEach(self.messages, id: \.messageId) { (message: SmsMessage) in
-                        HStack {
-                            if (message.phoneNumber == self.device.phoneNumber) {
-                                Spacer()
-                                SmsMessageBubble(isCurrentUser: true, message: message.body)
-                                
-                            } else {
-                                SmsMessageBubble(isCurrentUser: false, message: message.body)
-                                Spacer()
-                            }
-                        }
-                        
+                        SmsMessageRow(
+                            isCurrentUser: message.phoneNumber == self.device.phoneNumber,
+                            message: message.body
+                        )
                     }
                     .scaleEffect(x: 1, y: -1, anchor: .center)
                 }
@@ -89,6 +92,7 @@ struct SmsMessagesView: View {
             print("Successfully sent sms message")
             self.refreshMessages()
         }
+        self.sendingMessages.append(self.messageToSend)
         self.messageToSend = ""
     }
     
@@ -98,6 +102,7 @@ struct SmsMessagesView: View {
         }
         
         self.isLoadingMessages = true
+        
         self.smsMessageService.fetchSmsMessages(self.device, self.threadId, 10000, 0) { (smsMessages: [SmsMessage], error: Error?) in
             
             self.isLoadingMessages = false
@@ -105,6 +110,17 @@ struct SmsMessagesView: View {
             if let error = error {
                 print("Encountered error when refreshing messages: \(error.localizedDescription)")
                 return
+            }
+            
+            var i = 0
+            while (i < self.sendingMessages.count){
+                for msg in smsMessages {
+                    if self.sendingMessages.contains(msg.body) {
+                        self.sendingMessages.remove(at: i)
+                        i -= 1
+                    }
+                }
+                i += 1
             }
             
             self.messages = smsMessages
