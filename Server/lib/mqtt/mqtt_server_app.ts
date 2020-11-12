@@ -1,10 +1,10 @@
 import aedes, { Aedes, AedesOptions, AuthenticateError, Client, PublishPacket, Subscription } from 'aedes'
 import { createServer, Server } from 'http'
-import { Authenticator, FirebaseAuthenticator } from './authenticator'
-import { Authorizer, FirebaseAuthorizer } from './authorizer'
+import { Authenticator, FirebaseAuthenticator } from '../services/authenticator'
+import { Authorizer, FirebaseAuthorizer } from '../services/authorizer'
 
 import * as admin from 'firebase-admin';
-import { App } from "./app";
+import { App } from "../app";
 
 export interface MqttServerAppOptions {
   verifyAuthentication: boolean,

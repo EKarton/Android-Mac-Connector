@@ -1,3 +1,5 @@
+import { HttpError } from "../rest_api/middlewares";
+
 export interface DeviceService {
   doesDeviceExist(userId: string, deviceType: string, hardwareId: string): Promise<boolean>
   registerDevice(userId: string, deviceType: string, hardwareId: string, capabilities: String[]): Promise<string>
@@ -39,7 +41,7 @@ export class FirebaseDeviceService implements DeviceService {
   
   async registerDevice(userId: string, deviceType: string, hardwareId: string, capabilities: String[]): Promise<string> {
     if (await this.doesDeviceExist(userId, deviceType, hardwareId)) {
-      throw new Error("Device already exists!")
+      throw new HttpError(409, "DeviceAlreadyExists", "Device already exist")
     }
 
     const devicesCollection = this.firestoreClient.collection("devices")
@@ -56,7 +58,7 @@ export class FirebaseDeviceService implements DeviceService {
 
   async updateDeviceCapabilities(deviceId: string, capabilities: string[]) {
     if (!(await this.doesDeviceIdExist(deviceId))) {
-      throw new Error("Device does not exist")
+      throw new HttpError(404, "DeviceNotFound", `Device with id ${deviceId}does not exist`)
     }
 
     const devicesCollection = this.firestoreClient.collection("devices")
@@ -89,7 +91,7 @@ export class FirebaseDeviceService implements DeviceService {
   async getDeviceCapabilities(deviceId: string): Promise<string[]> {
     const doc = await this.firestoreClient.doc(deviceId).get()    
     if (doc.exists) {
-      throw new Error("Device does not exist")
+      throw new HttpError(404, "DeviceNotFound", `Device with id ${deviceId}does not exist`)
     }
 
     return <string[]> doc.data()["capabilities"]
@@ -97,7 +99,7 @@ export class FirebaseDeviceService implements DeviceService {
 
   async updatePushNotificationToken(deviceId: string, newToken: string) {
     if (!(await this.doesDeviceIdExist(deviceId))) {
-      throw new Error("Device does not exist")
+      throw new HttpError(404, "DeviceNotFound", `Device with id ${deviceId}does not exist`)
     }
 
     const devicesCollection = this.firestoreClient.collection("devices")
@@ -107,7 +109,7 @@ export class FirebaseDeviceService implements DeviceService {
   async getPushNotificationToken(deviceId: string): Promise<string> {
     const doc = await this.firestoreClient.doc(deviceId).get()    
     if (doc.exists) {
-      throw new Error("Device does not exist")
+      throw new HttpError(404, "DeviceNotFound", `Device with id ${deviceId}does not exist`)
     }
 
     return <string> doc.data()["push_notification_token"]

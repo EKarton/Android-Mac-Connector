@@ -1,35 +1,14 @@
 import { json, Router } from "express";
-import { Authenticator } from "../authenticator";
-import { DeviceService } from "./device_service";
-import { ResourcePolicyService } from "./resource_policy_service";
+import { Authenticator } from "../services/authenticator";
+import { createAuthenticateMiddleware } from "./middlewares";
+import { DeviceService } from "../services/device_service";
+import { ResourcePolicyService } from "../services/resource_policy_service";
 
 export const createDeviceRouter = (service: DeviceService, authService: Authenticator, resourcePolicyService: ResourcePolicyService) => {
   const router = Router();
 
   // Middleware to authenticate user
-  router.use(async (req, res, next) => {
-    const authHeaderValue = req.header("Authorization")
-
-    if (!authHeaderValue) {
-      throw new Error("Missing Authorization header")
-    }
-
-    if (authHeaderValue.length < 7) {
-      throw new Error("Malformed Authorization header")
-    }
-
-    if (authHeaderValue.substring(0, 6) != "Bearer") {
-      throw new Error("Invalid Authorization header prefix")
-    }
-
-    const accessToken = authHeaderValue.substring(7)
-    console.log(accessToken)
-    const userId = await authService.getUserIdFromToken(accessToken)
-
-    req.headers.user_id = userId
-
-    next()
-  })
+  router.use(createAuthenticateMiddleware(authService))
 
   router.get("/registered", async (req, res) => {
     const userId = req.header("user_id")
@@ -103,7 +82,9 @@ export const createDeviceRouter = (service: DeviceService, authService: Authenti
     await service.updateDeviceCapabilities(deviceId, newCapabilities)
 
     res.setHeader('Content-Type', 'application/json');
-    res.status(200)
+    res.status(200).json({
+      "status": "success"
+    })
   });
 
   router.put("/:deviceId/token", async (req, res) => {
@@ -113,7 +94,9 @@ export const createDeviceRouter = (service: DeviceService, authService: Authenti
     await service.updatePushNotificationToken(deviceId, newToken)
 
     res.setHeader('Content-Type', 'application/json');
-    res.status(200)
+    res.status(200).json({
+      "status": "success"
+    })
   });
 
   return router

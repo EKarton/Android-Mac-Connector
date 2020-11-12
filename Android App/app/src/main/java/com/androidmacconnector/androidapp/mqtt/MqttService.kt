@@ -80,6 +80,7 @@ class MqttService: Service() {
         this.client.subscribe("${getDeviceId(this)}/sms/messages/query-requests", 2)
 
         startForeground()
+        Log.d(LOG_TAG, "Completed onCreate()")
     }
 
     private fun startForeground() {

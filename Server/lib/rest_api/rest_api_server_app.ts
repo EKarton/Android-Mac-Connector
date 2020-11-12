@@ -1,11 +1,12 @@
 import express, { json } from "express";
-import { App } from "./app";
+import { App } from "../app";
 import { Server } from "net"
 import admin from "firebase-admin";
-import { FirebaseDeviceService } from "./devices/device_service";
-import { FirebaseAuthenticator } from "./authenticator";
-import { createDeviceRouter } from "./devices/routes";
-import { FirebaseResourcePolicyService } from "./devices/resource_policy_service";
+import { FirebaseDeviceService } from "../services/device_service";
+import { FirebaseAuthenticator } from "../services/authenticator";
+import { createDeviceRouter } from "./devices_routes";
+import { FirebaseResourcePolicyService } from "../services/resource_policy_service";
+import { handleErrorsMiddleware } from "./middlewares";
 
 export class RestApiServerApp implements App {
   private readonly port = 8080
@@ -26,13 +27,18 @@ export class RestApiServerApp implements App {
     this.app.use(json());
 
     // Middleware to log requests
-    this.app.use((req, res, next) => {
-      console.log(`${req.method}: ${req.url} with payload ${JSON.stringify(req.body)}`)
-      next()
-      console.log(`${res.statusCode}`)
-    })
+    // this.app.use((req, res, next) => {
+    //   console.log(`${req.method}: ${req.url} with payload ${JSON.stringify(req.body)}`)
+    //   next()
+    // })
 
     this.app.use("/api/v1/devices", createDeviceRouter(service, authService, resourcePolicyService))
+
+    // Middleware to handle errors
+    this.app.use((err, req, res, next) => {
+      handleErrorsMiddleware(err, res)
+      next()
+    });
   }
 
   startServer() {
