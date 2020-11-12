@@ -13,6 +13,9 @@
 		1301899A255B924A001BD60D /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 13018999255B924A001BD60D /* Assets.xcassets */; };
 		1301899D255B924A001BD60D /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 1301899C255B924A001BD60D /* Preview Assets.xcassets */; };
 		130189A0255B924A001BD60D /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 1301899E255B924A001BD60D /* LaunchScreen.storyboard */; };
+		1324DD9E255D9E10009BCC0A /* MQTTSubscriptionClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1324DD9D255D9E10009BCC0A /* MQTTSubscriptionClient.swift */; };
+		1324DDA4255DBA62009BCC0A /* MQTTClientAuthObserver.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1324DDA3255DBA62009BCC0A /* MQTTClientAuthObserver.swift */; };
+		1324DDA6255DC004009BCC0A /* MQTTPublisherClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1324DDA5255DC004009BCC0A /* MQTTPublisherClient.swift */; };
 		139CF301255B96D800F9EA05 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 139CF300255B96D800F9EA05 /* GoogleService-Info.plist */; };
 		139CF303255B97D100F9EA05 /* SessionStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 139CF302255B97D100F9EA05 /* SessionStore.swift */; };
 		139CF305255B980200F9EA05 /* SignInView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 139CF304255B980200F9EA05 /* SignInView.swift */; };
@@ -47,6 +50,9 @@
 		1301899F255B924A001BD60D /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		130189A1255B924A001BD60D /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		130189A7255B9277001BD60D /* Mac Catalyst App.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = "Mac Catalyst App.entitlements"; sourceTree = "<group>"; };
+		1324DD9D255D9E10009BCC0A /* MQTTSubscriptionClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MQTTSubscriptionClient.swift; sourceTree = "<group>"; };
+		1324DDA3255DBA62009BCC0A /* MQTTClientAuthObserver.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MQTTClientAuthObserver.swift; sourceTree = "<group>"; };
+		1324DDA5255DC004009BCC0A /* MQTTPublisherClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MQTTPublisherClient.swift; sourceTree = "<group>"; };
 		139CF300255B96D800F9EA05 /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 		139CF302255B97D100F9EA05 /* SessionStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionStore.swift; sourceTree = "<group>"; };
 		139CF304255B980200F9EA05 /* SignInView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SignInView.swift; sourceTree = "<group>"; };
@@ -218,6 +224,9 @@
 			isa = PBXGroup;
 			children = (
 				139CF339255BA0F000F9EA05 /* MQTTClient.swift */,
+				1324DDA3255DBA62009BCC0A /* MQTTClientAuthObserver.swift */,
+				1324DD9D255D9E10009BCC0A /* MQTTSubscriptionClient.swift */,
+				1324DDA5255DC004009BCC0A /* MQTTPublisherClient.swift */,
 			);
 			path = MQTT;
 			sourceTree = "<group>";
@@ -373,8 +382,10 @@
 				139CF30D255B99E800F9EA05 /* Device.swift in Sources */,
 				13018998255B9246001BD60D /* ContentView.swift in Sources */,
 				139CF307255B981000F9EA05 /* SignUpView.swift in Sources */,
+				1324DDA6255DC004009BCC0A /* MQTTPublisherClient.swift in Sources */,
 				13A4D5B2255CB13700414751 /* GetSmsMessageService.swift in Sources */,
 				139CF340255BA16B00F9EA05 /* SmsMessageBubble.swift in Sources */,
+				1324DD9E255D9E10009BCC0A /* MQTTSubscriptionClient.swift in Sources */,
 				139CF305255B980200F9EA05 /* SignInView.swift in Sources */,
 				139CF336255B9F6200F9EA05 /* SmsMessage.swift in Sources */,
 				13A4D5B4255CDC9A00414751 /* SmsMessageRow.swift in Sources */,
@@ -382,6 +393,7 @@
 				139CF30B255B99C000F9EA05 /* DeviceActionsList.swift in Sources */,
 				139CF30F255B9A0800F9EA05 /* DeviceService.swift in Sources */,
 				139CF344255BA27200F9EA05 /* NewSmsMessageView.swift in Sources */,
+				1324DDA4255DBA62009BCC0A /* MQTTClientAuthObserver.swift in Sources */,
 				139CF342255BA18200F9EA05 /* SmsMessagesView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

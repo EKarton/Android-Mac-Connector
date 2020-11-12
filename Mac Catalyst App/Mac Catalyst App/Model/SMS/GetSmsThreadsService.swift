@@ -20,10 +20,12 @@ struct GetSmsThreadsResponsePayload: Codable {
 }
 
 class GetSmsThreadsService: ObservableObject {
-    private var mqttClient: MQTTClient
+    private var mqttSubcription: MQTTSubscriptionClient
+    private var mqttPublisher: MQTTPublisherClient
     
-    init(_ mqttClient: MQTTClient) {
-        self.mqttClient = mqttClient
+    init(_ mqttSubcription: MQTTSubscriptionClient, _ mqttPublisher: MQTTPublisherClient) {
+        self.mqttSubcription = mqttSubcription
+        self.mqttPublisher = mqttPublisher
     }
     
     func fetchSmsThreads(_ device: Device, _ limit: Int, _ start: Int, _ handler: @escaping ([SmsThread], Error?) -> Void) {
@@ -37,6 +39,8 @@ class GetSmsThreadsService: ObservableObject {
             let subscriber = MQTTSubscriber(subscriberTopic)
             
             subscriber.setHandler { msg in
+                print("Got sms threads: \(msg)")
+                
                 guard let json = msg.data(using: .utf8) else {
                     return
                 }
@@ -50,19 +54,22 @@ class GetSmsThreadsService: ObservableObject {
                         return
                     }
 
-                    self.mqttClient.unsubscribe(subscriber) { _ in
+                    self.mqttSubcription.unsubscribe(subscriber) { _ in
                         handler(payload.threads, nil)
                     }
                 } catch {
-                    self.mqttClient.unsubscribe(subscriber) { _ in
+                    self.mqttSubcription.unsubscribe(subscriber) { _ in
                         handler([SmsThread](), error)
                     }
                 }
             }
             
-            self.mqttClient.subscribe(subscriber) { error in
+            self.mqttSubcription.subscribe(subscriber) { error in
+                print("Ready to publish")
                 if error == nil {
-                    self.mqttClient.publish(publishTopic, jsonString)
+                    self.mqttPublisher.publish(publishTopic, jsonString)
+                } else {
+                    handler([SmsThread](), error)
                 }
             }
             

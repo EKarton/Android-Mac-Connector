@@ -18,8 +18,8 @@ struct SmsMessagesView: View {
     var phoneNumber: String
     
     @State private var messages = [SmsMessage]()
-    @State private var sendingMessages = [String]()
     @State private var messageToSend: String = ""
+    @State private var sendingMessages = [String]()
     @State private var isLoadingMessages = false
     
     init(device: Device, threadId: String, contactName: String, phoneNumber: String) {
@@ -97,6 +97,7 @@ struct SmsMessagesView: View {
     }
     
     func refreshMessages() {
+        print(self.isLoadingMessages)
         if self.isLoadingMessages {
             return
         }
@@ -104,6 +105,7 @@ struct SmsMessagesView: View {
         self.isLoadingMessages = true
         
         self.smsMessageService.fetchSmsMessages(self.device, self.threadId, 10000, 0) { (smsMessages: [SmsMessage], error: Error?) in
+            print("Fetched new sms messages")
             
             self.isLoadingMessages = false
             

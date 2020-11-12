@@ -21,10 +21,18 @@ struct GetSmsMessagesResponsePayload: Codable {
     var messages: [SmsMessage]
 }
 class GetSmsMessageService: ObservableObject {
-    private var mqttClient: MQTTClient
+    private var jsonEncoder = JSONEncoder()
+    private var jsonDecoder = JSONDecoder()
     
-    init(_ mqttClient: MQTTClient) {
-        self.mqttClient = mqttClient
+    private var mqttSubcription: MQTTSubscriptionClient
+    private var mqttPublisher: MQTTPublisherClient
+    
+    init(_ mqttSubcription: MQTTSubscriptionClient, _ mqttPublisher: MQTTPublisherClient) {
+        self.mqttSubcription = mqttSubcription
+        self.mqttPublisher = mqttPublisher
+        
+        self.jsonEncoder.keyEncodingStrategy = .convertToSnakeCase
+        self.jsonDecoder.keyDecodingStrategy = .convertFromSnakeCase
     }
     
     func fetchSmsMessages(_ device: Device, _ threadId: String, _ limit: Int, _ start: Int, _ handler: @escaping ([SmsMessage], Error?) -> Void) {
@@ -35,9 +43,6 @@ class GetSmsMessageService: ObservableObject {
                 threadId: threadId, limit: limit, start: start
             )
             
-            let jsonEncoder = JSONEncoder()
-            jsonEncoder.keyEncodingStrategy = .convertToSnakeCase
-            
             let jsonData = try jsonEncoder.encode(publishPayload)
             let jsonString = String(data: jsonData, encoding: .utf8)!
             
@@ -45,15 +50,13 @@ class GetSmsMessageService: ObservableObject {
             let subscriber = MQTTSubscriber(subscriberTopic)
             
             subscriber.setHandler { msg in
+                print("Got sms msg: \(msg)")
                 guard let json = msg.data(using: .utf8) else {
                     return
                 }
                 
-                let jsonDecoder = JSONDecoder()
-                jsonDecoder.keyDecodingStrategy = .convertFromSnakeCase
-                
                 do {
-                    let payload = try jsonDecoder.decode(GetSmsMessagesResponsePayload.self, from: json)
+                    let payload = try self.jsonDecoder.decode(GetSmsMessagesResponsePayload.self, from: json)
                     let isProperResponse = (payload.limit == publishPayload.limit) &&
                             (payload.start == publishPayload.start) &&
                             (payload.threadId == publishPayload.threadId)
@@ -62,19 +65,19 @@ class GetSmsMessageService: ObservableObject {
                         return
                     }
                     
-                    self.mqttClient.unsubscribe(subscriber) { _ in
+                    self.mqttSubcription.unsubscribe(subscriber) { _ in
                         handler(payload.messages, nil)
                     }
                 } catch {
-                    self.mqttClient.unsubscribe(subscriber) { _ in
+                    self.mqttSubcription.unsubscribe(subscriber) { _ in
                         handler([SmsMessage](), error)
                     }
                 }
             }
             
-            self.mqttClient.subscribe(subscriber) { error in
+            self.mqttSubcription.subscribe(subscriber) { error in
                 if error == nil {
-                    self.mqttClient.publish(publishTopic, jsonString)
+                    self.mqttPublisher.publish(publishTopic, jsonString)
                 }
             }
             

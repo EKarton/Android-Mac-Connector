@@ -23,10 +23,14 @@ struct SendSmsResultsPayload: Codable {
 class SmsSenderService: ObservableObject {
     private var jsonEncoder = JSONEncoder()
     private var jsonDecoder = JSONDecoder()
-    private var mqttClient: MQTTClient
     
-    init(_ mqttClient: MQTTClient) {
-        self.mqttClient = mqttClient
+    private var mqttSubcription: MQTTSubscriptionClient
+    private var mqttPublisher: MQTTPublisherClient
+    
+    init(_ mqttSubcription: MQTTSubscriptionClient, _ mqttPublisher: MQTTPublisherClient) {
+        self.mqttSubcription = mqttSubcription
+        self.mqttPublisher = mqttPublisher
+        
         self.jsonEncoder.keyEncodingStrategy = .convertToSnakeCase
         self.jsonDecoder.keyDecodingStrategy = .convertFromSnakeCase
     }
@@ -44,7 +48,7 @@ class SmsSenderService: ObservableObject {
             let subscriber = MQTTSubscriber(subscriberTopic)
             
             subscriber.setHandler { msg in
-                print("Got:", msg)
+                print("Got sms sent results:", msg)
                 guard let json = msg.data(using: .utf8) else {
                     return
                 }
@@ -55,24 +59,24 @@ class SmsSenderService: ObservableObject {
                         return
                     }
 
-                    self.mqttClient.unsubscribe(subscriber) { _ in
+                    self.mqttSubcription.unsubscribe(subscriber) { _ in
                         handler(nil)
                     }
                 } catch {
-                    self.mqttClient.unsubscribe(subscriber) { _ in
+                    self.mqttSubcription.unsubscribe(subscriber) { _ in
                         handler(error)
                     }
                 }
             }
             
-            self.mqttClient.subscribe(subscriber) { error in
+            self.mqttSubcription.subscribe(subscriber) { error in
                 guard (error == nil) else {
                     print("Got error: \(error.debugDescription)")
                     handler(error)
                     return
                 }
                 
-                self.mqttClient.publish(publishTopic, jsonString)
+                self.mqttPublisher.publish(publishTopic, jsonString)
             }
             
         } catch {

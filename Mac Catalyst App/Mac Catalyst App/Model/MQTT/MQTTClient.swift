@@ -9,28 +9,6 @@
 import SwiftUI
 import CocoaMQTT
 
-class MQTTSubscriber: Hashable {
-    var id = UUID()
-    var topic: String
-    var handler: ((String) -> Void)? = nil
-    
-    init(_ topic: String) {
-        self.topic = topic
-    }
-    
-    func setHandler(_ handler: @escaping (String) -> Void) {
-        self.handler = handler
-    }
-    
-    func hash(into hasher: inout Hasher) {
-        hasher.combine(self.id)
-    }
-    
-    static func == (lhs: MQTTSubscriber, rhs: MQTTSubscriber) -> Bool {
-        return lhs.id == rhs.id
-    }
-}
-
 class MQTTEventHandler: Hashable {
     var id = UUID()
     var handler: (Error?) -> Void
@@ -48,16 +26,54 @@ class MQTTEventHandler: Hashable {
     }
 }
 
-enum MQTTClientErrors: Error {
-    case SubscriptionFailed(topic: String)
+class MQTTDelegateEventHandler<T>: Hashable {
+    var id = UUID()
+    var handler: T?
+    
+    init(_ handler: T) {
+        self.handler = handler
+    }
+    
+    func hash(into hasher: inout Hasher) {
+        hasher.combine(self.id)
+    }
+    
+    static func == (lhs: MQTTDelegateEventHandler, rhs: MQTTDelegateEventHandler) -> Bool {
+        return lhs.id == rhs.id
+    }
 }
 
-class MQTTClient: CocoaMQTTDelegate, ObservableObject {
-    private var topicToSubscribers = Dictionary<String, Set<MQTTSubscriber>>()
-    private var topicToOnSubscribeHandlers = Dictionary<String, Set<MQTTEventHandler>>()
-    private var topicToOnUnsubscribeHandlers = Dictionary<String, Set<MQTTEventHandler>>()
+// MARK: The event listeners
+class MQTTDidConnectAckListener: MQTTDelegateEventHandler<(CocoaMQTT, CocoaMQTTConnAck) -> Void> {}
+class MQTTDidDisconnectistener: MQTTDelegateEventHandler<(CocoaMQTT, Error?) -> Void> {}
+
+class MQTTDidPublishMessageListener: MQTTDelegateEventHandler<(CocoaMQTT, CocoaMQTTMessage, UInt16) -> Void> {}
+class MQTTDidPublishAckListener: MQTTDelegateEventHandler<(CocoaMQTT, UInt16) -> Void> {}
+
+class MQTTDidSubscribeAckListener: MQTTDelegateEventHandler<(CocoaMQTT, NSDictionary, [String]) -> Void> {}
+class MQTTDidUnsubscribeAckListener: MQTTDelegateEventHandler<(CocoaMQTT, [String]) -> Void> {}
+class MQTTDidReceiveMessageListener: MQTTDelegateEventHandler<(CocoaMQTT, CocoaMQTTMessage, UInt16) -> Void> {}
+
+class MQTTDidPingListener: MQTTDelegateEventHandler<(CocoaMQTT) -> Void> {}
+class MQTTDidReceivePongListener: MQTTDelegateEventHandler<(CocoaMQTT) -> Void> {}
+
+// MARK: The main class
+class MQTTClient: CocoaMQTTDelegate {
+    internal var mqtt: CocoaMQTT
     
-    private var mqtt: CocoaMQTT
+    public var mqttDidConnectAckListener: MQTTDidConnectAckListener? = nil
+    
+    public var mqttDidPublishMessageListener: MQTTDidPublishMessageListener? = nil
+    public var mqttDidPublishAckListener: MQTTDidPublishAckListener? = nil
+    
+    public var mqttDidSubscribeTopicsListener: MQTTDidSubscribeAckListener? = nil
+    public var mqttDidUnsubscribeTopicsListener: MQTTDidUnsubscribeAckListener? = nil
+    public var mqttDidReceiveMessageListener: MQTTDidReceiveMessageListener? = nil
+    
+    public var mqttDidPingListener: MQTTDidPingListener? = nil
+    public var mqttDidReceivePongListener: MQTTDidReceivePongListener? = nil
+    
+    public var mqttDidDisconnectListener: MQTTDidDisconnectistener? = nil
     
     init(_ host: String, _ port: UInt16, _ clientId: String, _ username: String, _ password: String) {
         let websocket = CocoaMQTTWebSocket()
@@ -86,136 +102,39 @@ class MQTTClient: CocoaMQTTDelegate, ObservableObject {
         self.mqtt.disconnect()
     }
     
-    func subscribe(_ subscriber: MQTTSubscriber, _ handler: @escaping (Error?) -> Void) {
-        if self.topicToSubscribers[subscriber.topic] == nil {
-            print("Subscribing to \(subscriber.topic)")
-            
-            self.mqtt.subscribe(subscriber.topic, qos: .qos2)
-            self.topicToOnSubscribeHandlers[subscriber.topic] = Set<MQTTEventHandler>()
-            self.topicToSubscribers[subscriber.topic] = Set<MQTTSubscriber>()
-        }
-        
-        self.topicToSubscribers[subscriber.topic]?.insert(subscriber)
-        self.topicToOnSubscribeHandlers[subscriber.topic]?.insert(MQTTEventHandler(handler))
-    }
-    
-    func unsubscribe(_ subscriber: MQTTSubscriber, _ handler: @escaping (Error?) -> Void) {
-        guard let subscribers = self.topicToSubscribers[subscriber.topic] else {
-            fatalError("Topic \(subscriber.topic) was never subscribed to before!")
-        }
-                
-        if subscribers.count == 1 {
-            self.mqtt.unsubscribe(subscriber.topic)
-            self.topicToSubscribers.removeValue(forKey: subscriber.topic)
-            
-        } else {
-            self.topicToSubscribers[subscriber.topic]?.remove(subscriber)
-        }
-        
-        if self.topicToOnUnsubscribeHandlers[subscriber.topic] == nil {
-            self.topicToOnUnsubscribeHandlers[subscriber.topic] = Set<MQTTEventHandler>()
-        }
-        self.topicToOnUnsubscribeHandlers[subscriber.topic]?.insert(MQTTEventHandler(handler))
-    }
-    
-    func publish(_ topic: String, _ message: String) {
-        print("Publishing \(message) to \(topic)")
-        self.mqtt.publish(topic, withString: message, qos: .qos2, retained: true)
-    }
-    
     internal func mqtt(_ mqtt: CocoaMQTT, didConnectAck ack: CocoaMQTTConnAck) {
-        print("didConnectAck: \(ack)")
+        self.mqttDidConnectAckListener?.handler?(mqtt, ack)
     }
     
     internal func mqtt(_ mqtt: CocoaMQTT, didPublishMessage message: CocoaMQTTMessage, id: UInt16) {
-        print("didPublishMessage: \(message), \(id)")
+        self.mqttDidPublishMessageListener?.handler?(mqtt, message, id)
     }
     
     internal func mqtt(_ mqtt: CocoaMQTT, didPublishAck id: UInt16) {
-        print("didPublishAck: \(id)")
-    }
-    
-    internal func mqtt(_ mqtt: CocoaMQTT, didReceiveMessage message: CocoaMQTTMessage, id: UInt16) {
-        print("didReceiveMessage: \(String(bytes: message.payload, encoding: .utf8) ?? "no data")")
-        
-        guard let payload = String(bytes: message.payload, encoding: .utf8) else {
-            print("Not a valid UTF-8 sequence")
-            return
-        }
-        
-        guard let subscribers = topicToSubscribers[message.topic] else {
-            fatalError("No subscribers!")
-        }
-                
-        subscribers.forEach { subscriber in
-            subscriber.handler?(payload)
-        }
+        self.mqttDidPublishAckListener?.handler?(mqtt, id)
     }
     
     internal func mqtt(_ mqtt: CocoaMQTT, didSubscribeTopics success: NSDictionary, failed: [String]) {
-        print("didSubscribeTopics: \(success), \(failed)")
-        
-        for (topic, _) in success {
-            if let subscribers = self.topicToOnSubscribeHandlers[topic as! String] {
-                subscribers.forEach { subscriber in
-                    subscriber.handler(nil)
-                }
-            }
-            
-            self.topicToOnSubscribeHandlers[topic as! String]?.removeAll()
-            self.topicToOnSubscribeHandlers.removeValue(forKey: topic as! String)
-        }
-        
-        for failedTopic in failed {
-            guard let subscribers = self.topicToOnSubscribeHandlers[failedTopic] else {
-                return
-            }
-
-            subscribers.forEach { subscriber in
-                subscriber.handler(MQTTClientErrors.SubscriptionFailed(topic: failedTopic))
-            }
-            
-            self.topicToOnSubscribeHandlers[failedTopic]?.removeAll()
-            self.topicToOnSubscribeHandlers.removeValue(forKey: failedTopic)
-        }
+        self.mqttDidSubscribeTopicsListener?.handler?(mqtt, success, failed)
     }
     
     internal func mqtt(_ mqtt: CocoaMQTT, didUnsubscribeTopics topics: [String]) {
-        print("didUnsubscribeTopics: \(topics)")
-        
-        for topic in topics {
-            if let eventListeners = self.topicToOnUnsubscribeHandlers[topic] {
-                eventListeners.forEach { eventListener in
-                    eventListener.handler(nil)
-                }
-            }
-            
-            self.topicToOnUnsubscribeHandlers[topic]?.removeAll()
-            self.topicToOnUnsubscribeHandlers.removeValue(forKey: topic)
-        }
+        self.mqttDidUnsubscribeTopicsListener?.handler?(mqtt, topics)
+    }
+    
+    internal func mqtt(_ mqtt: CocoaMQTT, didReceiveMessage message: CocoaMQTTMessage, id: UInt16) {
+        self.mqttDidReceiveMessageListener?.handler?(mqtt, message, id)
     }
     
     internal func mqttDidPing(_ mqtt: CocoaMQTT) {
-        print("mqttDidPing")
+        self.mqttDidPingListener?.handler?(mqtt)
     }
-    
+
     internal func mqttDidReceivePong(_ mqtt: CocoaMQTT) {
-        print("mqttDidReceivePong")
+        self.mqttDidReceivePongListener?.handler?(mqtt)
     }
     
     internal func mqttDidDisconnect(_ mqtt: CocoaMQTT, withError err: Error?) {
-        print("mqttDidDisconnect: \(String(describing: err?.localizedDescription))")
-    }
-}
-
-class MQTTAuthObserverClient: MQTTClient, SessionChangedListener {
-    func handler(_ oldSession: Session, _ newSession: Session) {
-        print("MQTTAuthObserverClient(): Old: \(oldSession) vs \(newSession)")
-        super.disconnect()
-        super.setPassword(newSession.accessToken)
-        
-        if (newSession.isSignedIn) {
-            super.connect()
-        }
+        self.mqttDidDisconnectListener?.handler?(mqtt, err)
     }
 }

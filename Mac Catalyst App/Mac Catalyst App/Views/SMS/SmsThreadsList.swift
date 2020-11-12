@@ -51,12 +51,14 @@ struct SmsThreadsList: View {
     }
     
     private func onAppearHandler() {
+        print("Refreshing sms threads")
         self.smsReader.fetchSmsThreads(self.device, 10000, 0) { (smsThreads, error) in
             guard error == nil else {
                 print("Error encountered: \(error.debugDescription)")
                 return
             }
             
+            print("Refreshed sms threads")
             self.smsThreads = smsThreads
         }
     }
