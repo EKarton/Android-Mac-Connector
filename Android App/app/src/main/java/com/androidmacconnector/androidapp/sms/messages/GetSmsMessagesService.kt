@@ -36,8 +36,7 @@ class GetSmsMessagesServiceImpl : GetSmsMessagesService {
         start: Int
     ): List<SmsMessage> {
 
-        val projection =
-            arrayOf("_id", "address", "person", "date", "body", "read", "date", "type");
+        val projection = arrayOf("_id", "address", "person", "date", "body", "read", "date", "type");
         val selection = "thread_id = ?";
         val selectionArgs = arrayOf(threadId)
         val cursor = contentResolver.query(

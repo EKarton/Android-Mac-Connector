@@ -22,6 +22,8 @@ struct SmsMessagesView: View {
     @State private var sendingMessages = [String]()
     @State private var isLoadingMessages = false
     
+    private var refreshMessagesSemaphore = DispatchSemaphore(value: 1)
+    
     init(device: Device, threadId: String, contactName: String, phoneNumber: String) {
         self.device = device
         self.threadId = threadId
@@ -49,7 +51,7 @@ struct SmsMessagesView: View {
                     ForEach(self.messages, id: \.messageId) { (message: SmsMessage) in
                         SmsMessageRow(
                             isCurrentUser: message.phoneNumber == self.device.phoneNumber,
-                            message: message.body
+                            message: message.body + " | " + message.phoneNumber
                         )
                     }
                     .scaleEffect(x: 1, y: -1, anchor: .center)
@@ -73,7 +75,7 @@ struct SmsMessagesView: View {
             }
             .padding()
         }
-        .navigationBarTitle(Text(self.contactName), displayMode: .inline)
+        .navigationBarTitle(Text(self.contactName + "|" + self.threadId), displayMode: .inline)
         .navigationBarItems(trailing:
             Button(action: self.refreshMessages) {
                 Image(systemName: "arrow.clockwise")
@@ -97,26 +99,36 @@ struct SmsMessagesView: View {
     }
     
     func refreshMessages() {
-        print(self.isLoadingMessages)
-        if self.isLoadingMessages {
+        print("Waiting for semaphore to finish")
+        refreshMessagesSemaphore.wait()
+        
+        print("Semaphore finished! Now refreshing msgs recursively")
+        refreshMessagesRecursively(1)
+    }
+    
+    private let cap = 64000.0
+    private let base = 500.0
+    private let maxAttempts = 10
+    
+    func refreshMessagesRecursively(_ attempt: Int) {
+        if attempt >= maxAttempts {
+            self.refreshMessagesSemaphore.signal()
             return
         }
+        print("refreshMessagesRecursively: \(attempt)")
         
-        self.isLoadingMessages = true
-        
-        self.smsMessageService.fetchSmsMessages(self.device, self.threadId, 10000, 0) { (smsMessages: [SmsMessage], error: Error?) in
-            print("Fetched new sms messages")
-            
-            self.isLoadingMessages = false
-            
-            if let error = error {
-                print("Encountered error when refreshing messages: \(error.localizedDescription)")
+        self.smsMessageService.fetchSmsMessages(self.device, self.threadId, 10000, 0) { (msgs: [SmsMessage], err: Error?) in
+            if let err = err {
+                print("Error encountered when refreshing messages: \(err)")
+                self.refreshMessagesSemaphore.signal()
                 return
             }
             
+            self.messages = msgs
+            
             var i = 0
             while (i < self.sendingMessages.count){
-                for msg in smsMessages {
+                for msg in msgs {
                     if self.sendingMessages.contains(msg.body) {
                         self.sendingMessages.remove(at: i)
                         i -= 1
@@ -125,7 +137,19 @@ struct SmsMessagesView: View {
                 i += 1
             }
             
-            self.messages = smsMessages
+            if self.sendingMessages.count == 0 {
+                self.refreshMessagesSemaphore.signal()
+                return
+            }
+            
+            let temp = min(self.cap, self.base * pow(2, Double(attempt)))
+            let sleepInMs = temp / 2 + Double.random(in: 0...(temp / 2))
+            
+            print("Did not get msgs that were sent. Retrying for \(sleepInMs) ms")
+            
+            DispatchQueue.main.asyncAfter(deadline: .now() + sleepInMs / 1000.0) {
+                self.refreshMessagesRecursively(attempt + 1)
+            }
         }
     }
 }

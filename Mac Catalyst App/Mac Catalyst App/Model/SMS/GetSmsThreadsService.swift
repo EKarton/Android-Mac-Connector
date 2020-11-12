@@ -39,7 +39,7 @@ class GetSmsThreadsService: ObservableObject {
             let subscriber = MQTTSubscriber(subscriberTopic)
             
             subscriber.setHandler { msg in
-                print("Got sms threads: \(msg)")
+                print("Got sms threads")
                 
                 guard let json = msg.data(using: .utf8) else {
                     return

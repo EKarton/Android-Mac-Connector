@@ -50,7 +50,7 @@ class GetSmsMessageService: ObservableObject {
             let subscriber = MQTTSubscriber(subscriberTopic)
             
             subscriber.setHandler { msg in
-                print("Got sms msg: \(msg)")
+                print("Got sms msg")
                 guard let json = msg.data(using: .utf8) else {
                     return
                 }

@@ -74,6 +74,8 @@ class GetSmsMessagesBroadcastReceiver: BroadcastReceiver() {
             }
             payload.put("messages", body)
 
+            Log.d(LOG_TAG, payload.toString())
+
             // Submit a job to our MQTT service with details for publishing
             val startIntent = Intent(this.applicationContext, MqttService::class.java)
             startIntent.action = MqttService.PUBLISH_INTENT_ACTION
