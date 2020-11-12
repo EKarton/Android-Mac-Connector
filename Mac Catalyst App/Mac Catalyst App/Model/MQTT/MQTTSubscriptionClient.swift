@@ -11,18 +11,19 @@ import CocoaMQTT
 
 enum MQTTClientErrors: Error {
     case SubscriptionFailed(topic: String)
+    case SubscriptionClosed(topic: String)
 }
 
 class MQTTSubscriber: Hashable {
     var id = UUID()
     var topic: String
-    var handler: ((String) -> Void)? = nil
+    var handler: ((String?, Error?) -> Void)? = nil
     
     init(_ topic: String) {
         self.topic = topic
     }
     
-    func setHandler(_ handler: @escaping (String) -> Void) {
+    func setHandler(_ handler: @escaping (String?, Error?) -> Void) {
         self.handler = handler
     }
     
@@ -52,7 +53,7 @@ class MQTTSubscriber: Hashable {
 //    5. client.subscribe("topic") { ... }
 // it will only call client.mqtt.unsubscribe("topic") once and wait until a unsubscribeAck
 
-class MQTTSubscriptionClient {
+class MQTTSubscriptionClient: ObservableObject {
     
     // Is a list of subscriptions that was called by this.mqttClient.subscribe() and received a subscribeAck
     private var currentSubscriptions = Set<String>()
@@ -82,14 +83,7 @@ class MQTTSubscriptionClient {
         self.client.mqttDidReceiveMessageListener = MQTTDidReceiveMessageListener(didReceiveMessageHandler)
     }
     
-    func subscribe(_ subscriber: MQTTSubscriber, _ handler: @escaping (Error?) -> Void) {
-        let topic = subscriber.topic
-        
-        if topicToSubscribers[topic] == nil {
-            topicToSubscribers[topic] = Set<MQTTSubscriber>()
-        }
-        topicToSubscribers[topic]?.insert(subscriber)
-        
+    func subscribe(_ topic: String, _ handler: @escaping (Error?) -> Void) {
         if currentSubscriptions.contains(topic) {
             handler(nil)
             return
@@ -108,9 +102,26 @@ class MQTTSubscriptionClient {
         client.mqtt.subscribe(topic, qos: .qos2)
     }
     
-    func unsubscribe(_ subscriber: MQTTSubscriber, _ handler: @escaping (Error?) -> Void) {
+    func addSubscriberHandle(_ subscriber: MQTTSubscriber) {
         let topic = subscriber.topic
         
+        if topicToSubscribers[topic] == nil {
+            topicToSubscribers[topic] = Set<MQTTSubscriber>()
+        }
+        topicToSubscribers[topic]?.insert(subscriber)
+    }
+    
+    func removeSubscriberHandle(_ subscriber: MQTTSubscriber) {
+        let topic = subscriber.topic
+        
+        topicToSubscribers[topic]?.remove(subscriber)
+        
+        if topicToSubscribers[topic]?.count == 0 {
+            topicToSubscribers.removeValue(forKey: topic)
+        }
+    }
+    
+    func unsubscribe(_ topic: String, _ handler: @escaping (Error?) -> Void) {
         if !currentSubscriptions.contains(topic) {
             handler(nil)
             return
@@ -167,6 +178,9 @@ class MQTTSubscriptionClient {
             }
             topicToUnsubscribeCallbacks.removeValue(forKey: topic)
             
+            topicToSubscribers[topic]?.forEach { sub in
+                sub.handler?(nil, MQTTClientErrors.SubscriptionClosed(topic: topic))
+            }
             topicToSubscribers.removeValue(forKey: topic)
         }
     }
@@ -177,17 +191,9 @@ class MQTTSubscriptionClient {
         }
         
         print("didReceiveMessage: \(payload)")
-        
-        if self.topicToSubscribers[message.topic] == nil {
-            fatalError("No subscribers!")
-        }
-        
-        if self.topicToSubscribers[message.topic]?.count == 0 {
-            fatalError("No subscribers!")
-        }
 
         self.topicToSubscribers[message.topic]?.forEach { sub in
-            sub.handler?(payload)
+            sub.handler?(payload, nil)
         }
     }
 }

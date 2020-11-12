@@ -23,56 +23,57 @@ class GetSmsThreadsService: ObservableObject {
     private var mqttSubcription: MQTTSubscriptionClient
     private var mqttPublisher: MQTTPublisherClient
     
+    private var jsonDecoder = JSONDecoder()
+    
     init(_ mqttSubcription: MQTTSubscriptionClient, _ mqttPublisher: MQTTPublisherClient) {
         self.mqttSubcription = mqttSubcription
         self.mqttPublisher = mqttPublisher
+        
+        self.jsonDecoder.keyDecodingStrategy = .convertFromSnakeCase
+        
     }
     
     func fetchSmsThreads(_ device: Device, _ limit: Int, _ start: Int, _ handler: @escaping ([SmsThread], Error?) -> Void) {
-        do {
-            let publishTopic = "\(device.id)/sms/threads/query-requests"
-            let publishPayload = GetSmsThreadsRequestPayload(limit: limit, start: start)
-            let jsonData = try JSONEncoder().encode(publishPayload)
-            let jsonString = String(data: jsonData, encoding: .utf8)!
+        let publishTopic = "\(device.id)/sms/threads/query-requests"
+        let publishPayload = GetSmsThreadsRequestPayload(limit: limit, start: start)
+        let jsonData = try! JSONEncoder().encode(publishPayload)
+        let jsonString = String(data: jsonData, encoding: .utf8)!
+        
+        let subscriber = MQTTSubscriber("\(device.id)/sms/threads/query-results")
+        subscriber.setHandler { (msg, err) in
+            print("Got sms threads results")
             
-            let subscriberTopic = "\(device.id)/sms/threads/query-results"
-            let subscriber = MQTTSubscriber(subscriberTopic)
-            
-            subscriber.setHandler { msg in
-                print("Got sms threads")
-                
-                guard let json = msg.data(using: .utf8) else {
-                    return
-                }
-                
-                let jsonDecoder = JSONDecoder()
-                jsonDecoder.keyDecodingStrategy = .convertFromSnakeCase
-                
-                do {
-                    let payload = try jsonDecoder.decode(GetSmsThreadsResponsePayload.self, from: json)
-                    guard payload.limit == publishPayload.limit && payload.start == publishPayload.start else {
-                        return
-                    }
-
-                    self.mqttSubcription.unsubscribe(subscriber) { _ in
-                        handler(payload.threads, nil)
-                    }
-                } catch {
-                    self.mqttSubcription.unsubscribe(subscriber) { _ in
-                        handler([SmsThread](), error)
-                    }
-                }
+            guard err == nil else {
+                self.mqttSubcription.removeSubscriberHandle(subscriber)
+                handler([SmsThread](), err)
+                return
             }
             
-            self.mqttSubcription.subscribe(subscriber) { error in
-                print("Ready to publish")
-                if error == nil {
-                    self.mqttPublisher.publish(publishTopic, jsonString)
-                } else {
-                    handler([SmsThread](), error)
-                }
+            guard let msg = msg else {
+                self.mqttSubcription.removeSubscriberHandle(subscriber)
+                handler([SmsThread](), nil)
+                return
             }
             
-        } catch { handler([SmsThread](), error) }
+            guard let json = msg.data(using: .utf8) else {
+                handler([SmsThread](), nil)
+                return
+            }
+            
+            guard let payload = try? self.jsonDecoder.decode(GetSmsThreadsResponsePayload.self, from: json) else {
+                handler([SmsThread](), nil)
+                return
+            }
+            
+            guard payload.limit == publishPayload.limit && payload.start == publishPayload.start else {
+                return
+            }
+            
+            self.mqttSubcription.removeSubscriberHandle(subscriber)
+            handler(payload.threads, nil)
+        }
+        
+        self.mqttSubcription.addSubscriberHandle(subscriber)
+        self.mqttPublisher.publish(publishTopic, jsonString)
     }
 }

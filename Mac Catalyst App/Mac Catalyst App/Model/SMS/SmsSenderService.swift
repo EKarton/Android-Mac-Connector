@@ -37,51 +37,52 @@ class SmsSenderService: ObservableObject {
     
     func sendSms(_ device: Device, _ phoneNumber: String, _ message: String, _ handler: @escaping (Error?) -> Void) {
         print("Sending message \(message) to \(phoneNumber)")
-        do {
-            let publishTopic = "\(device.id)/send-sms-request"
-            let publishPayload = SendSmsRequestPayload(phone_number: phoneNumber, message: message)
+        
+        let publishTopic = "\(device.id)/send-sms-request"
+        let publishPayload = SendSmsRequestPayload(phone_number: phoneNumber, message: message)
+        
+        let jsonData = try! jsonEncoder.encode(publishPayload)
+        let jsonString = String(data: jsonData, encoding: .utf8)!
+        
+        let subscriber = MQTTSubscriber("\(device.id)/send-sms-results")
+        
+        subscriber.setHandler { (msg, err) in
+            print("Got sent sms results:", msg!)
             
-            let jsonData = try jsonEncoder.encode(publishPayload)
-            let jsonString = String(data: jsonData, encoding: .utf8)!
-            
-            let subscriberTopic = "\(device.id)/send-sms-results"
-            let subscriber = MQTTSubscriber(subscriberTopic)
-            
-            subscriber.setHandler { msg in
-                print("Got sms sent results:", msg)
-                guard let json = msg.data(using: .utf8) else {
-                    return
-                }
-                
-                do {
-                    let payload = try self.jsonDecoder.decode(SendSmsResultsPayload.self, from: json)
-                    guard payload.messageId == publishPayload.messageId else {
-                        return
-                    }
-
-                    self.mqttSubcription.unsubscribe(subscriber) { _ in
-                        handler(nil)
-                    }
-                } catch {
-                    self.mqttSubcription.unsubscribe(subscriber) { _ in
-                        handler(error)
-                    }
-                }
+            guard err == nil else {
+                self.mqttSubcription.removeSubscriberHandle(subscriber)
+                handler(err)
+                return
             }
             
-            self.mqttSubcription.subscribe(subscriber) { error in
-                guard (error == nil) else {
-                    print("Got error: \(error.debugDescription)")
-                    handler(error)
-                    return
-                }
-                
-                self.mqttPublisher.publish(publishTopic, jsonString)
+            guard let msg = msg else {
+                self.mqttSubcription.removeSubscriberHandle(subscriber)
+                handler(nil)
+                return
             }
             
-        } catch {
-            print("Encountered error when sending msg: \(error)")
-            handler(error)
+            guard let json = msg.data(using: .utf8) else {
+                self.mqttSubcription.removeSubscriberHandle(subscriber)
+                handler(nil)
+                return
+            }
+            
+            guard let payload = try? self.jsonDecoder.decode(SendSmsResultsPayload.self, from: json) else {
+                self.mqttSubcription.removeSubscriberHandle(subscriber)
+                handler(nil)
+                return
+            }
+            
+            // Check if the msg is for us, and if not, we keep on waiting
+            guard payload.messageId == publishPayload.messageId else {
+                return
+            }
+            
+            self.mqttSubcription.removeSubscriberHandle(subscriber)
+            handler(nil)
         }
+        
+        self.mqttSubcription.addSubscriberHandle(subscriber)
+        self.mqttPublisher.publish(publishTopic, jsonString)
     }
 }

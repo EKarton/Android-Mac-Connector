@@ -33,6 +33,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
             let contentView = ContentView()
                 .environmentObject(sessionStore)
                 .environmentObject(DeviceService())
+                .environmentObject(mqttSubscriptionClient)
                 .environmentObject(GetSmsThreadsService(mqttSubscriptionClient, mqttPublisherClient))
                 .environmentObject(GetSmsMessageService(mqttSubscriptionClient, mqttPublisherClient))
                 .environmentObject(SmsSenderService(mqttSubscriptionClient, mqttPublisherClient))

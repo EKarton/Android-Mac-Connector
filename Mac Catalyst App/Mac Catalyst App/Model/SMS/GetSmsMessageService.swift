@@ -36,51 +36,56 @@ class GetSmsMessageService: ObservableObject {
     }
     
     func fetchSmsMessages(_ device: Device, _ threadId: String, _ limit: Int, _ start: Int, _ handler: @escaping ([SmsMessage], Error?) -> Void) {
+        let publishTopic = "\(device.id)/sms/messages/query-requests"
+        let publishPayload = GetSmsMessagesRequestPayload(
+            threadId: threadId, limit: limit, start: start
+        )
         
-        do {
-            let publishTopic = "\(device.id)/sms/messages/query-requests"
-            let publishPayload = GetSmsMessagesRequestPayload(
-                threadId: threadId, limit: limit, start: start
-            )
+        let jsonData = try! jsonEncoder.encode(publishPayload)
+        let jsonString = String(data: jsonData, encoding: .utf8)!
+        
+        let subscriber = MQTTSubscriber("\(device.id)/sms/messages/query-results")
+        subscriber.setHandler { (msg, err) in
+            print("Got sms msg results")
             
-            let jsonData = try jsonEncoder.encode(publishPayload)
-            let jsonString = String(data: jsonData, encoding: .utf8)!
-            
-            let subscriberTopic = "\(device.id)/sms/messages/query-results"
-            let subscriber = MQTTSubscriber(subscriberTopic)
-            
-            subscriber.setHandler { msg in
-                print("Got sms msg")
-                guard let json = msg.data(using: .utf8) else {
-                    return
-                }
-                
-                do {
-                    let payload = try self.jsonDecoder.decode(GetSmsMessagesResponsePayload.self, from: json)
-                    let isProperResponse = (payload.limit == publishPayload.limit) &&
-                            (payload.start == publishPayload.start) &&
-                            (payload.threadId == publishPayload.threadId)
-                    
-                    if !isProperResponse {
-                        return
-                    }
-                    
-                    self.mqttSubcription.unsubscribe(subscriber) { _ in
-                        handler(payload.messages, nil)
-                    }
-                } catch {
-                    self.mqttSubcription.unsubscribe(subscriber) { _ in
-                        handler([SmsMessage](), error)
-                    }
-                }
+            guard err == nil else {
+                self.mqttSubcription.removeSubscriberHandle(subscriber)
+                handler([SmsMessage](), err)
+                return
             }
             
-            self.mqttSubcription.subscribe(subscriber) { error in
-                if error == nil {
-                    self.mqttPublisher.publish(publishTopic, jsonString)
-                }
+            guard let msg = msg else {
+                self.mqttSubcription.removeSubscriberHandle(subscriber)
+                handler([SmsMessage](), nil)
+                return
             }
             
-        } catch { handler([SmsMessage](), error) }
+            guard let json = msg.data(using: .utf8) else {
+                self.mqttSubcription.removeSubscriberHandle(subscriber)
+                handler([SmsMessage](), nil)
+                return
+            }
+                        
+            guard let payload = try? self.jsonDecoder.decode(GetSmsMessagesResponsePayload.self, from: json) else {
+                self.mqttSubcription.removeSubscriberHandle(subscriber)
+                handler([SmsMessage](), nil)
+                return
+            }
+            
+            // Check if the messaeg is for us, and if not, we keep waiting for the message to come to us
+            let isProperResponse = (payload.limit == publishPayload.limit) &&
+                (payload.start == publishPayload.start) &&
+                (payload.threadId == publishPayload.threadId)
+            
+            guard isProperResponse else {
+                return
+            }
+            
+            self.mqttSubcription.removeSubscriberHandle(subscriber)
+            handler(payload.messages, nil)
+        }
+        
+        self.mqttSubcription.addSubscriberHandle(subscriber)
+        self.mqttPublisher.publish(publishTopic, jsonString)
     }
 }
