@@ -1,6 +1,9 @@
 package com.androidmacconnector.androidapp.mqtt
 
-import android.app.*
+import android.app.Notification
+import android.app.NotificationChannel
+import android.app.NotificationManager
+import android.app.Service
 import android.content.Context
 import android.content.Intent
 import android.graphics.Color
@@ -10,7 +13,6 @@ import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationCompat.PRIORITY_MIN
-import com.androidmacconnector.androidapp.MainActivity
 import com.androidmacconnector.androidapp.utils.getDeviceId
 import com.androidmacconnector.androidapp.utils.getDeviceIdSafely
 import com.google.firebase.auth.FirebaseAuth
@@ -34,15 +36,18 @@ class MqttService: Service() {
      */
     override fun onCreate() {
         super.onCreate()
-        Log.d(LOG_TAG, "onCreate() called")
 
-        val accessToken = getAccessToken() ?: return
+        this.setupClient()
+        this.setupSubscriptions()
+
+        this.startForeground()
+    }
+
+    private fun setupClient() {
+        Log.d(LOG_TAG, "Setting up client")
         val deviceId = getDeviceIdSafely(this) ?: return
-
         this.client = MqttAsyncClient(SERVER_URL, deviceId, MemoryPersistence())
         this.client.setCallback(MqttClientListener(this))
-
-        Log.d(LOG_TAG, "Client created")
 
         // Set up the disconnected buffer
         val disconnectedBufferOptions = DisconnectedBufferOptions()
@@ -54,11 +59,9 @@ class MqttService: Service() {
         // Set up connection to the server
         val connectOptions = MqttConnectOptions()
         connectOptions.userName = deviceId
-        connectOptions.password = accessToken.toCharArray()
+        connectOptions.password = (this.getAccessToken() ?: "").toCharArray()
         connectOptions.isCleanSession = false
         connectOptions.isAutomaticReconnect = true
-
-        Log.d(LOG_TAG, "Connect options: ${connectOptions.debug}")
 
         // Connect to the server
         val latch = CountDownLatch(1)
@@ -74,13 +77,13 @@ class MqttService: Service() {
         })
 
         latch.await()
+    }
 
+    private fun setupSubscriptions() {
+        Log.d(LOG_TAG, "Setting up subscriptions")
         this.client.subscribe("${getDeviceId(this)}/send-sms-request", 2)
         this.client.subscribe("${getDeviceId(this)}/sms/threads/query-requests", 2)
         this.client.subscribe("${getDeviceId(this)}/sms/messages/query-requests", 2)
-
-        startForeground()
-        Log.d(LOG_TAG, "Completed onCreate()")
     }
 
     private fun startForeground() {
@@ -101,7 +104,6 @@ class MqttService: Service() {
             .build()
         startForeground(101, notification)
     }
-
 
     @RequiresApi(Build.VERSION_CODES.O)
     private fun createNotificationChannel(): String{
@@ -156,7 +158,7 @@ class MqttService: Service() {
     override fun onDestroy() {
         super.onDestroy()
         Log.d(LOG_TAG, "onDestroy()")
-        this.client.disconnect()
+
         this.client.close()
     }
 

@@ -41,10 +41,16 @@ class MqttClientListener(private val context: Context) : MqttCallbackExtended {
      * Called when our client receives a message from a subscription
      */
     override fun messageArrived(topic: String?, message: MqttMessage?) {
-        Log.d(LOG_TAG, "Message arrived from $topic with message $message")
         if (topic == null || message == null) {
             return
         }
+
+        Log.d(LOG_TAG, "Message arrived from $topic " +
+                "\n payload:$message " +
+                "\n qos: ${message.qos} " +
+                "\n isRetained: ${message.isRetained} " +
+                "\n isDup: ${message.isDuplicate}"
+        )
 
         val deviceId = getDeviceId(context)
         val intent: Intent = when(topic) {

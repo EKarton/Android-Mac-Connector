@@ -68,17 +68,12 @@ class MainActivity : AppCompatActivity() {
                 if (task.isSuccessful && task.result?.token != null) {
                     val accessToken = task.result?.token!!
 
-                    Log.d(LOG_TAG, "Uploading new FCM access token to server: $accessToken")
-
                     // Upload the fcm token to our server
                     val deviceWebService = DeviceWebService(this)
                     deviceWebService.updatePushNotificationToken(accessToken, deviceId, token, object: UpdatePushNotificationTokenHandler() {
-                        override fun onSuccess() {
-                            Log.d(LOG_TAG, "Successfully updated fcm token")
-                        }
+                        override fun onSuccess() {}
 
                         override fun onError(exception: Exception) {
-                            Log.d(LOG_TAG, "Failed to update FCM token")
                             throw exception
                         }
                     })
