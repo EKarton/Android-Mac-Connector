@@ -9,7 +9,7 @@
 import SwiftUI
 
 struct SmsThreadsList: View {
-    @EnvironmentObject var smsReader: SmsReaderService
+    @EnvironmentObject var smsReader: GetSmsThreadsService
     
     var device: Device
     

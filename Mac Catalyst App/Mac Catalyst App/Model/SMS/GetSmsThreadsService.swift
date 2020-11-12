@@ -19,7 +19,7 @@ struct GetSmsThreadsResponsePayload: Codable {
     var threads: [SmsThread]
 }
 
-class SmsReaderService: ObservableObject {
+class GetSmsThreadsService: ObservableObject {
     private var mqttClient: MQTTClient
     
     init(_ mqttClient: MQTTClient) {
@@ -67,18 +67,5 @@ class SmsReaderService: ObservableObject {
             }
             
         } catch { handler([SmsThread](), error) }
-    }
-    
-    func fetchSmsMessages(_ device: Device, _ threadId: String, _ handler: ([SmsMessage]) -> Void) {
-        
-        let messages = [
-            SmsMessage(messageId: "1", phoneNumber: "123-456-7890", person: "Bob Smith", body: "Hey there!", time: 1),
-            SmsMessage(messageId: "2", phoneNumber: "647-607-6358", person: "Sam Smith", body: "Hi!", time: 1),
-            SmsMessage(messageId: "3", phoneNumber: "123-456-7890", person: "Bob Smith", body: "Are you almost done with your project?", time: 1),
-            SmsMessage(messageId: "4", phoneNumber: "647-607-6358", person: "Sam Smith", body: "Not yet", time: 1),
-            SmsMessage(messageId: "5", phoneNumber: "123-456-7890", person: "Bob Smith", body: "Cool, lemme know when it's done.", time: 1)
-        ]
-        
-        handler(messages)
     }
 }

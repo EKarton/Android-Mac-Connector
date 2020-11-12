@@ -5,7 +5,7 @@ import android.provider.Telephony
 
 data class SmsMessage(
     val messageId: String,
-    val address: String?,
+    val phoneNumber: String,
     val person: String?,
     val body: String,
     val readState: Boolean,

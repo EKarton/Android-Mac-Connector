@@ -20,7 +20,7 @@ struct ContentView: View {
                     DevicesListView()
                 }
             }
-            .navigationViewStyle(StackNavigationViewStyle())
+//            .navigationViewStyle(StackNavigationViewStyle())
         }
         .onAppear {
             self.sessionStore.bindListeners()

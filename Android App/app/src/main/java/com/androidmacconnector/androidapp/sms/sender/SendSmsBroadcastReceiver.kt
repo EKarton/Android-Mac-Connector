@@ -72,17 +72,39 @@ class SendSmsBroadcastReceiver: BroadcastReceiver() {
             // SEND BroadcastReceiver
             val sendSMS: BroadcastReceiver = object : BroadcastReceiver() {
                 override fun onReceive(context: Context, intent: Intent) {
+                    var status = ""
+                    var reason: String? = null
+
                     when (resultCode) {
-                        Activity.RESULT_OK -> Log.d(LOG_TAG, "SMS sent")
-                        SmsManager.RESULT_ERROR_GENERIC_FAILURE -> Log.d(LOG_TAG, "Generic failure")
-                        SmsManager.RESULT_ERROR_NO_SERVICE -> Log.d(LOG_TAG, "No service")
-                        SmsManager.RESULT_ERROR_NULL_PDU -> Log.d(LOG_TAG, "Null PDU")
-                        SmsManager.RESULT_ERROR_RADIO_OFF -> Log.d(LOG_TAG, "Radio off")
+                        Activity.RESULT_OK -> {
+                            Log.d(LOG_TAG, "SMS sent")
+                            status = "success"
+                        }
+                        SmsManager.RESULT_ERROR_GENERIC_FAILURE -> {
+                            Log.d(LOG_TAG, "Generic failure")
+                            status = "failure"
+                            reason = "generic-failure"
+                        }
+                        SmsManager.RESULT_ERROR_NO_SERVICE -> {
+                            Log.d(LOG_TAG, "No service")
+                            status = "failure"
+                            reason = "no-reason"
+                        }
+                        SmsManager.RESULT_ERROR_NULL_PDU -> {
+                            Log.d(LOG_TAG, "Null PDU")
+                            status = "failure"
+                            reason = "no-reason"
+                        }
+                        SmsManager.RESULT_ERROR_RADIO_OFF -> {
+                            Log.d(LOG_TAG, "Radio off")
+                            status = "failure"
+                            reason = "radio-off"
+                        }
                     }
 
                     // Ask the MQTT service to publish an event
                     if (publishSmsResults) {
-                        publishSendSmsResult(messageId, resultCode)
+                        publishSendSmsResult(messageId, status, reason)
                     }
                 }
             }
@@ -90,13 +112,22 @@ class SendSmsBroadcastReceiver: BroadcastReceiver() {
             // DELIVERY BroadcastReceiver
             val deliverSMS: BroadcastReceiver = object : BroadcastReceiver() {
                 override fun onReceive(context: Context, intent: Intent) {
+                    var status = ""
+                    var reason: String? = null
                     when (resultCode) {
-                        Activity.RESULT_OK -> Log.d(LOG_TAG, "SMS delivered")
-                        Activity.RESULT_CANCELED -> Log.d(LOG_TAG, "SMS not delivered")
+                        Activity.RESULT_OK -> {
+                            Log.d(LOG_TAG, "SMS delivered")
+                            status = "delivered"
+                        }
+                        Activity.RESULT_CANCELED -> {
+                            Log.d(LOG_TAG, "SMS not delivered")
+                            status = "failed"
+                            reason = "unknown-error"
+                        }
                     }
 
                     if (publishSmsResults) {
-                        publishSendSmsResult(messageId, resultCode)
+                        publishSendSmsResult(messageId, status, reason)
                     }
                 }
             }
@@ -112,12 +143,13 @@ class SendSmsBroadcastReceiver: BroadcastReceiver() {
             sms.sendTextMessage(phoneNumber, null, message, sentPI, deliveredPI)
         }
 
-        private fun publishSendSmsResult(messageId: String, resultCode: Int) {
+        private fun publishSendSmsResult(messageId: String, status: String, reason: String?) {
             Log.d(LOG_TAG, "Publishing send sms results")
 
             val payload = JSONObject()
             payload.put("message_id", messageId)
-            payload.put("result_code", resultCode)
+            payload.put("status", status)
+            payload.put("reason", reason)
 
             // Submit a job to our MQTT service with details for publishing
             val startIntent = Intent(this.applicationContext, MqttService::class.java)

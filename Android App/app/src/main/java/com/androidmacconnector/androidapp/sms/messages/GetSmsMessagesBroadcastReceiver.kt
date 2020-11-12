@@ -63,7 +63,7 @@ class GetSmsMessagesBroadcastReceiver: BroadcastReceiver() {
             messages.forEach {
                 val messageJson = JSONObject()
                 messageJson.put("message_id", it.messageId)
-                messageJson.put("phone_number", it.address)
+                messageJson.put("phone_number", it.phoneNumber)
                 messageJson.put("person", it.person)
                 messageJson.put("body", it.body)
                 messageJson.put("read_state", it.readState)

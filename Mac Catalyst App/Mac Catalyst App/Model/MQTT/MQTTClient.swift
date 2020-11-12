@@ -90,7 +90,7 @@ class MQTTClient: CocoaMQTTDelegate, ObservableObject {
         if self.topicToSubscribers[subscriber.topic] == nil {
             print("Subscribing to \(subscriber.topic)")
             
-            self.mqtt.subscribe(subscriber.topic)
+            self.mqtt.subscribe(subscriber.topic, qos: .qos2)
             self.topicToOnSubscribeHandlers[subscriber.topic] = Set<MQTTEventHandler>()
             self.topicToSubscribers[subscriber.topic] = Set<MQTTSubscriber>()
         }
@@ -119,6 +119,7 @@ class MQTTClient: CocoaMQTTDelegate, ObservableObject {
     }
     
     func publish(_ topic: String, _ message: String) {
+        print("Publishing \(message) to \(topic)")
         self.mqtt.publish(topic, withString: message, qos: .qos2, retained: true)
     }
     
@@ -135,12 +136,13 @@ class MQTTClient: CocoaMQTTDelegate, ObservableObject {
     }
     
     internal func mqtt(_ mqtt: CocoaMQTT, didReceiveMessage message: CocoaMQTTMessage, id: UInt16) {
-        print("didReceiveMessage: \(message)")
-        
         guard let payload = String(bytes: message.payload, encoding: .utf8) else {
             print("Not a valid UTF-8 sequence")
             return
         }
+        
+        print("didReceiveMessage: \(payload)")
+
         
         guard let subscribers = topicToSubscribers[message.topic] else {
             fatalError("No subscribers!")

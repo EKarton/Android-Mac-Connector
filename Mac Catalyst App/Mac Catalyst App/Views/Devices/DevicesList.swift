@@ -16,7 +16,6 @@ struct DevicesListView: View {
     
     var body: some View {
         VStack {
-            Text("Access token: \(sessionStore.currentSession.accessToken)")
             List(self.devicesList, id: \.id) { device in
                 NavigationLink(destination: DeviceActionsList(device: device)) {
                     HStack {
