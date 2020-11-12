@@ -1,4 +1,4 @@
-import aedes, { Aedes, AedesOptions, AuthenticateError, Client, PublishPacket, Subscription } from 'aedes'
+import aedes, { Aedes, AedesOptions, AedesPublishPacket, AuthenticateError, Client, PublishPacket, Subscription } from 'aedes'
 import { createServer, Server } from 'http'
 import { Authenticator, FirebaseAuthenticator } from '../services/authenticator'
 import { Authorizer, FirebaseAuthorizer } from '../services/authorizer'
@@ -30,6 +30,15 @@ export class MqttServerApp implements App {
     const authorizer = new FirebaseAuthorizer(firestore)
 
     const mqttServer = this.createMqttServer(authenticator, authorizer)
+    mqttServer.on("publish", (packet: AedesPublishPacket, client: Client) => {
+      console.log(`Publish from ${client ? client.id : "null"}: ${packet.topic} | ${packet.dup} | ${packet.qos} | ${packet.payload}`)
+    })
+    mqttServer.on("subscribe", (subscriptions: Subscription[], client: Client) => {
+      console.log(`Subscribe from ${client}: ${subscriptions.map(sub => sub.topic)} | ${subscriptions.map(sub => sub.qos)}`)
+    })
+    mqttServer.on("unsubscribe", (unsubscriptions: string[], client: Client) => {
+      console.log(`Unsubscribe from ${client}: ${unsubscriptions}`)
+    })
 
     this.server = createServer()
     require('websocket-stream').createServer({ server: this.server }, mqttServer.handle)
@@ -38,7 +47,6 @@ export class MqttServerApp implements App {
   private createMqttServer(authenticator: Authenticator, authorizer: Authorizer): Aedes {
     const mqttServerOpts: AedesOptions = {
       authenticate: (client: Client, username: string, password: Buffer, done: (error: AuthenticateError | null, success: boolean | null) => void) => {
-        console.log(`On authenticate: ${client.id}`)
         if (!(this.opts?.verifyAuthentication)) {
           done(null, true)
           return
@@ -62,8 +70,6 @@ export class MqttServerApp implements App {
           })
       },
       authorizePublish: (client: Client, packet: PublishPacket, callback: (error?: Error | null) => void) => {
-        console.log(`On authorize publish: ${client.id} at ${packet.topic}`)
-
         if (!(this.opts?.verifyAuthorization)) {
           callback(null)
           return
@@ -78,8 +84,6 @@ export class MqttServerApp implements App {
           })
       },
       authorizeSubscribe: (client: Client, subscription: Subscription, callback: (error: Error | null, subscription?: Subscription | null) => void) => {
-        console.log(`On authorize subscribe ${client.id} at ${subscription.topic}`)
-
         if (!(this.opts.verifyAuthorization)) {
           callback(null, subscription)
           return
