@@ -31,7 +31,7 @@ export class MqttServerApp implements App {
 
     const mqttServer = this.createMqttServer(authenticator, authorizer)
     mqttServer.on("publish", (packet: AedesPublishPacket, client: Client) => {
-      console.log(`Publish from ${client ? client.id : "null"}: ${packet.topic} | ${packet.dup} | ${packet.qos} | ${packet.payload}`)
+      console.log(`Publish from ${client ? client.id : "null"}: ${packet.topic} | ${packet.dup} | ${packet.qos}`)
     })
     mqttServer.on("subscribe", (subscriptions: Subscription[], client: Client) => {
       console.log(`Subscribe from ${client}: ${subscriptions.map(sub => sub.topic)} | ${subscriptions.map(sub => sub.qos)}`)

@@ -20,22 +20,13 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
         // Use a UIHostingController as window root view controller.
         if let windowScene = scene as? UIWindowScene {
-//            let mqttClient = MQTTClient("192.168.0.102", 8888, "client", "username", "password")
-//
-//            let mqttSubscriptionClient = MQTTSubscriptionClient(mqttClient)
-//            let mqttPublisherClient = MQTTPublisherClient(mqttClient)
-//
-//            let mqttAuthObserverClient = MQTTAuthObserverClient(mqttClient)
-//            let sessionStore = SessionStore()
-//            sessionStore.addSessionChangedListener(mqttAuthObserverClient)
-            
             let appDelegate = UIApplication.shared.delegate as! AppDelegate
             let contentView = ContentView()
-                .environmentObject(appDelegate.sessionStore)
-                .environmentObject(appDelegate.deviceService)
-                .environmentObject(appDelegate.smsSenderService)
-                .environmentObject(appDelegate.getSmsThreadsService)
-                .environmentObject(appDelegate.getSmsMessageService)
+                .environmentObject(appDelegate.auth.sessionStore)
+                .environmentObject(appDelegate.device.deviceService)
+                .environmentObject(appDelegate.sms.smsSenderService)
+                .environmentObject(appDelegate.sms.getSmsThreadsService)
+                .environmentObject(appDelegate.sms.getSmsMessageService)
                             
             let window = UIWindow(windowScene: windowScene)
             window.rootViewController = UIHostingController(rootView: contentView)
