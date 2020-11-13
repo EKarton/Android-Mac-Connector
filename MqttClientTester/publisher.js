@@ -7,7 +7,7 @@ var client  = mqtt.connect('ws://192.168.0.102:8888', {
 })
  
 client.on('connect', function () {
-  const deviceId = '5BEiGAB54yfecW4DXGPt'
+  const deviceId = 'WRF2KV4cefu0HuH8LDks'
   const publishOptions = {
     qos: 2,
     retain: true

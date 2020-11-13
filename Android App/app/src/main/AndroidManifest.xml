@@ -38,7 +38,7 @@
             </intent-filter>
         </receiver> <!-- The firebase messaging service -->
         <service
-            android:name=".fcm.FirebaseMessagingServiceInstance"
+            android:name=".fcm.FcmServiceInstance"
             android:exported="false"
             android:permission="">
             <intent-filter>
@@ -47,7 +47,7 @@
         </service> <!-- Disable starting up FCM on boot time -->
         <meta-data
             android:name="firebase_messaging_auto_init_enabled"
-            android:value="false" />
+            android:value="true" />
         <meta-data
             android:name="firebase_analytics_collection_enabled"
             android:value="false" /> <!-- It is required for FCM notifications to be sent to a particular channel -->

@@ -3,12 +3,9 @@ package com.androidmacconnector.androidapp
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.Intent
-import android.net.Uri
 import android.os.Build
 import android.os.Bundle
-import android.provider.Telephony
 import android.util.Log
-import android.widget.EditText
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.androidmacconnector.androidapp.devices.DeviceWebService
@@ -88,12 +85,6 @@ class MainActivity : AppCompatActivity() {
         })
 
         Intent(this, MqttService::class.java).also {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                Log.d(LOG_TAG, "Starting the service in >=26 Mode")
-                startForegroundService(it)
-                return
-            }
-            Log.d(LOG_TAG, "Starting the service in < 26 Mode")
             startService(it)
         }
     }

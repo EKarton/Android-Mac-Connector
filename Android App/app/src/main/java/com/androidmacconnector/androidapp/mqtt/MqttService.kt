@@ -39,8 +39,6 @@ class MqttService: Service() {
 
         this.setupClient()
         this.setupSubscriptions()
-
-        this.startForeground()
     }
 
     private fun setupClient() {
@@ -81,41 +79,9 @@ class MqttService: Service() {
 
     private fun setupSubscriptions() {
         Log.d(LOG_TAG, "Setting up subscriptions")
-        this.client.subscribe("${getDeviceId(this)}/sms/send-message-requests", 2)
+        this.client.subscribe("${getDeviceId(this)}/sms/send-message-requests", 2, )
         this.client.subscribe("${getDeviceId(this)}/sms/threads/query-requests", 2)
         this.client.subscribe("${getDeviceId(this)}/sms/messages/query-requests", 2)
-    }
-
-    private fun startForeground() {
-        val channelId =
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                createNotificationChannel()
-            } else {
-                // If earlier version channel ID is not used
-                // https://developer.android.com/reference/android/support/v4/app/NotificationCompat.Builder.html#NotificationCompat.Builder(android.content.Context)
-                ""
-            }
-
-        val notificationBuilder = NotificationCompat.Builder(this, channelId)
-        val notification = notificationBuilder.setOngoing(true)
-//            .setSmallIcon(R.mipmap.ic_launcher)
-            .setPriority(PRIORITY_MIN)
-            .setCategory(Notification.CATEGORY_SERVICE)
-            .build()
-        startForeground(101, notification)
-    }
-
-    @RequiresApi(Build.VERSION_CODES.O)
-    private fun createNotificationChannel(): String{
-        val channelId = "my_service"
-        val channelName = "My Background Service"
-        val chan = NotificationChannel(channelId, channelName, NotificationManager.IMPORTANCE_HIGH)
-        chan.lightColor = Color.BLUE
-        chan.importance = NotificationManager.IMPORTANCE_NONE
-        chan.lockscreenVisibility = Notification.VISIBILITY_PRIVATE
-        val service = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-        service.createNotificationChannel(chan)
-        return channelId
     }
 
     private fun getAccessToken(): String? {
@@ -159,6 +125,7 @@ class MqttService: Service() {
         super.onDestroy()
         Log.d(LOG_TAG, "onDestroy()")
 
+        this.client.disconnect()
         this.client.close()
     }
 

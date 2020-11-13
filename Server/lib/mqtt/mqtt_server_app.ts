@@ -5,6 +5,8 @@ import { Authorizer, FirebaseAuthorizer } from '../services/authorizer'
 
 import * as admin from 'firebase-admin';
 import { App } from "../app";
+import { AndroidDeviceNotifier } from '../services/device_notifier';
+import { FirebaseDeviceService } from '../services/device_service';
 
 export interface MqttServerAppOptions {
   verifyAuthentication: boolean,
@@ -25,13 +27,35 @@ export class MqttServerApp implements App {
 
     const authServer = firebaseApp.auth();
     const firestore = firebaseApp.firestore();
+    const fcmMessaging = firebaseApp.messaging();
 
     const authenticator = new FirebaseAuthenticator(authServer, firestore)
     const authorizer = new FirebaseAuthorizer(firestore)
+    const androidDeviceNotifier = new AndroidDeviceNotifier(fcmMessaging)
+    const deviceService = new FirebaseDeviceService(firestore)
 
     const mqttServer = this.createMqttServer(authenticator, authorizer)
-    mqttServer.on("publish", (packet: AedesPublishPacket, client: Client) => {
+    mqttServer.on("publish", async (packet: AedesPublishPacket, client: Client) => {
       console.log(`Publish from ${client ? client.id : "null"}: ${packet.topic} | ${packet.dup} | ${packet.qos}`)
+
+      let topicParts = packet.topic.split('/')
+      if (topicParts.length == 0) {
+        console.log(`Cannot get device id from topic ${topicParts}`)
+        return
+      }
+
+      let deviceId = topicParts[0]
+
+      if (await deviceService.doesDeviceIdExist(deviceId)) {
+        let token = await deviceService.getPushNotificationToken(deviceId)
+        let deviceType = await deviceService.getDeviceType(deviceId)
+
+        if (deviceType == "android") {
+          await androidDeviceNotifier.notifyDevice(token)
+        } else {
+          console.log(`Unsupported push notification for device ${deviceType}`)
+        }
+      }
     })
     mqttServer.on("subscribe", (subscriptions: Subscription[], client: Client) => {
       console.log(`Subscribe from ${client}: ${subscriptions.map(sub => sub.topic)} | ${subscriptions.map(sub => sub.qos)}`)

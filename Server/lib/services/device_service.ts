@@ -89,17 +89,28 @@ export class FirebaseDeviceService implements DeviceService {
   }
 
   async getDeviceCapabilities(deviceId: string): Promise<string[]> {
-    const doc = await this.firestoreClient.doc(deviceId).get()    
-    if (doc.exists) {
-      throw new HttpError(404, "DeviceNotFound", `Device with id ${deviceId}does not exist`)
+    const devicesCollection = this.firestoreClient.collection("devices")
+    const doc = await devicesCollection.doc(deviceId).get()    
+    if (!doc.exists) {
+      throw new HttpError(404, "DeviceNotFound", `Device with id ${deviceId} does not exist`)
     }
 
     return <string[]> doc.data()["capabilities"]
   }
 
+  async getDeviceType(deviceId: string): Promise<string> {
+    const devicesCollection = this.firestoreClient.collection("devices")
+    const doc = await devicesCollection.doc(deviceId).get()    
+    if (!doc.exists) {
+      throw new HttpError(404, "DeviceNotFound", `Device with id ${deviceId} does not exist`)
+    }
+
+    return <string> doc.data()["device_type"]
+  }
+
   async updatePushNotificationToken(deviceId: string, newToken: string) {
     if (!(await this.doesDeviceIdExist(deviceId))) {
-      throw new HttpError(404, "DeviceNotFound", `Device with id ${deviceId}does not exist`)
+      throw new HttpError(404, "DeviceNotFound", `Device with id ${deviceId} does not exist`)
     }
 
     const devicesCollection = this.firestoreClient.collection("devices")
@@ -107,9 +118,10 @@ export class FirebaseDeviceService implements DeviceService {
   }
 
   async getPushNotificationToken(deviceId: string): Promise<string> {
-    const doc = await this.firestoreClient.doc(deviceId).get()    
-    if (doc.exists) {
-      throw new HttpError(404, "DeviceNotFound", `Device with id ${deviceId}does not exist`)
+    const devicesCollection = this.firestoreClient.collection("devices")
+    const doc = await devicesCollection.doc(deviceId).get()    
+    if (!doc.exists) {
+      throw new HttpError(404, "DeviceNotFound", `Device with id ${deviceId} does not exist`)
     }
 
     return <string> doc.data()["push_notification_token"]
