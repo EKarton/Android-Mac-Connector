@@ -6,10 +6,38 @@
 //  Copyright © 2020 Emilio Kartono. All rights reserved.
 //
 
-struct ReceivedSmsMessage {
+import SwiftUI
+
+struct ReceivedSmsMessage: Codable {
     var phoneNumber: String
     var body: String
     var timestamp: Int
+    
+    static func fromJson(_ json: String) -> ReceivedSmsMessage? {
+        let jsonDecoder = JSONDecoder()
+        jsonDecoder.keyDecodingStrategy = .convertFromSnakeCase
+        
+        guard let jsonData = json.data(using: .utf8) else {
+            return nil
+        }
+                    
+        guard let newStruct = try? jsonDecoder.decode(ReceivedSmsMessage.self, from: jsonData) else {
+            return nil
+        }
+        
+        return newStruct
+    }
+    
+    static func toJson(msg: ReceivedSmsMessage) -> String? {
+        let jsonEncoder = JSONEncoder()
+        jsonEncoder.keyEncodingStrategy = .convertToSnakeCase
+        
+        guard let jsonData = try? jsonEncoder.encode(msg) else {
+            return nil
+        }
+        
+        return String(data: jsonData, encoding: .utf8)
+    }
 }
 
 #if DEBUG

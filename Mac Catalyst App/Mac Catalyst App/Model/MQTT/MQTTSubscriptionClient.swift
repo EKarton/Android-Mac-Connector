@@ -140,9 +140,7 @@ class MQTTSubscriptionClient: ObservableObject {
         client.mqtt.unsubscribe(topic)
     }
     
-    private func didSubscribeTopicsHandler(_ mqtt: CocoaMQTT, didSubscribeTopics success: NSDictionary, failed: [String]) {
-        print("didSubscribeTopics: \(success), \(failed)")
-        
+    private func didSubscribeTopicsHandler(_ mqtt: CocoaMQTT, didSubscribeTopics success: NSDictionary, failed: [String]) {        
         for (key, _) in success {
             let topic = key as! String
             currentSubscriptions.insert(topic)
@@ -167,8 +165,6 @@ class MQTTSubscriptionClient: ObservableObject {
     }
     
     private func didUnsubscribeTopicsHandler(_ mqtt: CocoaMQTT, didUnsubscribeTopics topics: [String]) {
-        print("didUnsubscribeTopics: \(topics)")
-        
         for topic in topics {
             currentSubscriptions.remove(topic)
             pendingUnsubscriptions.remove(topic)
@@ -190,8 +186,6 @@ class MQTTSubscriptionClient: ObservableObject {
             return
         }
         
-        print("didReceiveMessage: \(payload)")
-
         self.topicToSubscribers[message.topic]?.forEach { sub in
             sub.handler?(payload, nil)
         }

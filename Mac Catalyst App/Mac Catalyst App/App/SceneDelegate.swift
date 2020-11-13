@@ -13,7 +13,6 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
     var window: UIWindow?
 
-
     func scene(_ scene: UIScene, willConnectTo session: UISceneSession, options connectionOptions: UIScene.ConnectionOptions) {
         // Use this method to optionally configure and attach the UIWindow `window` to the provided UIWindowScene `scene`.
         // If using a storyboard, the `window` property will automatically be initialized and attached to the scene.
@@ -21,23 +20,23 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
         // Use a UIHostingController as window root view controller.
         if let windowScene = scene as? UIWindowScene {
-            let mqttClient = MQTTClient("192.168.0.102", 8888, "client", "username", "password")
+//            let mqttClient = MQTTClient("192.168.0.102", 8888, "client", "username", "password")
+//
+//            let mqttSubscriptionClient = MQTTSubscriptionClient(mqttClient)
+//            let mqttPublisherClient = MQTTPublisherClient(mqttClient)
+//
+//            let mqttAuthObserverClient = MQTTAuthObserverClient(mqttClient)
+//            let sessionStore = SessionStore()
+//            sessionStore.addSessionChangedListener(mqttAuthObserverClient)
             
-            let mqttSubscriptionClient = MQTTSubscriptionClient(mqttClient)
-            let mqttPublisherClient = MQTTPublisherClient(mqttClient)
-            
-            let mqttAuthObserverClient = MQTTAuthObserverClient(mqttClient)
-            let sessionStore = SessionStore()
-            sessionStore.addSessionChangedListener(mqttAuthObserverClient)
-            
+            let appDelegate = UIApplication.shared.delegate as! AppDelegate
             let contentView = ContentView()
-                .environmentObject(sessionStore)
-                .environmentObject(DeviceService())
-                .environmentObject(mqttSubscriptionClient)
-                .environmentObject(GetSmsThreadsService(mqttSubscriptionClient, mqttPublisherClient))
-                .environmentObject(GetSmsMessageService(mqttSubscriptionClient, mqttPublisherClient))
-                .environmentObject(SmsSenderService(mqttSubscriptionClient, mqttPublisherClient))
-                
+                .environmentObject(appDelegate.sessionStore)
+                .environmentObject(appDelegate.deviceService)
+                .environmentObject(appDelegate.smsSenderService)
+                .environmentObject(appDelegate.getSmsThreadsService)
+                .environmentObject(appDelegate.getSmsMessageService)
+                            
             let window = UIWindow(windowScene: windowScene)
             window.rootViewController = UIHostingController(rootView: contentView)
             self.window = window

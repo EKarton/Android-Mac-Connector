@@ -30,8 +30,12 @@ struct DevicesListView: View {
     
     private func onAppearHandler() {
         self.deviceService.getDevices(sessionStore.currentSession.accessToken) { (devices: [Device], error: Error?) in
+            guard error == nil else {
+                print("Encountered error when fetching devices: \(error.debugDescription)")
+                return
+            }
+            
             self.devicesList = devices
-            print("Error: \(String(describing: error?.localizedDescription))")
         }
     }
 }

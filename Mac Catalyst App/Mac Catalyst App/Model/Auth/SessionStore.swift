@@ -27,9 +27,7 @@ class SessionStore: ObservableObject {
     
     private var listeners = [SessionChangedListener]()
     private var handle: AuthStateDidChangeListenerHandle?
-    
-    init() {}
-    
+        
     func unbindListeners() {
         if let curHandle = self.handle {
             Auth.auth().removeStateDidChangeListener(curHandle)
@@ -43,7 +41,6 @@ class SessionStore: ObservableObject {
         }
         
         handle = Auth.auth().addStateDidChangeListener { (auth: Auth, user: User?) in
-            print("Updated user state: \(String(describing: user))")
             if let curUser = user {
                 self.updateSession(curUser)
             }

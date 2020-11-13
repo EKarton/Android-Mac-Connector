@@ -15,12 +15,13 @@ class MQTTAuthObserverClient: SessionChangedListener {
     }
     
     func handler(_ oldSession: Session, _ newSession: Session) {
-        print("MQTTAuthObserverClient(): Old: \(oldSession) vs \(newSession)")
+        print("MQTTAuthObserverClient.handler()")
         client.disconnect()
         client.setPassword(newSession.accessToken)
         
         if (newSession.isSignedIn) {
-            client.connect()
+            let isSuccessful = client.connect()
+            print("Reconnect successful? \(isSuccessful)")
         }
     }
 }

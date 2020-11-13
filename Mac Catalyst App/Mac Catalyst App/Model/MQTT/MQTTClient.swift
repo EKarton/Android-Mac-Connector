@@ -83,7 +83,12 @@ class MQTTClient: CocoaMQTTDelegate {
         self.mqtt.password = password
         self.mqtt.willMessage = CocoaMQTTMessage(topic: "/will", string: "dieout")
         self.mqtt.keepAlive = 60
+        self.mqtt.autoReconnect = true
         self.mqtt.delegate = self
+    }
+    
+    func setClientId(_ clientId: String) {
+        self.mqtt.clientID = clientId
     }
     
     func setUsername(_ username: String) {
@@ -103,38 +108,47 @@ class MQTTClient: CocoaMQTTDelegate {
     }
     
     internal func mqtt(_ mqtt: CocoaMQTT, didConnectAck ack: CocoaMQTTConnAck) {
+        print("didConnectAck")
         self.mqttDidConnectAckListener?.handler?(mqtt, ack)
     }
     
     internal func mqtt(_ mqtt: CocoaMQTT, didPublishMessage message: CocoaMQTTMessage, id: UInt16) {
+        print("didPublishMessage")
         self.mqttDidPublishMessageListener?.handler?(mqtt, message, id)
     }
     
     internal func mqtt(_ mqtt: CocoaMQTT, didPublishAck id: UInt16) {
+        print("didPublishAck")
         self.mqttDidPublishAckListener?.handler?(mqtt, id)
     }
     
     internal func mqtt(_ mqtt: CocoaMQTT, didSubscribeTopics success: NSDictionary, failed: [String]) {
+        print("didSubscribeTopics: \(success), \(failed)")
         self.mqttDidSubscribeTopicsListener?.handler?(mqtt, success, failed)
     }
     
     internal func mqtt(_ mqtt: CocoaMQTT, didUnsubscribeTopics topics: [String]) {
+        print("didUnsubscribeTopics: \(topics)")
         self.mqttDidUnsubscribeTopicsListener?.handler?(mqtt, topics)
     }
     
     internal func mqtt(_ mqtt: CocoaMQTT, didReceiveMessage message: CocoaMQTTMessage, id: UInt16) {
+        print("didReceiveMessage")
         self.mqttDidReceiveMessageListener?.handler?(mqtt, message, id)
     }
     
     internal func mqttDidPing(_ mqtt: CocoaMQTT) {
+        print("mqttDidPing")
         self.mqttDidPingListener?.handler?(mqtt)
     }
 
     internal func mqttDidReceivePong(_ mqtt: CocoaMQTT) {
+        print("mqttDidReceivePong")
         self.mqttDidReceivePongListener?.handler?(mqtt)
     }
     
     internal func mqttDidDisconnect(_ mqtt: CocoaMQTT, withError err: Error?) {
+        print("mqttDidDisconnect")
         self.mqttDidDisconnectListener?.handler?(mqtt, err)
     }
 }

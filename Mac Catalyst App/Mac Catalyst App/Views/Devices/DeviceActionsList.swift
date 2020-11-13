@@ -8,9 +8,7 @@
 
 import SwiftUI
 
-struct DeviceActionsList: View {
-    @EnvironmentObject var subscriber: MQTTSubscriptionClient
-    
+struct DeviceActionsList: View {    
     var device: Device
     
     var body: some View {
@@ -22,23 +20,6 @@ struct DeviceActionsList: View {
             }
         }
         .navigationBarTitle("\(self.device.name)", displayMode: .inline)
-        .onAppear {
-            self.subscriber.subscribe("\(self.device.id)/sms/messages/query-results") { err in
-                
-            }
-            
-            self.subscriber.subscribe("\(self.device.id)/sms/threads/query-results") { err in
-                
-            }
-            
-            self.subscriber.subscribe("\(self.device.id)/sms/send-message-results") { err in
-                
-            }
-            
-            self.subscriber.subscribe("\(self.device.id)/sms/received-messages") { err in
-                
-            }
-        }
     }
 }
 
