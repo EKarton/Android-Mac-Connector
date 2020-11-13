@@ -1,34 +1,25 @@
 package com.androidmacconnector.androidapp.mqtt
 
-import android.app.Notification
-import android.app.NotificationChannel
-import android.app.NotificationManager
 import android.app.Service
-import android.content.Context
 import android.content.Intent
-import android.graphics.Color
-import android.os.Build
 import android.os.IBinder
 import android.util.Log
-import androidx.annotation.RequiresApi
-import androidx.core.app.NotificationCompat
-import androidx.core.app.NotificationCompat.PRIORITY_MIN
-import com.androidmacconnector.androidapp.utils.getDeviceId
+import com.androidmacconnector.androidapp.sms.messages.GetSmsMessagesBroadcastReceiver
+import com.androidmacconnector.androidapp.sms.sender.SendSmsBroadcastReceiver
+import com.androidmacconnector.androidapp.sms.threads.GetSmsThreadsBroadcastReceiver
 import com.androidmacconnector.androidapp.utils.getDeviceIdSafely
 import com.google.firebase.auth.FirebaseAuth
-import org.eclipse.paho.client.mqttv3.*
-import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence
+import org.eclipse.paho.client.mqttv3.MqttMessage
 import java.util.concurrent.CountDownLatch
 
 
 class MqttService: Service() {
-    private lateinit var client: MqttAsyncClient
+    private lateinit var client: MQTTClient
 
     companion object {
         private const val LOG_TAG = "MqttClientService"
         private const val SERVER_URL = "ws://192.168.0.102:8888"
         const val PUBLISH_INTENT_ACTION = "com.androidmacconnector.androidapp.mqtt.intent.action.PUBLISH"
-        const val SUBSCRIBE_INTENT_ACTION = "com.androidmacconnector.androidapp.mqtt.intent.action.SUBSCRIBE"
     }
 
     /**
@@ -37,51 +28,30 @@ class MqttService: Service() {
     override fun onCreate() {
         super.onCreate()
 
-        this.setupClient()
-        this.setupSubscriptions()
-    }
-
-    private fun setupClient() {
-        Log.d(LOG_TAG, "Setting up client")
         val deviceId = getDeviceIdSafely(this) ?: return
-        this.client = MqttAsyncClient(SERVER_URL, deviceId, MemoryPersistence())
-        this.client.setCallback(MqttClientListener(this))
+        val accessToken = getAccessToken() ?: return
+        this.client = MQTTClient(SERVER_URL, deviceId)
+        this.client.setUsername(deviceId)
+        this.client.setPassword(accessToken)
+        this.client.connect()
 
-        // Set up the disconnected buffer
-        val disconnectedBufferOptions = DisconnectedBufferOptions()
-        disconnectedBufferOptions.isBufferEnabled = true
-        disconnectedBufferOptions.isDeleteOldestMessages = true
-        disconnectedBufferOptions.isPersistBuffer = true
-        this.client.setBufferOpts(disconnectedBufferOptions)
-
-        // Set up connection to the server
-        val connectOptions = MqttConnectOptions()
-        connectOptions.userName = deviceId
-        connectOptions.password = (this.getAccessToken() ?: "").toCharArray()
-        connectOptions.isCleanSession = false
-        connectOptions.isAutomaticReconnect = true
-
-        // Connect to the server
-        val latch = CountDownLatch(1)
-        this.client.connect(connectOptions, null, object : IMqttActionListener {
-            override fun onSuccess(asyncActionToken: IMqttToken?) {
-                Log.d(LOG_TAG, "Connected successfully")
-                latch.countDown()
+        this.client.subscribe("$deviceId/sms/send-message-requests", 2) { msg, err ->
+            if (msg != null && err == null) {
+                sendBroadcastIntent(SendSmsBroadcastReceiver::class.java, msg)
             }
+        }
 
-            override fun onFailure(asyncActionToken: IMqttToken?, exception: Throwable?) {
-                throw exception!!
+        this.client.subscribe("$deviceId/sms/threads/query-requests", 2) { msg, err ->
+            if (msg != null && err == null) {
+                sendBroadcastIntent(GetSmsThreadsBroadcastReceiver::class.java, msg)
             }
-        })
+        }
 
-        latch.await()
-    }
-
-    private fun setupSubscriptions() {
-        Log.d(LOG_TAG, "Setting up subscriptions")
-        this.client.subscribe("${getDeviceId(this)}/sms/send-message-requests", 2, )
-        this.client.subscribe("${getDeviceId(this)}/sms/threads/query-requests", 2)
-        this.client.subscribe("${getDeviceId(this)}/sms/messages/query-requests", 2)
+        this.client.subscribe("$deviceId/sms/messages/query-requests", 2) { msg, err ->
+            if (msg != null && err == null) {
+                sendBroadcastIntent(GetSmsMessagesBroadcastReceiver::class.java, msg)
+            }
+        }
     }
 
     private fun getAccessToken(): String? {
@@ -95,6 +65,17 @@ class MqttService: Service() {
         return null
     }
 
+    private fun sendBroadcastIntent(cls: Class<*>, message: MqttMessage) {
+        val intent = Intent(applicationContext, cls).also { intent ->
+            intent.putExtra("payload", String(message.payload))
+            intent.putExtra("id", message.id)
+            intent.putExtra("is_duplicate", message.isDuplicate)
+            intent.putExtra("is_retained", message.isRetained)
+            intent.putExtra("qos", message.qos)
+        }
+        applicationContext.sendBroadcast(intent)
+    }
+
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         Log.d(LOG_TAG, "onStartCommand() with action ${intent?.action} and topic ${intent?.getStringExtra("topic")}")
 
@@ -105,14 +86,10 @@ class MqttService: Service() {
         val topic = intent.getStringExtra("topic") ?: return START_STICKY
 
         if (intent.action == PUBLISH_INTENT_ACTION) {
-            val payload = intent.getByteArrayExtra("payload")
-
-            Log.d(LOG_TAG, "Publishing to topic $topic with payload $payload")
-            this.client.publish(topic, payload, 2, true)
-
-        } else if (intent.action == SUBSCRIBE_INTENT_ACTION) {
-            Log.d(LOG_TAG, "Subscribing topic $topic")
-            this.client.subscribe(topic, 2)
+            intent.getStringExtra("payload")?.let { payload ->
+                Log.d(LOG_TAG, "Publishing to topic $topic with payload $payload")
+                this.client.publish(topic, payload, 2, true, null)
+            }
         }
 
         return START_STICKY
@@ -125,8 +102,7 @@ class MqttService: Service() {
         super.onDestroy()
         Log.d(LOG_TAG, "onDestroy()")
 
-        this.client.disconnect()
-        this.client.close()
+        this.client.disconnect(null)
     }
 
     override fun onBind(intent: Intent?): IBinder? {

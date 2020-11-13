@@ -48,7 +48,7 @@ class ReceivedSmsBroadcastReceiver : BroadcastReceiver() {
                 val startIntent = Intent(context, MqttService::class.java)
                 startIntent.action = PUBLISH_INTENT_ACTION
                 startIntent.putExtra("topic", "${getDeviceId(context)}/sms/new-messages")
-                startIntent.putExtra("payload", payload.toString().toByteArray())
+                startIntent.putExtra("payload", payload.toString())
 
                 context.startService(startIntent)
             }
