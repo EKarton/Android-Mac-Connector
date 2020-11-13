@@ -50,8 +50,8 @@ struct SmsMessagesView: View {
                     
                     ForEach(self.messages, id: \.messageId) { (message: SmsMessage) in
                         SmsMessageRow(
-                            isCurrentUser: message.phoneNumber == self.device.phoneNumber,
-                            message: message.body + " | " + message.phoneNumber
+                            isCurrentUser: message.isCurrentUser,
+                            message: message.body
                         )
                     }
                     .scaleEffect(x: 1, y: -1, anchor: .center)

@@ -37,7 +37,7 @@ class GetSmsMessagesServiceImpl : GetSmsMessagesService {
     ): List<SmsMessage> {
 
         val projection = arrayOf("_id", "address", "person", "date", "body", "read", "date", "type");
-        val selection = "thread_id = ?";
+        val selection = "thread_id = ?"
         val selectionArgs = arrayOf(threadId)
         val cursor = contentResolver.query(
             Telephony.Sms.CONTENT_URI,
@@ -67,15 +67,14 @@ class GetSmsMessagesServiceImpl : GetSmsMessagesService {
                     type = "inbox";
                 }
 
-                val smsMessage =
-                    SmsMessage(messageId, address, person, body, readState, timeInSeconds, type)
+                val smsMessage = SmsMessage(messageId, address, person, body, readState, timeInSeconds, type)
                 smsMessages.add(smsMessage)
 
                 cursor.moveToNext()
             }
         }
 
-        cursor?.close();
+        cursor?.close()
         return smsMessages
     }
 }

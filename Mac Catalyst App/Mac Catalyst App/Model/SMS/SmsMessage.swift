@@ -14,4 +14,8 @@ struct SmsMessage: Codable {
     var readState: Bool
     var time: Int
     var type: String
+    
+    var isCurrentUser: Bool {
+        return self.type == "sent"
+    }
 }

@@ -3,8 +3,10 @@ package com.androidmacconnector.androidapp
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.Intent
+import android.net.Uri
 import android.os.Build
 import android.os.Bundle
+import android.provider.Telephony
 import android.util.Log
 import android.widget.EditText
 import android.widget.Toast
@@ -27,16 +29,16 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        val textbox = findViewById<EditText>(R.id.myTextBox)
-
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             // Create channel to show notifications.
             val channelId = getString(R.string.default_notification_channel_id)
             val channelName = getString(R.string.default_notification_channel_name)
             val notificationManager = getSystemService(NotificationManager::class.java)
             notificationManager?.createNotificationChannel(
-                NotificationChannel(channelId,
-                channelName, NotificationManager.IMPORTANCE_LOW)
+                NotificationChannel(
+                    channelId,
+                    channelName, NotificationManager.IMPORTANCE_LOW
+                )
             )
         }
 
@@ -70,7 +72,7 @@ class MainActivity : AppCompatActivity() {
 
                     // Upload the fcm token to our server
                     val deviceWebService = DeviceWebService(this)
-                    deviceWebService.updatePushNotificationToken(accessToken, deviceId, token, object: UpdatePushNotificationTokenHandler() {
+                    deviceWebService.updatePushNotificationToken(accessToken, deviceId, token, object : UpdatePushNotificationTokenHandler() {
                         override fun onSuccess() {}
 
                         override fun onError(exception: Exception) {
@@ -82,7 +84,6 @@ class MainActivity : AppCompatActivity() {
 
             // Log and toast
             Log.d(LOG_TAG, token)
-            textbox.setText(textbox.text.toString() + "\n\n" + token)
             Toast.makeText(baseContext, token, Toast.LENGTH_SHORT).show()
         })
 
