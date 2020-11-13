@@ -31,7 +31,11 @@ struct DeviceActionsList: View {
                 
             }
             
-            self.subscriber.subscribe("\(self.device.id)/send-sms-results") { err in
+            self.subscriber.subscribe("\(self.device.id)/sms/send-message-results") { err in
+                
+            }
+            
+            self.subscriber.subscribe("\(self.device.id)/sms/received-messages") { err in
                 
             }
         }

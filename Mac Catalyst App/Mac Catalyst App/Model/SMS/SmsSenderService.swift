@@ -38,13 +38,13 @@ class SmsSenderService: ObservableObject {
     func sendSms(_ device: Device, _ phoneNumber: String, _ message: String, _ handler: @escaping (Error?) -> Void) {
         print("Sending message \(message) to \(phoneNumber)")
         
-        let publishTopic = "\(device.id)/send-sms-request"
+        let publishTopic = "\(device.id)/sms/send-message-requests"
         let publishPayload = SendSmsRequestPayload(phone_number: phoneNumber, message: message)
         
         let jsonData = try! jsonEncoder.encode(publishPayload)
         let jsonString = String(data: jsonData, encoding: .utf8)!
         
-        let subscriber = MQTTSubscriber("\(device.id)/send-sms-results")
+        let subscriber = MQTTSubscriber("\(device.id)/sms/send-message-results")
         
         subscriber.setHandler { (msg, err) in
             print("Got sent sms results:", msg!)

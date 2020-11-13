@@ -154,7 +154,7 @@ class SendSmsBroadcastReceiver: BroadcastReceiver() {
             // Submit a job to our MQTT service with details for publishing
             val startIntent = Intent(this.applicationContext, MqttService::class.java)
             startIntent.action = MqttService.PUBLISH_INTENT_ACTION
-            startIntent.putExtra("topic", "${getDeviceId(this.applicationContext)}/send-sms-results")
+            startIntent.putExtra("topic", "${getDeviceId(this.applicationContext)}/sms/send-message-results")
             startIntent.putExtra("payload", payload.toString().toByteArray())
 
             this.applicationContext.startService(startIntent)

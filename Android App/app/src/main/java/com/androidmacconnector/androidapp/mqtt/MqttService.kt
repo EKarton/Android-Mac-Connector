@@ -81,7 +81,7 @@ class MqttService: Service() {
 
     private fun setupSubscriptions() {
         Log.d(LOG_TAG, "Setting up subscriptions")
-        this.client.subscribe("${getDeviceId(this)}/send-sms-request", 2)
+        this.client.subscribe("${getDeviceId(this)}/sms/send-message-requests", 2)
         this.client.subscribe("${getDeviceId(this)}/sms/threads/query-requests", 2)
         this.client.subscribe("${getDeviceId(this)}/sms/messages/query-requests", 2)
     }

@@ -54,7 +54,7 @@ class MqttClientListener(private val context: Context) : MqttCallbackExtended {
 
         val deviceId = getDeviceId(context)
         val intent: Intent = when(topic) {
-            "$deviceId/send-sms-request" -> {
+            "$deviceId/sms/send-message-requests" -> {
                 createBroadcastIntent(SendSmsBroadcastReceiver::class.java, message)
             }
             "${deviceId}/sms/threads/query-requests" -> {
