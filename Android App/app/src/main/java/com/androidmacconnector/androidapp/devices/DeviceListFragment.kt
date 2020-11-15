@@ -1,5 +1,6 @@
 package com.androidmacconnector.androidapp.devices
 
+import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -7,13 +8,14 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
-import com.androidmacconnector.androidapp.databinding.FragmentDeviceListBinding
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.androidmacconnector.androidapp.R
 import com.androidmacconnector.androidapp.auth.SessionServiceImpl
+import com.androidmacconnector.androidapp.databinding.FragmentDeviceListBinding
 import com.androidmacconnector.androidapp.utils.getDeviceIdSafely
+
 
 class DeviceListFragment: Fragment() {
 
@@ -48,12 +50,12 @@ class DeviceListFragment: Fragment() {
                 }
 
                 // Remove our current device from the list
-                val filteredDevices = newDevices.filter { it.deviceId != curDeviceId }
+//                val filteredDevices = newDevices.filter { it.deviceId != curDeviceId }
 
                 devices.clear()
-                devices.addAll(filteredDevices)
+//                devices.addAll(filteredDevices)
+                devices.addAll(newDevices)
                 adapter?.notifyDataSetChanged()
-
                 dataBindings?.showNoDevicesPrompt = devices.count() == 0
             }
         }
@@ -66,20 +68,30 @@ class DeviceListFragment: Fragment() {
         // Create the layout for this fragment
         val view = inflater.inflate(R.layout.fragment_device_list, container, false)
 
+        // A handler for when a device is clicked on from the list
+        val onDeviceClickHandler = { device: Device ->
+            val intent = Intent(activity, DeviceDetailsActivity::class.java)
+            intent.putExtra("device", device)
+            startActivity(intent)
+        }
+
         // Set the RecyclerView to the list of devices
-        val devicesList = view.findViewById(R.id.devicesRecyclerView) as RecyclerView
-        adapter = DeviceListAdapter(devices)
+        val devicesList = view?.findViewById(R.id.devicesRecyclerView) as RecyclerView
+        adapter = DeviceListAdapter(devices, onDeviceClickHandler)
         devicesList.adapter = adapter
         devicesList.layoutManager = LinearLayoutManager(this.context)
 
-        // Set up data bindings
-        dataBindings = FragmentDeviceListBinding.inflate(layoutInflater, container, false)
+        // Set up the data bindings
+        dataBindings = FragmentDeviceListBinding.bind(view)
 
         return view
     }
 }
 
-class DeviceListAdapter(private val devices: List<Device>) : RecyclerView.Adapter<DeviceListAdapter.ViewHolder>() {
+class DeviceListAdapter(
+    private val devices: List<Device>,
+    private val listener: (Device) -> Unit
+): RecyclerView.Adapter<DeviceListAdapter.ViewHolder>() {
 
     // Represents a row's view in the adapter
     inner class ViewHolder(listItemView: View) : RecyclerView.ViewHolder(listItemView) {
@@ -110,6 +122,7 @@ class DeviceListAdapter(private val devices: List<Device>) : RecyclerView.Adapte
         }
 
         holder.deviceImage.setImageResource(imageResource)
+        holder.itemView.setOnClickListener { listener(device) }
     }
 
     override fun getItemCount(): Int {

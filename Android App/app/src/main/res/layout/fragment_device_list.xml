@@ -6,7 +6,7 @@
 
     <data>
         <import type="android.view.View"/>
-        <variable name="showNoDevicesPrompt" type="Boolean"/>
+        <variable name="showNoDevicesPrompt" type="boolean"/>
     </data>
 
     <androidx.coordinatorlayout.widget.CoordinatorLayout
@@ -17,7 +17,6 @@
         app:layout_constrainedHeight="true"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintBottom_toTopOf="@+id/tabLayout"
         tools:context=".devices.DeviceListFragment">
 
         <com.google.android.material.appbar.AppBarLayout
@@ -36,7 +35,7 @@
         </com.google.android.material.appbar.AppBarLayout>
 
         <androidx.constraintlayout.widget.ConstraintLayout
-            android:visibility="@{showNoDevicesPrompt ? View.GONE : View.VISIBLE}"
+            android:visibility="@{showNoDevicesPrompt ? View.VISIBLE : View.GONE}"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             app:layout_behavior="@string/appbar_scrolling_view_behavior">
@@ -47,7 +46,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="30dp"
                 android:layout_marginBottom="30dp"
-                android:text="There are no devices!"
+                android:text="@{String.valueOf(showNoDevicesPrompt)}"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"

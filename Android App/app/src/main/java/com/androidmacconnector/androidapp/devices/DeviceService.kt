@@ -10,6 +10,7 @@ import com.androidmacconnector.androidapp.utils.WebServiceResponseHandler
 import org.json.JSONArray
 import org.json.JSONException
 import org.json.JSONObject
+import java.io.Serializable
 import java.lang.String.format
 
 interface DeviceService {
@@ -176,7 +177,13 @@ class DeviceWebService(context: Context): WebService(context), DeviceService {
     }
 }
 
-class Device(val deviceId: String, val name: String, val type: String, val capabilities: List<String>) {
+class Device(
+    val deviceId: String,
+    val name: String,
+    val type: String,
+    val capabilities: List<String>
+): Serializable {
+
     companion object {
         fun createDevicesList(numDevices: Int) : ArrayList<Device> {
             val contacts = ArrayList<Device>()
@@ -185,6 +192,26 @@ class Device(val deviceId: String, val name: String, val type: String, val capab
             }
             return contacts
         }
+    }
+
+    fun canPingDevice(): Boolean {
+        return capabilities.contains("ping_device")
+    }
+
+    fun canReceiveFiles(): Boolean {
+        return capabilities.contains("receive_files")
+    }
+
+    fun canSendSms(): Boolean {
+        return capabilities.contains("send_sms")
+    }
+
+    fun canReadSms(): Boolean {
+        return capabilities.contains("read_sms")
+    }
+
+    fun canReceiveSms(): Boolean {
+        return capabilities.contains("receive_sms")
     }
 }
 

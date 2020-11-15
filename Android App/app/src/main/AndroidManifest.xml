@@ -7,8 +7,7 @@
     <uses-permission android:name="android.permission.SEND_SMS" />
     <uses-permission android:name="android.permission.RECEIVE_SMS" />
     <uses-permission android:name="android.permission.READ_CONTACTS" />
-
-    <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
 
     <application
         android:allowBackup="true"
@@ -18,16 +17,16 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.AndroidToMacContinuity">
+        <activity android:name=".devices.DeviceDetailsActivity"></activity>
         <activity android:name=".devices.DeviceRegistrationActivity" />
-        <activity android:name=".MainActivity" >
+        <activity android:name=".MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".LoginActivity">
-        </activity> <!-- The broadcast receiver for SMS messages -->
+        <activity android:name=".LoginActivity"></activity> <!-- The broadcast receiver for SMS messages -->
         <receiver
             android:name=".sms.receiver.ReceivedSmsBroadcastReceiver"
             android:enabled="true"
@@ -53,22 +52,21 @@
             android:value="false" /> <!-- It is required for FCM notifications to be sent to a particular channel -->
         <meta-data
             android:name="com.google.firebase.messaging.default_notification_channel_id"
-            android:value="default_channel_id" />
+            android:value="default_channel_id" /> <!-- The MQTT service -->
+        <service android:name=".mqtt.MqttService" />
 
-        <!-- The MQTT service -->
-        <service android:name="com.androidmacconnector.androidapp.mqtt.MqttService"/>
         <receiver
             android:name=".sms.sender.SendSmsBroadcastReceiver"
             android:enabled="true"
-            android:exported="true"/>
+            android:exported="true" />
         <receiver
             android:name=".sms.threads.GetSmsThreadsBroadcastReceiver"
             android:enabled="true"
-            android:exported="true"/>
+            android:exported="true" />
         <receiver
             android:name=".sms.messages.GetSmsMessagesBroadcastReceiver"
             android:enabled="true"
-            android:exported="true"/>
+            android:exported="true" />
     </application>
 
 </manifest>

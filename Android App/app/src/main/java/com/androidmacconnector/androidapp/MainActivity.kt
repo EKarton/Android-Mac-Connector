@@ -12,6 +12,7 @@ import androidx.fragment.app.FragmentActivity
 import androidx.viewpager2.adapter.FragmentStateAdapter
 import androidx.viewpager2.widget.ViewPager2
 import com.androidmacconnector.androidapp.auth.SessionServiceImpl
+import com.androidmacconnector.androidapp.devices.DeviceDetailsActivity
 import com.androidmacconnector.androidapp.devices.DeviceListFragment
 import com.androidmacconnector.androidapp.devices.DeviceWebService
 import com.androidmacconnector.androidapp.mqtt.MqttService
