@@ -1,10 +1,7 @@
 package com.androidmacconnector.androidapp.devices
 
 import android.Manifest
-import android.app.NotificationChannel
-import android.app.NotificationManager
 import android.content.Intent
-import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import android.view.View
@@ -13,8 +10,7 @@ import com.androidmacconnector.androidapp.MainActivity
 import com.androidmacconnector.androidapp.R
 import com.androidmacconnector.androidapp.ping.PingDeviceService
 import com.androidmacconnector.androidapp.ping.PingDeviceServiceImpl
-import com.androidmacconnector.androidapp.sms.receiver.ReceivedSmsBroadcastReceiver
-import com.androidmacconnector.androidapp.sms.messages.GetSmsMessagesServiceImpl
+import com.androidmacconnector.androidapp.sms.receiver.ReceivedSmsReceiver
 import com.androidmacconnector.androidapp.utils.getOrCreateUniqueDeviceId
 import com.androidmacconnector.androidapp.utils.saveDeviceId
 import com.google.firebase.auth.FirebaseAuth
@@ -45,7 +41,7 @@ class DeviceRegistrationActivity : AppCompatActivity() {
     }
 
     fun onYesButtonClickedHandler(view: View) {
-        val requiredPermissions = ReceivedSmsBroadcastReceiver.getRequiredPermissions() +
+        val requiredPermissions = ReceivedSmsReceiver.getRequiredPermissions() +
                 listOf(Manifest.permission.SEND_SMS, Manifest.permission.READ_SMS, Manifest.permission.READ_CONTACTS, PingDeviceService.PERMISSION)
 
         val permsListener = object : MultiplePermissionsListener {

@@ -9,7 +9,7 @@ import android.content.IntentFilter
 import android.telephony.SmsManager
 import android.util.Log
 import androidx.work.*
-import com.androidmacconnector.androidapp.mqtt.MqttService
+import com.androidmacconnector.androidapp.mqtt.MQTTService
 import com.androidmacconnector.androidapp.utils.getDeviceId
 import org.json.JSONObject
 
@@ -17,7 +17,7 @@ import org.json.JSONObject
 /**
  * A receiver used to receive requests for when someone wants to send an sms message through this device
  */
-class SendSmsBroadcastReceiver: BroadcastReceiver() {
+class SendSmsReceiver: BroadcastReceiver() {
     companion object {
         private const val LOG_TAG = "SendSmsBR"
     }
@@ -153,8 +153,8 @@ class SendSmsBroadcastReceiver: BroadcastReceiver() {
             payload.put("reason", reason)
 
             // Submit a job to our MQTT service with details for publishing
-            val startIntent = Intent(this.applicationContext, MqttService::class.java)
-            startIntent.action = MqttService.PUBLISH_INTENT_ACTION
+            val startIntent = Intent(this.applicationContext, MQTTService::class.java)
+            startIntent.action = MQTTService.PUBLISH_INTENT_ACTION
             startIntent.putExtra("topic", "${getDeviceId(this.applicationContext)}/sms/send-message-results")
             startIntent.putExtra("payload", payload.toString())
 

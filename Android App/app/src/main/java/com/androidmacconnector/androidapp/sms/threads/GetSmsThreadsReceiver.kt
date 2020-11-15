@@ -5,7 +5,7 @@ import android.content.Context
 import android.content.Intent
 import android.util.Log
 import androidx.work.*
-import com.androidmacconnector.androidapp.mqtt.MqttService
+import com.androidmacconnector.androidapp.mqtt.MQTTService
 import com.androidmacconnector.androidapp.utils.getDeviceId
 import org.json.JSONArray
 import org.json.JSONObject
@@ -13,7 +13,7 @@ import org.json.JSONObject
 /**
  * A receiver used to receive requests to query sms threads on this device
  */
-class GetSmsThreadsBroadcastReceiver: BroadcastReceiver() {
+class GetSmsThreadsReceiver: BroadcastReceiver() {
     companion object {
         private const val LOG_TAG = "GetSmsThreadsBR"
     }
@@ -77,8 +77,8 @@ class GetSmsThreadsBroadcastReceiver: BroadcastReceiver() {
             payload.put("threads", body)
 
             // Submit a job to our MQTT service with details for publishing
-            val startIntent = Intent(this.applicationContext, MqttService::class.java)
-            startIntent.action = MqttService.PUBLISH_INTENT_ACTION
+            val startIntent = Intent(this.applicationContext, MQTTService::class.java)
+            startIntent.action = MQTTService.PUBLISH_INTENT_ACTION
             startIntent.putExtra("topic", "${getDeviceId(this.applicationContext)}/sms/threads/query-results")
             startIntent.putExtra("payload", payload.toString())
 

@@ -8,7 +8,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import com.androidmacconnector.androidapp.R
 import com.androidmacconnector.androidapp.databinding.ActivityDeviceDetailsBinding
-import com.androidmacconnector.androidapp.mqtt.MqttService
+import com.androidmacconnector.androidapp.mqtt.MQTTService
 
 
 class DeviceDetailsActivity : AppCompatActivity() {
@@ -54,8 +54,8 @@ class DeviceDetailsActivity : AppCompatActivity() {
     }
 
     private fun pingDevice() {
-        val startIntent = Intent(this.applicationContext, MqttService::class.java)
-        startIntent.action = MqttService.PUBLISH_INTENT_ACTION
+        val startIntent = Intent(this.applicationContext, MQTTService::class.java)
+        startIntent.action = MQTTService.PUBLISH_INTENT_ACTION
         startIntent.putExtra("topic", "${device.deviceId}/ping/requests")
         startIntent.putExtra("payload", "")
 

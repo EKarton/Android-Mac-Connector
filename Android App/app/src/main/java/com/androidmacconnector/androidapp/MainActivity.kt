@@ -12,10 +12,9 @@ import androidx.fragment.app.FragmentActivity
 import androidx.viewpager2.adapter.FragmentStateAdapter
 import androidx.viewpager2.widget.ViewPager2
 import com.androidmacconnector.androidapp.auth.SessionServiceImpl
-import com.androidmacconnector.androidapp.devices.DeviceDetailsActivity
 import com.androidmacconnector.androidapp.devices.DeviceListFragment
 import com.androidmacconnector.androidapp.devices.DeviceWebService
-import com.androidmacconnector.androidapp.mqtt.MqttService
+import com.androidmacconnector.androidapp.mqtt.MQTTService
 import com.androidmacconnector.androidapp.utils.getDeviceIdSafely
 import com.google.android.gms.common.GoogleApiAvailability
 import com.google.android.gms.tasks.OnCompleteListener
@@ -41,7 +40,7 @@ class MainActivity : AppCompatActivity() {
         uploadFcmToken()
 
 
-        Intent(this, MqttService::class.java).also {
+        Intent(this, MQTTService::class.java).also {
             startService(it)
         }
     }

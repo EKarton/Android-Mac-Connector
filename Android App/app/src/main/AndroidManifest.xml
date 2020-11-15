@@ -28,7 +28,7 @@
         </activity>
         <activity android:name=".LoginActivity" /> <!-- The broadcast receiver for SMS messages -->
         <receiver
-            android:name=".sms.receiver.ReceivedSmsBroadcastReceiver"
+            android:name=".sms.receiver.ReceivedSmsReceiver"
             android:enabled="true"
             android:exported="true"
             android:permission="android.permission.BROADCAST_SMS">
@@ -37,7 +37,7 @@
             </intent-filter>
         </receiver> <!-- The firebase messaging service -->
         <service
-            android:name=".fcm.FcmServiceInstance"
+            android:name=".fcm.FcmService"
             android:exported="false"
             android:permission="">
             <intent-filter>
@@ -53,22 +53,22 @@
         <meta-data
             android:name="com.google.firebase.messaging.default_notification_channel_id"
             android:value="default_channel_id" /> <!-- The MQTT service -->
-        <service android:name=".mqtt.MqttService" />
+        <service android:name=".mqtt.MQTTService" />
 
         <receiver
-            android:name=".ping.PingDeviceBroadcastReceiver"
+            android:name=".ping.PingDeviceReceiver"
             android:enabled="true"
             android:exported="true" />
         <receiver
-            android:name=".sms.sender.SendSmsBroadcastReceiver"
+            android:name=".sms.sender.SendSmsReceiver"
             android:enabled="true"
             android:exported="true" />
         <receiver
-            android:name=".sms.threads.GetSmsThreadsBroadcastReceiver"
+            android:name=".sms.threads.GetSmsThreadsReceiver"
             android:enabled="true"
             android:exported="true" />
         <receiver
-            android:name=".sms.messages.GetSmsMessagesBroadcastReceiver"
+            android:name=".sms.messages.GetSmsMessagesReceiver"
             android:enabled="true"
             android:exported="true" />
     </application>

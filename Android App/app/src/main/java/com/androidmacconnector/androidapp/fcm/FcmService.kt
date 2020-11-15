@@ -1,28 +1,17 @@
 package com.androidmacconnector.androidapp.fcm
 
-import android.R
-import android.app.NotificationChannel
-import android.app.NotificationManager
-import android.app.PendingIntent
-import android.content.Context
 import android.content.Intent
-import android.media.RingtoneManager
-import android.os.Build
 import android.util.Log
-import android.widget.Toast
-import androidx.core.app.NotificationCompat
-import com.androidmacconnector.androidapp.MainActivity
 import com.androidmacconnector.androidapp.devices.DeviceWebService
 import com.androidmacconnector.androidapp.devices.UpdatePushNotificationTokenHandler
-import com.androidmacconnector.androidapp.mqtt.MqttService
-import com.androidmacconnector.androidapp.utils.getDeviceId
+import com.androidmacconnector.androidapp.mqtt.MQTTService
 import com.androidmacconnector.androidapp.utils.getDeviceIdSafely
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
 
 
-class FcmServiceInstance : FirebaseMessagingService() {
+class FcmService : FirebaseMessagingService() {
     private lateinit var deviceService: DeviceWebService
 
     companion object {
@@ -65,7 +54,7 @@ class FcmServiceInstance : FirebaseMessagingService() {
         Log.d(LOG_TAG, "Received new message: $remoteMessage")
 
         // It doesn't do much except for waking up the MQTT Service
-        Intent(this, MqttService::class.java).also {
+        Intent(this, MQTTService::class.java).also {
             startService(it)
         }
     }

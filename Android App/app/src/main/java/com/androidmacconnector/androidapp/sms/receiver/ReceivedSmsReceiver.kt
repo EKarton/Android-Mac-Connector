@@ -6,15 +6,15 @@ import android.content.*
 import android.os.Build
 import android.telephony.SmsMessage
 import android.util.Log
-import com.androidmacconnector.androidapp.mqtt.MqttService
-import com.androidmacconnector.androidapp.mqtt.MqttService.Companion.PUBLISH_INTENT_ACTION
+import com.androidmacconnector.androidapp.mqtt.MQTTService
+import com.androidmacconnector.androidapp.mqtt.MQTTService.Companion.PUBLISH_INTENT_ACTION
 import com.androidmacconnector.androidapp.utils.getDeviceId
 import org.json.JSONObject
 
 /**
  * This class is responsible for receiving SMS messages from Android
  */
-class ReceivedSmsBroadcastReceiver : BroadcastReceiver() {
+class ReceivedSmsReceiver : BroadcastReceiver() {
     companion object {
         private const val LOG_TAG = "ReceivedSmsBR"
 
@@ -46,7 +46,7 @@ class ReceivedSmsBroadcastReceiver : BroadcastReceiver() {
                 payload.put("timestamp", (smsMessage.timestampMillis / 1000).toInt())
 
                 // Submit a job to our MQTT service with details for publishing
-                val startIntent = Intent(context, MqttService::class.java)
+                val startIntent = Intent(context, MQTTService::class.java)
                 startIntent.action = PUBLISH_INTENT_ACTION
                 startIntent.putExtra("topic", "${getDeviceId(context)}/sms/new-messages")
                 startIntent.putExtra("payload", payload.toString())
