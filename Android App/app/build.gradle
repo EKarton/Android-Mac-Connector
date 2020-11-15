@@ -18,7 +18,9 @@ android {
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
-
+    buildFeatures {
+        dataBinding true
+    }
     buildTypes {
         release {
             minifyEnabled false
@@ -58,6 +60,9 @@ dependencies {
 
     // Dependencies for work manager (https://developer.android.com/topic/libraries/architecture/workmanager)
     implementation "androidx.work:work-runtime-ktx:2.4.0"
+    implementation 'androidx.legacy:legacy-support-v4:1.0.0'
+
+    // Dependencies for show-hide action bar
 
     testImplementation 'junit:junit:4.+'
     androidTestImplementation 'androidx.test.ext:junit:1.1.1'

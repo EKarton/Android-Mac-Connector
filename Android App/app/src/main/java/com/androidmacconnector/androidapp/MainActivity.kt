@@ -6,16 +6,18 @@ import android.content.Intent
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.fragment.app.Fragment
+import androidx.fragment.app.FragmentActivity
+import androidx.viewpager2.adapter.FragmentStateAdapter
+import androidx.viewpager2.widget.ViewPager2
+import com.androidmacconnector.androidapp.auth.SessionServiceImpl
+import com.androidmacconnector.androidapp.devices.DeviceListFragment
 import com.androidmacconnector.androidapp.devices.DeviceWebService
-import com.androidmacconnector.androidapp.devices.UpdatePushNotificationTokenHandler
 import com.androidmacconnector.androidapp.mqtt.MqttService
-import com.androidmacconnector.androidapp.utils.getDeviceId
 import com.androidmacconnector.androidapp.utils.getDeviceIdSafely
 import com.google.android.gms.common.GoogleApiAvailability
 import com.google.android.gms.tasks.OnCompleteListener
-import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.messaging.FirebaseMessaging
 
 
@@ -26,6 +28,24 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
+        val viewPager = findViewById<ViewPager2>(R.id.view_pager)
+        viewPager.adapter = ViewPagerAdapter(this)
+
+        if (getDeviceIdSafely(this) == null) {
+            startActivity(Intent(this, LoginActivity::class.java))
+            return
+        }
+
+        setupNotifications()
+        uploadFcmToken()
+
+
+        Intent(this, MqttService::class.java).also {
+            startService(it)
+        }
+    }
+
+    private fun setupNotifications() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             // Create channel to show notifications.
             val channelId = getString(R.string.default_notification_channel_id)
@@ -38,17 +58,13 @@ class MainActivity : AppCompatActivity() {
                 )
             )
         }
+    }
 
-        if (getDeviceIdSafely(this) == null) {
-            startActivity(Intent(this, LoginActivity::class.java))
-            return
-        }
-
-        FirebaseMessaging.getInstance().isAutoInitEnabled = true
-
+    private fun uploadFcmToken() {
         // Google play services are required with FCM
         GoogleApiAvailability.getInstance().makeGooglePlayServicesAvailable(this)
 
+        FirebaseMessaging.getInstance().isAutoInitEnabled = true
         FirebaseMessaging.getInstance().token.addOnCompleteListener(OnCompleteListener { task ->
             if (!task.isSuccessful || task.result == null) {
                 Log.w(LOG_TAG, "Fetching FCM registration token failed", task.exception)
@@ -59,34 +75,28 @@ class MainActivity : AppCompatActivity() {
             val token = task.result!!
 
             // Get the device id
-            val deviceId = getDeviceId(this)
+            val deviceId = getDeviceIdSafely(this) ?: return@OnCompleteListener
 
-            // Get the access token
-            val user = FirebaseAuth.getInstance().currentUser
-            user?.getIdToken(false)?.addOnCompleteListener { task ->
-                if (task.isSuccessful && task.result?.token != null) {
-                    val accessToken = task.result?.token!!
+            val sessionService = SessionServiceImpl()
+            sessionService.getAuthToken { authToken, err ->
+                if (err != null) {
+                    Log.d(LOG_TAG, "Error getting auth token: $err")
+                    return@getAuthToken
+                }
 
-                    // Upload the fcm token to our server
-                    val deviceWebService = DeviceWebService(this)
-                    deviceWebService.updatePushNotificationToken(accessToken, deviceId, token, object : UpdatePushNotificationTokenHandler() {
-                        override fun onSuccess() {}
+                if (authToken.isNullOrBlank()) {
+                    Log.d(LOG_TAG, "Token is blank!")
+                    return@getAuthToken
+                }
 
-                        override fun onError(exception: Exception) {
-                            throw exception
-                        }
-                    })
+                val deviceService = DeviceWebService(this)
+                deviceService.updatePushNotificationToken2(authToken, deviceId, token) { err2 ->
+                    err2?.let {
+                        Log.d(LOG_TAG, "Failed to update push notification: $it")
+                    }
                 }
             }
-
-            // Log and toast
-            Log.d(LOG_TAG, token)
-            Toast.makeText(baseContext, token, Toast.LENGTH_SHORT).show()
         })
-
-        Intent(this, MqttService::class.java).also {
-            startService(it)
-        }
     }
 
     override fun onResume() {
@@ -94,5 +104,18 @@ class MainActivity : AppCompatActivity() {
 
         // Google play services are required with FCM
         GoogleApiAvailability.getInstance().makeGooglePlayServicesAvailable(this)
+    }
+}
+
+class ViewPagerAdapter(fragmentActivity: FragmentActivity): FragmentStateAdapter(fragmentActivity) {
+    override fun createFragment(position: Int): Fragment {
+        return when(position){
+            0 -> DeviceListFragment()
+            else -> DeviceListFragment()
+        }
+    }
+
+    override fun getItemCount(): Int {
+        return 1
     }
 }

@@ -16,6 +16,7 @@ import com.androidmacconnector.androidapp.devices.DeviceWebService
 import com.androidmacconnector.androidapp.devices.UpdatePushNotificationTokenHandler
 import com.androidmacconnector.androidapp.mqtt.MqttService
 import com.androidmacconnector.androidapp.utils.getDeviceId
+import com.androidmacconnector.androidapp.utils.getDeviceIdSafely
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
@@ -37,12 +38,12 @@ class FcmServiceInstance : FirebaseMessagingService() {
         Log.d(LOG_TAG, "Received new FCM token: $token")
 
         // Get device id
-        val deviceId = getDeviceId(this)
+        val deviceId = getDeviceIdSafely(this) ?: return
 
         // Get the access token
         val user = FirebaseAuth.getInstance().currentUser
         user?.getIdToken(false)?.addOnCompleteListener { task ->
-            if (!task.isSuccessful || task.result?.token != null) {
+            if (!task.isSuccessful || task.result?.token == null) {
                 Log.w(LOG_TAG, "Failed to get access token")
                 return@addOnCompleteListener
             }
