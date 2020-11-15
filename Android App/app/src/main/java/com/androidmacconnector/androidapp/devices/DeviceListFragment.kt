@@ -35,7 +35,6 @@ class DeviceListFragment: Fragment() {
         super.onCreate(savedInstanceState)
 
         val context = this.requireContext()
-//        val curDeviceId = getDeviceIdSafely(context) ?: throw Exception("DeviceID should be set here!")
 
         SessionServiceImpl().getAuthToken { authToken, err ->
             if (authToken.isNullOrBlank() || err != null) {
@@ -49,11 +48,7 @@ class DeviceListFragment: Fragment() {
                     return@getDevices
                 }
 
-                // Remove our current device from the list
-//                val filteredDevices = newDevices.filter { it.deviceId != curDeviceId }
-
                 devices.clear()
-//                devices.addAll(filteredDevices)
                 devices.addAll(newDevices)
                 adapter?.notifyDataSetChanged()
                 dataBindings?.showNoDevicesPrompt = devices.count() == 0

@@ -21,14 +21,14 @@
 
         <com.google.android.material.appbar.AppBarLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:backgroundTint="@color/white">
+            android:layout_height="wrap_content">
 
             <com.google.android.material.appbar.MaterialToolbar
                 android:id="@+id/toolbar"
                 android:layout_width="match_parent"
                 android:layout_height="?attr/actionBarSize"
-                app:title="@{device.name, default=`Device name`}" />
+                app:title="@{device.name, default=`Device name`}"
+                style="@style/Widget.MaterialComponents.Toolbar.Primary"/>
         </com.google.android.material.appbar.AppBarLayout>
 
         <LinearLayout
@@ -43,6 +43,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginStart="17dp"
                 bind:canPingDevice="@{device.canPingDevice()}"
+                bind:noActionsText="@{`You cannot interact with this device right now`}"
                 bind:handlers="@{actionListeners}"/>
 
             <include

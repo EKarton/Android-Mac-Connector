@@ -12,30 +12,34 @@ import androidx.fragment.app.FragmentActivity
 import androidx.viewpager2.adapter.FragmentStateAdapter
 import androidx.viewpager2.widget.ViewPager2
 import com.androidmacconnector.androidapp.auth.SessionServiceImpl
+import com.androidmacconnector.androidapp.devices.DeviceActionsFragment
 import com.androidmacconnector.androidapp.devices.DeviceListFragment
 import com.androidmacconnector.androidapp.devices.DeviceWebService
 import com.androidmacconnector.androidapp.mqtt.MQTTService
 import com.androidmacconnector.androidapp.utils.getDeviceIdSafely
 import com.google.android.gms.common.GoogleApiAvailability
 import com.google.android.gms.tasks.OnCompleteListener
+import com.google.android.material.tabs.TabLayout
+import com.google.android.material.tabs.TabLayoutMediator
 import com.google.firebase.messaging.FirebaseMessaging
+import java.lang.IllegalStateException
 
 
 class MainActivity : AppCompatActivity() {
-    private val LOG_TAG = "MainActivity"
+    companion object {
+        private const val LOG_TAG = "MainActivity"
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-
-        val viewPager = findViewById<ViewPager2>(R.id.view_pager)
-        viewPager.adapter = ViewPagerAdapter(this)
 
         if (getDeviceIdSafely(this) == null) {
             startActivity(Intent(this, LoginActivity::class.java))
             return
         }
 
+        setupTabs()
         setupNotifications()
         uploadFcmToken()
 
@@ -43,6 +47,22 @@ class MainActivity : AppCompatActivity() {
         Intent(this, MQTTService::class.java).also {
             startService(it)
         }
+    }
+
+    private fun setupTabs() {
+        // Bind the view pager to the tabs so that when the user clicks on the tab, it changes the view pager
+        // Refer to https://developer.android.com/guide/navigation/navigation-swipe-view-2
+        val viewPager = findViewById<ViewPager2>(R.id.view_pager)
+        viewPager.adapter = ViewPagerAdapter(this)
+
+        val tabLayout = findViewById<TabLayout>(R.id.tabLayout)
+        TabLayoutMediator(tabLayout, viewPager) { tab, position ->
+            tab.text = when (position) {
+                0 -> "Actions"
+                1 -> "Devices"
+                else -> throw IllegalStateException("There is a max. 2 tabs")
+            }
+        }.attach()
     }
 
     private fun setupNotifications() {
@@ -108,14 +128,21 @@ class MainActivity : AppCompatActivity() {
 }
 
 class ViewPagerAdapter(fragmentActivity: FragmentActivity): FragmentStateAdapter(fragmentActivity) {
+    companion object {
+        private const val LOG_TAG = "ViewPagerAdapter"
+    }
+
     override fun createFragment(position: Int): Fragment {
+        Log.d(LOG_TAG, position.toString())
+
         return when(position){
-            0 -> DeviceListFragment()
-            else -> DeviceListFragment()
+            0 -> DeviceActionsFragment()
+            1 -> DeviceListFragment()
+            else -> throw IllegalStateException("There is a max. 2 tabs")
         }
     }
 
     override fun getItemCount(): Int {
-        return 1
+        return 2
     }
 }

@@ -1,12 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
-
 <layout xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:bind="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     xmlns:android="http://schemas.android.com/apk/res/android">
 
     <data>
         <import type="android.view.View"/>
-        <variable name="showNoDevicesPrompt" type="boolean"/>
+        <variable name="showNoActionsPrompt" type="Boolean"/>
+        <variable name="hasPingableDevice" type="Boolean" />
+        <variable name="listeners" type="com.androidmacconnector.androidapp.devices.DeviceActionsListener"/>
     </data>
 
     <androidx.coordinatorlayout.widget.CoordinatorLayout
@@ -30,33 +32,23 @@
                 android:layout_height="?attr/actionBarSize"
                 android:theme="@style/ThemeOverlay.AppCompat.ActionBar"
                 app:layout_scrollFlags="scroll|enterAlways|snap"
-                app:title="Devices" />
+                app:title="Actions" />
         </com.google.android.material.appbar.AppBarLayout>
 
-        <androidx.constraintlayout.widget.ConstraintLayout
-            android:visibility="@{showNoDevicesPrompt ? View.VISIBLE : View.GONE}"
+        <FrameLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
-            <TextView
-                android:id="@+id/textView4"
-                android:layout_width="wrap_content"
+            <include
+                layout="@layout/device_actions_list"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="30dp"
-                android:layout_marginBottom="30dp"
-                android:text="@{String.valueOf(showNoDevicesPrompt)}"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
-        </androidx.constraintlayout.widget.ConstraintLayout>
-
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/devicesRecyclerView"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            app:layout_behavior="@string/appbar_scrolling_view_behavior" />
-
+                android:layout_marginStart="17dp"
+                bind:hideTitle="@{Boolean.TRUE}"
+                bind:canPingDevice="@{hasPingableDevice}"
+                bind:noActionsText="@{`There are no devices you can interact with right now`}"
+                bind:handlers="@{listeners}"/>
+        </FrameLayout>
     </androidx.coordinatorlayout.widget.CoordinatorLayout>
 </layout>
