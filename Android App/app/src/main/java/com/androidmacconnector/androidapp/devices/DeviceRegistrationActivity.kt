@@ -1,13 +1,18 @@
 package com.androidmacconnector.androidapp.devices
 
 import android.Manifest
+import android.app.NotificationChannel
+import android.app.NotificationManager
 import android.content.Intent
+import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import com.androidmacconnector.androidapp.MainActivity
 import com.androidmacconnector.androidapp.R
+import com.androidmacconnector.androidapp.ping.PingDeviceService
+import com.androidmacconnector.androidapp.ping.PingDeviceServiceImpl
 import com.androidmacconnector.androidapp.sms.receiver.ReceivedSmsBroadcastReceiver
 import com.androidmacconnector.androidapp.sms.messages.GetSmsMessagesServiceImpl
 import com.androidmacconnector.androidapp.utils.getOrCreateUniqueDeviceId
@@ -29,7 +34,8 @@ class DeviceRegistrationActivity : AppCompatActivity() {
             Manifest.permission.RECEIVE_SMS to "receive_sms",
             Manifest.permission.READ_SMS to "read_sms",
             Manifest.permission.READ_CONTACTS to "read_contacts",
-            Manifest.permission.SEND_SMS to "send_sms"
+            Manifest.permission.SEND_SMS to "send_sms",
+            PingDeviceService.PERMISSION to "ping_device"
         )
     }
 
@@ -40,7 +46,7 @@ class DeviceRegistrationActivity : AppCompatActivity() {
 
     fun onYesButtonClickedHandler(view: View) {
         val requiredPermissions = ReceivedSmsBroadcastReceiver.getRequiredPermissions() +
-                listOf(Manifest.permission.SEND_SMS, Manifest.permission.READ_SMS, Manifest.permission.READ_CONTACTS)
+                listOf(Manifest.permission.SEND_SMS, Manifest.permission.READ_SMS, Manifest.permission.READ_CONTACTS, PingDeviceService.PERMISSION)
 
         val permsListener = object : MultiplePermissionsListener {
             override fun onPermissionsChecked(report: MultiplePermissionsReport) {
@@ -74,11 +80,11 @@ class DeviceRegistrationActivity : AppCompatActivity() {
         val deviceId = getOrCreateUniqueDeviceId(this)
         val deviceService = DeviceWebService(this)
 
-        // Get the device capabilities
-        val capabilities = report.grantedPermissionResponses.filter {
-            PERMISSIONS_TO_CAPABILITIES.containsKey(it.permissionName)
-        }.map {
-            PERMISSIONS_TO_CAPABILITIES[it.permissionName]!!
+        val capabilities = getCapabilities(report)
+
+        // Set up the ping device notifications channel
+        if (capabilities.contains("ping_device")) {
+            PingDeviceServiceImpl(this).setupNotificationChannel()
         }
 
         // Get the access token
@@ -105,5 +111,20 @@ class DeviceRegistrationActivity : AppCompatActivity() {
                 throw task.exception ?: Exception("Cannot get access token")
             }
         }
+    }
+
+    private fun getCapabilities(report: MultiplePermissionsReport): List<String> {
+        // Get the device capabilities
+        val capabilities = report.grantedPermissionResponses.filter {
+            PERMISSIONS_TO_CAPABILITIES.containsKey(it.permissionName)
+        }.map {
+            PERMISSIONS_TO_CAPABILITIES[it.permissionName]!!
+        }
+
+        val newCapabilities = mutableListOf<String>()
+        newCapabilities.addAll(capabilities)
+        newCapabilities.add("ping_device")
+
+        return newCapabilities
     }
 }

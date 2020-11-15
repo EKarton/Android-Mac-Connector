@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">AndroidMacConnector</string>
+    <string name="app_name">Android Mac Connector</string>
     <string name="default_notification_channel_id">fcm_default_channel</string>
     <string name="default_notification_channel_name">fcm_default_channel</string>
     <string name="app_data_file_key">com.androidmacconnector.androidapp.AppData</string>
@@ -9,4 +9,6 @@
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="devices_list_fragment_title">Devices</string>
+    <string name="ping_device_channel_name">Ping Device</string>
+    <string name="ping_device_channel_description">Ping device notifications</string>
 </resources>

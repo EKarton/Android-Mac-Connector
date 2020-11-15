@@ -35,7 +35,7 @@ class DeviceListFragment: Fragment() {
         super.onCreate(savedInstanceState)
 
         val context = this.requireContext()
-        val curDeviceId = getDeviceIdSafely(context) ?: throw Exception("DeviceID should be set here!")
+//        val curDeviceId = getDeviceIdSafely(context) ?: throw Exception("DeviceID should be set here!")
 
         SessionServiceImpl().getAuthToken { authToken, err ->
             if (authToken.isNullOrBlank() || err != null) {

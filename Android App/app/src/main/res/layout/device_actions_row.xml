@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layout xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     xmlns:android="http://schemas.android.com/apk/res/android">
 
     <data>
@@ -8,32 +7,24 @@
         <variable name="imageSrc" type="int"/>
         <variable name="imageCaption" type="String"/>
         <variable name="actionName" type="String"/>
+        <variable name="handlers" type="com.androidmacconnector.androidapp.devices.DeviceActionsListener"/>
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
-        <ImageView
-            android:id="@+id/image"
+        <Button
+            android:id="@+id/textButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:adjustViewBounds="true"
-            android:contentDescription="@{imageCaption, default=`Action image`}"
-            android:maxHeight="30dp"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            app:srcCompat="@drawable/fui_ic_check_circle_black_128dp" />
-
-        <TextView
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="20dp"
-            android:textSize="18sp"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toEndOf="@+id/image"
-            app:layout_constraintTop_toTopOf="parent"
-            tools:text="@{actionName, default=`Action name`}" />
+            android:onClick="@{handlers::onClickPingDeviceHandler}"
+            app:icon="@drawable/fui_ic_check_circle_black_128dp"
+            app:iconSize="30dp"
+            android:text="@{actionName, default=`Action name`}"
+            style="@style/Widget.MaterialComponents.Button.TextButton" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>

@@ -6,6 +6,7 @@
     <data>
         <import type="android.view.View"/>
         <variable name="canPingDevice" type="Boolean"/>
+        <variable name="handlers" type="com.androidmacconnector.androidapp.devices.DeviceActionsListener"/>
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -49,7 +50,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 bind:imageCaption="@{`Ping device icon`}"
-                bind:actionName="@{`Ping device`}" />
+                bind:actionName="@{`Ping device`}"
+                bind:handlers="@{handlers}"/>
 
         </LinearLayout>
 

@@ -17,7 +17,7 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.AndroidToMacContinuity">
-        <activity android:name=".devices.DeviceDetailsActivity"></activity>
+        <activity android:name=".devices.DeviceDetailsActivity" />
         <activity android:name=".devices.DeviceRegistrationActivity" />
         <activity android:name=".MainActivity">
             <intent-filter>
@@ -26,7 +26,7 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".LoginActivity"></activity> <!-- The broadcast receiver for SMS messages -->
+        <activity android:name=".LoginActivity" /> <!-- The broadcast receiver for SMS messages -->
         <receiver
             android:name=".sms.receiver.ReceivedSmsBroadcastReceiver"
             android:enabled="true"
@@ -55,6 +55,10 @@
             android:value="default_channel_id" /> <!-- The MQTT service -->
         <service android:name=".mqtt.MqttService" />
 
+        <receiver
+            android:name=".ping.PingDeviceBroadcastReceiver"
+            android:enabled="true"
+            android:exported="true" />
         <receiver
             android:name=".sms.sender.SendSmsBroadcastReceiver"
             android:enabled="true"

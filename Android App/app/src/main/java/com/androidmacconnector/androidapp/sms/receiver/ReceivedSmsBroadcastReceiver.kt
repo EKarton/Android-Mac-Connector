@@ -23,6 +23,7 @@ class ReceivedSmsBroadcastReceiver : BroadcastReceiver() {
         }
     }
 
+    /** This method is called when the BroadcastReceiver is receiving an Intent broadcast. **/
     @TargetApi(Build.VERSION_CODES.M)
     override fun onReceive(context: Context, intent: Intent) {
 

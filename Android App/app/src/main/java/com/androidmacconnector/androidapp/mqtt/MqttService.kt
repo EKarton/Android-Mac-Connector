@@ -4,6 +4,7 @@ import android.app.Service
 import android.content.Intent
 import android.os.IBinder
 import android.util.Log
+import com.androidmacconnector.androidapp.ping.PingDeviceBroadcastReceiver
 import com.androidmacconnector.androidapp.sms.messages.GetSmsMessagesBroadcastReceiver
 import com.androidmacconnector.androidapp.sms.sender.SendSmsBroadcastReceiver
 import com.androidmacconnector.androidapp.sms.threads.GetSmsThreadsBroadcastReceiver
@@ -50,6 +51,12 @@ class MqttService: Service() {
         this.client.subscribe("$deviceId/sms/messages/query-requests", 2) { msg, err ->
             if (msg != null && err == null) {
                 sendBroadcastIntent(GetSmsMessagesBroadcastReceiver::class.java, msg)
+            }
+        }
+
+        this.client.subscribe("$deviceId/ping/requests", 2) { msg, err ->
+            if (msg != null && err == null) {
+                sendBroadcastIntent(PingDeviceBroadcastReceiver::class.java, msg)
             }
         }
     }

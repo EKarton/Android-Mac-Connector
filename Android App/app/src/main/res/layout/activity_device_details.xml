@@ -7,6 +7,7 @@
     <data>
         <import type="android.view.View"/>
         <variable name="device" type="com.androidmacconnector.androidapp.devices.Device"/>
+        <variable name="actionListeners" type="com.androidmacconnector.androidapp.devices.DeviceActionsListener"/>
     </data>
 
     <androidx.coordinatorlayout.widget.CoordinatorLayout
@@ -41,7 +42,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="17dp"
-                bind:canPingDevice="@{device.canPingDevice()}" />
+                bind:canPingDevice="@{device.canPingDevice()}"
+                bind:handlers="@{actionListeners}"/>
 
             <include
                 layout="@layout/device_capabilities_list"
@@ -51,7 +53,7 @@
                 bind:canPingDevice="@{device.canPingDevice()}"
                 bind:canSendSms="@{device.canSendSms()}"
                 bind:canReadSms="@{device.canReadSms()}"
-                bind:canReceiveSms="@{device.canReceiveSms()}"/>
+                bind:canReceiveSms="@{device.canReceiveSms()}" />
 
         </LinearLayout>
     </androidx.coordinatorlayout.widget.CoordinatorLayout>
