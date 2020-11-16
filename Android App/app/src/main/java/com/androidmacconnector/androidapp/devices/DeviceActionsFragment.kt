@@ -6,6 +6,7 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import com.androidmacconnector.androidapp.R
 import com.androidmacconnector.androidapp.auth.SessionStoreImpl
@@ -56,7 +57,6 @@ class DeviceActionsFragment : Fragment() {
 
         // Bind the bindings to this view
         dataBindings = FragmentDeviceActionsBinding.bind(view)
-
         dataBindings?.listeners = object: DeviceActionsListener {
             override fun onClickPingDeviceHandler(view: View) {
                 Log.d(LOG_TAG, "Ping device button clicked")

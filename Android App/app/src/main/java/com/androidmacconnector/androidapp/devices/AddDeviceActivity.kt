@@ -93,7 +93,7 @@ class AddDeviceActivity : AppCompatActivity() {
         }
 
         // Get the hardware id
-        val hardwareId = Settings.Secure.getString(this.contentResolver, Settings.Secure.ANDROID_ID);
+        val hardwareId = Settings.Secure.getString(this.contentResolver, Settings.Secure.ANDROID_ID)
 
         // Get the access token
         val context = this

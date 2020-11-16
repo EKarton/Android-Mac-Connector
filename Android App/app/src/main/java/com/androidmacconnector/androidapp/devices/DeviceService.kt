@@ -49,6 +49,7 @@ data class Device(
 interface DeviceService {
     fun isDeviceRegistered(authToken: String, deviceType: String, hardwareId: String, handler: (Boolean?, Throwable?) -> Unit)
     fun registerDevice(authToken: String, deviceType: String, hardwareId: String, capabilities: List<String>, handler: (String?, Throwable?) -> Unit)
+    fun unregisterDevice(authToken: String, deviceId: String, handler: (Throwable?) -> Unit)
     fun getDevices(authToken: String, handler: (List<Device>, Throwable?) -> Unit)
     fun updatePushNotificationToken(authToken: String, deviceId: String, newToken: String, handler: (Throwable?) -> Unit)
 }
@@ -61,6 +62,7 @@ class DeviceWebService(private val context: Context): DeviceService {
         private const val LOG_TAG = "DeviceWebService"
         private const val IS_DEVICE_REGISTERED_PATH = "/api/v1/devices/registered"
         private const val REGISTER_DEVICE_PATH = "/api/v1/devices/register"
+        private const val UNREGISTER_DEVICE_PATH = "api/v1/devices/%s"
         private const val GET_DEVICES_PATH = "/api/v1/devices"
         private const val UPDATE_PUSH_NOTIFICATION_TOKEN_PATH = "/api/v1/devices/%s/token"
     }
@@ -127,6 +129,33 @@ class DeviceWebService(private val context: Context): DeviceService {
         }
     }
 
+    override fun unregisterDevice(authToken: String, deviceId: String, handler: (Throwable?) -> Unit) {
+        Log.d(LOG_TAG, "Unregistering device $deviceId")
+
+        val apiPath = UNREGISTER_DEVICE_PATH.format(deviceId)
+        val uri = Uri.Builder()
+            .scheme(getServerProtocol())
+            .encodedAuthority(getServerAuthority())
+            .encodedPath(apiPath)
+            .build()
+            .toString()
+
+        val headers = mapOf("Authorization" to format("Bearer %s", authToken))
+        makeJsonObjectRequest(Request.Method.DELETE, uri, null, headers) { json, err ->
+            if (err != null) {
+                handler(err)
+                return@makeJsonObjectRequest
+            }
+
+            if (json != null && json.getString("status") == "success") {
+                handler(null)
+                return@makeJsonObjectRequest
+            }
+
+            handler(JSONException("Missing status=success in response:"))
+        }
+    }
+
     override fun getDevices(authToken: String, handler: (List<Device>, Throwable?) -> Unit) {
         Log.d(LOG_TAG, "Getting devices")
 
@@ -145,7 +174,7 @@ class DeviceWebService(private val context: Context): DeviceService {
             }
 
             if (json == null || !json.has("devices")) {
-                handler(emptyList(), JSONException("Missing devices in response:"))
+                handler(emptyList(), JSONException("Missing devices in response"))
                 return@makeJsonObjectRequest
             }
 

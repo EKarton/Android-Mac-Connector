@@ -6,17 +6,20 @@ import android.content.Intent
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
+import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.GravityCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
 import androidx.viewpager2.adapter.FragmentStateAdapter
-import androidx.viewpager2.widget.ViewPager2
 import com.androidmacconnector.androidapp.auth.SessionStoreImpl
 import com.androidmacconnector.androidapp.auth.SignInActivity
+import com.androidmacconnector.androidapp.databinding.ActivityMainBinding
 import com.androidmacconnector.androidapp.devices.DeviceActionsFragment
 import com.androidmacconnector.androidapp.devices.DeviceListFragment
 import com.androidmacconnector.androidapp.devices.DeviceWebService
 import com.androidmacconnector.androidapp.mqtt.MQTTService
+import com.androidmacconnector.androidapp.settings.SettingsActivity
 import com.androidmacconnector.androidapp.utils.getDeviceIdSafely
 import com.google.android.gms.common.GoogleApiAvailability
 import com.google.android.gms.tasks.OnCompleteListener
@@ -24,10 +27,9 @@ import com.google.android.material.tabs.TabLayout
 import com.google.android.material.tabs.TabLayoutMediator
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.messaging.FirebaseMessaging
-import java.lang.IllegalStateException
-
 
 class MainActivity : AppCompatActivity() {
+    private lateinit var binding: ActivityMainBinding
     private lateinit var sessionStore: SessionStoreImpl
 
     companion object {
@@ -36,18 +38,24 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
+
+        // Set up the binding and the view
+        binding = ActivityMainBinding.inflate(layoutInflater)
+        setContentView(binding.root)
 
         sessionStore = SessionStoreImpl(FirebaseAuth.getInstance())
 
         if (!sessionStore.isSignedIn()) {
             val intent = Intent(this, SignInActivity::class.java)
-            intent.flags = intent.flags or Intent.FLAG_ACTIVITY_NO_HISTORY
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP)
             startActivity(intent)
             return
         }
 
+        setSupportActionBar(binding.mainToolbar)
+
         setupTabs()
+        setupNavMenu()
         setupNotifications()
         uploadFcmToken()
 
@@ -59,17 +67,50 @@ class MainActivity : AppCompatActivity() {
     private fun setupTabs() {
         // Bind the view pager to the tabs so that when the user clicks on the tab, it changes the view pager
         // Refer to https://developer.android.com/guide/navigation/navigation-swipe-view-2
-        val viewPager = findViewById<ViewPager2>(R.id.view_pager)
-        viewPager.adapter = ViewPagerAdapter(this)
+        binding.viewPager.adapter = ViewPagerAdapter(this)
 
-        val tabLayout = findViewById<TabLayout>(R.id.tabLayout)
-        TabLayoutMediator(tabLayout, viewPager) { tab, position ->
+        TabLayoutMediator(binding.tabLayout, binding.viewPager) { tab, position ->
             tab.text = when (position) {
                 0 -> "Actions"
                 1 -> "Devices"
                 else -> throw IllegalStateException("There is a max. 2 tabs")
             }
         }.attach()
+
+        // Bind the action bar's text to the tab's text
+        binding.tabLayout.addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener {
+            override fun onTabSelected(tab: TabLayout.Tab?) {
+                supportActionBar?.title = tab?.text
+            }
+
+            override fun onTabUnselected(tab: TabLayout.Tab?) {}
+            override fun onTabReselected(tab: TabLayout.Tab?) {}
+        })
+    }
+
+    private fun setupNavMenu() {
+        // Make the drawer open and close from the nav menu icon in the action bar
+        val toggle = ActionBarDrawerToggle(
+            this,
+            binding.drawer,
+            binding.mainToolbar,
+            R.string.navigation_drawer_open,
+            R.string.navigation_drawer_close
+        )
+        binding.drawer.addDrawerListener(toggle)
+
+        // Add a listener to when the user selects an item from the nav drawer
+        binding.navView.setNavigationItemSelectedListener { item ->
+            when (item.itemId) {
+                R.id.actionsMenuItem -> binding.viewPager.setCurrentItem(0, true)
+                R.id.devicesMenuItem -> binding.viewPager.setCurrentItem(1, true)
+                R.id.settingsMenuItem -> {
+                    startActivity(Intent(this, SettingsActivity::class.java))
+                }
+            }
+            binding.drawer.closeDrawer(GravityCompat.START)
+            return@setNavigationItemSelectedListener true
+        }
     }
 
     private fun setupNotifications() {

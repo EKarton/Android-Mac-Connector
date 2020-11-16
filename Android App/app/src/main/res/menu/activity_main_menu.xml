@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context="com.androidmacconnector.androidapp.MainActivity">
+
+    <group android:checkableBehavior="single">
+
+        <group android:id="@+id/essentialGroup"
+            android:checkableBehavior="single">
+
+            <item
+                android:id="@+id/actionsMenuItem"
+                android:icon="@android:drawable/ic_menu_send"
+                android:title="Actions" />
+
+            <item
+                android:id="@+id/devicesMenuItem"
+                android:icon="@drawable/ic_generic_device"
+                android:title="Devices" />
+
+        </group>
+
+        <group android:id="@+id/settingsGroup"
+            android:checkableBehavior="single">
+
+            <item
+                android:id="@+id/settingsMenuItem"
+                android:icon="@android:drawable/ic_menu_preferences"
+                android:title="Settings" />
+
+        </group>
+
+    </group>
+
+</menu>

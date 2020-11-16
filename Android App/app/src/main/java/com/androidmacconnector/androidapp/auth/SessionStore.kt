@@ -2,9 +2,14 @@ package com.androidmacconnector.androidapp.auth
 
 import com.google.firebase.auth.FirebaseAuth
 
+data class User(
+    val email: String?
+)
+
 interface SessionStore {
     fun getAuthToken(handler: (String, Exception?) -> Unit)
     fun isSignedIn(): Boolean
+    fun getUserDetails(): User?
     fun signUp(email: String, password: String, handler: (Exception?) -> Unit)
     fun signIn(email: String, password: String, handler: (Exception?) -> Unit)
     fun signOut()
@@ -32,6 +37,15 @@ class SessionStoreImpl(private val firebaseAuth: FirebaseAuth): SessionStore {
 
     override fun isSignedIn(): Boolean {
         return firebaseAuth.currentUser != null
+    }
+
+    override fun getUserDetails(): User? {
+        if (firebaseAuth.currentUser != null) {
+            return User(
+                firebaseAuth.currentUser!!.email
+            )
+        }
+        return null
     }
 
     override fun signUp(email: String, password: String, handler: (Exception?) -> Unit) {
