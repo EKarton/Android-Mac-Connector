@@ -3,6 +3,7 @@ import { HttpError } from "../rest_api/middlewares";
 export interface DeviceService {
   doesDeviceExist(userId: string, deviceType: string, hardwareId: string): Promise<boolean>
   registerDevice(userId: string, deviceType: string, hardwareId: string, capabilities: String[]): Promise<string>
+  removeDevice(deviceId: string)
   getDevices(userId: string): Promise<Device[]>
 	updateDeviceCapabilities(deviceId: string, capabilities: string[])
   getDeviceCapabilities(deviceId: string): Promise<string[]>
@@ -54,6 +55,17 @@ export class FirebaseDeviceService implements DeviceService {
     })
 
     return doc.id
+  }
+
+  async removeDevice(deviceId: string) {
+    const devicesCollection = this.firestoreClient.collection("devices")
+    const doc = await devicesCollection.doc(deviceId).get()
+
+    if (!doc.exists) {
+      throw new HttpError(404, "DeviceNotExist", "Device does not exist")
+    }
+  
+    await devicesCollection.doc(deviceId).delete()
   }
 
   async updateDeviceCapabilities(deviceId: string, capabilities: string[]) {

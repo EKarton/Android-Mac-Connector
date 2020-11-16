@@ -52,42 +52,53 @@ class SettingsActivity : AppCompatActivity() {
     private fun setupButtonListeners() {
         binding.addRemoveDeviceBttn.setOnClickListener { view ->
             if (isDeviceRegistered()) {
-                sessionStore.getAuthToken { authToken, err1 ->
-                    if (err1 != null) {
-                        Log.d(LOG_TAG, "Error getting auth token: $err1")
-                        Toast.makeText(this, "Error unregistering device", Toast.LENGTH_LONG).show()
-                        return@getAuthToken
-                    }
-
-                    val deviceId = getDeviceIdSafely(this) ?: throw IllegalStateException("Device id should be present here")
-                    deviceService.unregisterDevice(authToken, deviceId) { err2 ->
-                        if (err2 != null) {
-                            Log.d(LOG_TAG, "Error unregistering device: $err2")
-                            Toast.makeText(this, "Error unregistering device", Toast.LENGTH_LONG).show()
-                            return@unregisterDevice
-                        }
-                        Log.d(LOG_TAG, "Successfully unregistered device")
-                    }
-
-                }
+                removeDevice()
             } else {
-                startActivity(Intent(this, AddDeviceActivity::class.java))
+                registerDevice()
             }
         }
 
-        binding.signOutButton.setOnClickListener { view ->
-            sessionStore.signOut()
-
-            // Go to the sign in page
-            val intent = Intent(this, SignInActivity::class.java)
-            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP)
-            startActivity(intent)
-            finish()
-        }
+        binding.signOutButton.setOnClickListener { view -> signOut() }
     }
 
     private fun isDeviceRegistered(): Boolean {
         return getDeviceIdSafely(this) != null
+    }
+
+    private fun registerDevice() {
+        startActivity(Intent(this, AddDeviceActivity::class.java))
+    }
+
+    private fun removeDevice() {
+        sessionStore.getAuthToken { authToken, err1 ->
+            if (err1 != null) {
+                Log.d(LOG_TAG, "Error getting auth token: $err1")
+                Toast.makeText(this, "Error unregistering device", Toast.LENGTH_LONG).show()
+                return@getAuthToken
+            }
+
+            val deviceId = getDeviceIdSafely(this) ?: throw IllegalStateException("Device id should be present here")
+            deviceService.unregisterDevice(authToken, deviceId) { err2 ->
+                if (err2 != null) {
+                    Log.d(LOG_TAG, "Error unregistering device: $err2")
+                    Toast.makeText(this, "Error unregistering device", Toast.LENGTH_LONG).show()
+                    return@unregisterDevice
+                }
+
+                Log.d(LOG_TAG, "Successfully unregistered device")
+                binding.isRegistered = false
+            }
+        }
+    }
+
+    private fun signOut() {
+        sessionStore.signOut()
+
+        // Go to the sign in page
+        val intent = Intent(this, SignInActivity::class.java)
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP)
+        startActivity(intent)
+        finish()
     }
 
     /**

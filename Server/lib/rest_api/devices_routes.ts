@@ -1,6 +1,6 @@
 import { json, Router } from "express";
 import { Authenticator } from "../services/authenticator";
-import { createAuthenticateMiddleware } from "./middlewares";
+import { createAuthenticateMiddleware, handleErrorsMiddleware } from "./middlewares";
 import { DeviceService } from "../services/device_service";
 import { ResourcePolicyService } from "../services/resource_policy_service";
 
@@ -14,8 +14,6 @@ export const createDeviceRouter = (service: DeviceService, authService: Authenti
     const userId = req.header("user_id")
     const deviceType = req.query.device_type.toString()
     const hardwareId = req.query.hardware_id.toString()
-
-    console.log(userId, deviceType, hardwareId)
 
     const result = await service.doesDeviceExist(userId, deviceType, hardwareId)
 
@@ -59,11 +57,24 @@ export const createDeviceRouter = (service: DeviceService, authService: Authenti
     const userId = req.header("user_id")
 
     const devices = await service.getDevices(userId)
+
     res.setHeader('Content-Type', 'application/json');
     res.status(200).json({
       "devices": devices
     })
   })
+
+  router.delete("/:deviceId", async (req, res) => {
+    const deviceId = req.params.deviceId
+
+    await service.removeDevice(deviceId)
+    await resourcePolicyService.deletePermission(null, null, deviceId)
+
+    res.setHeader('Content-Type', 'application/json');
+    res.status(200).json({
+      "status": "success"
+    })
+  });
 
   router.get("/:deviceId/capabilities", async (req, res) => {
     const deviceId = req.params.deviceId

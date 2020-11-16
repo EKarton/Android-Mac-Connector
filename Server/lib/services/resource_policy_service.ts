@@ -1,6 +1,6 @@
 export interface ResourcePolicyService {
   addPermission(action: string, principal: string, resource: string)
-  deletePermission(action: string, principal: string, resource: string)
+  deletePermission(action?: string, principal?: string, resource?: string)
   isAuthorized(action: string, principal: string, resource: string): Promise<boolean>
 }
 
@@ -42,7 +42,7 @@ export class FirebaseResourcePolicyService implements ResourcePolicyService {
     }
   }
 
-  async deletePermission(action: string, principal: string, resource: string) {
+  async deletePermission(action?: string, principal?: string, resource?: string) {
     const collection = this.firestoreClient.collection("resource-policies")
     const docs = await this.getPermissions(action, principal, resource)
     const pendingResults = [];
@@ -52,7 +52,7 @@ export class FirebaseResourcePolicyService implements ResourcePolicyService {
       pendingResults.push(pendingResult)
     })
 
-    Promise.all(pendingResults)
+    await Promise.all(pendingResults)
   }
 
   async isAuthorized(action: string, principal: string, resource: string): Promise<boolean> {
