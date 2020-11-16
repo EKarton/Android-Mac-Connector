@@ -37,6 +37,12 @@ class SessionServiceImpl(private val firebaseAuth: FirebaseAuth): SessionService
     override fun signUp(email: String, password: String, handler: (Exception?) -> Unit) {
         firebaseAuth.createUserWithEmailAndPassword(email, password)
             .addOnCompleteListener { task ->
+                if (!task.isSuccessful) {
+                    handler(task.exception)
+                    return@addOnCompleteListener
+                }
+
+                handler(null)
             }
     }
 

@@ -1,22 +1,63 @@
 package com.androidmacconnector.androidapp.auth
 
+import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.util.Log
 import android.view.View
+import androidx.databinding.DataBindingUtil
+import com.androidmacconnector.androidapp.MainActivity
 import com.androidmacconnector.androidapp.R
+import com.androidmacconnector.androidapp.databinding.ActivitySignUpBinding
 import com.google.firebase.auth.FirebaseAuth
 
 class SignUpActivity : AppCompatActivity() {
+    private lateinit var binding: ActivitySignUpBinding
     private lateinit var sessionStore: SessionServiceImpl
+
+    companion object {
+        private const val LOG_TAG = "SignUpActivity"
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_sign_up)
+        binding = DataBindingUtil.setContentView(this, R.layout.activity_sign_up)
 
         sessionStore = SessionServiceImpl(FirebaseAuth.getInstance())
     }
 
     fun onSignUpButtonClicked(view: View) {
+        val email = binding.email
+        val password1 = binding.password1
+        val password2 = binding.password2
 
+        if (email.isNullOrBlank()) {
+            binding.errorMessage = "Email must not be blank"
+            return
+        }
+
+        if (password1.isNullOrBlank()) {
+            binding.errorMessage = "Password must not be blank"
+            return
+        }
+
+        if (password1 != password2) {
+            binding.errorMessage = "Passwords do not match"
+            return
+        }
+
+        sessionStore.signUp(email, password1) { err ->
+            if (err != null) {
+                Log.d(LOG_TAG, "Error trying to sign up: $err")
+                binding.errorMessage = err.localizedMessage
+                return@signUp
+            }
+
+            Log.d(LOG_TAG, "Successfully signed up")
+
+            val intent = Intent(this, MainActivity::class.java)
+            intent.flags = intent.flags or Intent.FLAG_ACTIVITY_NO_HISTORY
+            startActivity(intent)
+        }
     }
 }

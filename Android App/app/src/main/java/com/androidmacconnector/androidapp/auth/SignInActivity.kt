@@ -23,9 +23,7 @@ class SignInActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = DataBindingUtil.setContentView(this, R.layout.activity_sign_in)
 
-        Log.d(LOG_TAG, "Create session store!")
         sessionStore = SessionServiceImpl(FirebaseAuth.getInstance())
-        Log.d(LOG_TAG, "Created session store! $sessionStore")
     }
 
     /** Called when the user clicks on the Create Account button **/
