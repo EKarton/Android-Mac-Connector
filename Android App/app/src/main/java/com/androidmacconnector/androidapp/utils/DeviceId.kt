@@ -14,6 +14,17 @@ fun saveDeviceId(context: Context, deviceId: String) {
     }
 }
 
+fun removeDeviceId(context: Context) {
+    val fileName = context.getString(R.string.app_data_file_key)
+    val sharedPreferences = context.getSharedPreferences(fileName, Context.MODE_PRIVATE)
+    val key = context.getString(R.string.android_device_id)
+
+    with (sharedPreferences.edit()) {
+        remove(key)
+        apply()
+    }
+}
+
 fun getDeviceIdSafely(context: Context): String? {
     val fileName = context.getString(R.string.app_data_file_key)
     val sharedPreferences = context.getSharedPreferences(fileName, Context.MODE_PRIVATE)

@@ -11,6 +11,7 @@ import com.androidmacconnector.androidapp.databinding.ActivitySettingsBinding
 import com.androidmacconnector.androidapp.devices.AddDeviceActivity
 import com.androidmacconnector.androidapp.devices.DeviceWebService
 import com.androidmacconnector.androidapp.utils.getDeviceIdSafely
+import com.androidmacconnector.androidapp.utils.removeDeviceId
 import com.google.firebase.auth.FirebaseAuth
 
 class SettingsActivity : AppCompatActivity() {
@@ -86,7 +87,9 @@ class SettingsActivity : AppCompatActivity() {
                 }
 
                 Log.d(LOG_TAG, "Successfully unregistered device")
+
                 binding.isRegistered = false
+                removeDeviceId(this)
             }
         }
     }

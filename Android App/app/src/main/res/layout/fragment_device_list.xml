@@ -15,13 +15,14 @@
 
         <TextView
             android:id="@+id/textView4"
-            android:layout_width="match_parent"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="30dp"
-            android:layout_marginBottom="30dp"
+            android:layout_margin="30dp"
             android:visibility="@{showNoDevicesPrompt ? View.VISIBLE : View.GONE}"
-            android:text="@{String.valueOf(showNoDevicesPrompt)}"
+            android:text="There are no devices in your account"
+            app:layout_constrainedWidth="true"
             app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
         <androidx.recyclerview.widget.RecyclerView

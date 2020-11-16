@@ -45,6 +45,7 @@
                 android:layout_height="wrap_content"
                 android:paddingTop="0dp"
                 android:paddingBottom="0dp"
+                android:layout_margin="30dp"
                 android:text="@{noActionsText}"/>
 
             <include

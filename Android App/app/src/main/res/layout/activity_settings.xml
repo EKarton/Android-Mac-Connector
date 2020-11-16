@@ -43,6 +43,8 @@
                 android:layout_marginStart="17dp"
                 android:layout_marginTop="32dp"
                 android:text="Device registration"
+                android:textAppearance="@style/TextAppearance.AppCompat.Small"
+                android:textStyle="bold"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
 
@@ -78,6 +80,8 @@
                 android:layout_marginStart="16dp"
                 android:layout_marginTop="64dp"
                 android:text="Account"
+                android:textAppearance="@style/TextAppearance.AppCompat.Small"
+                android:textStyle="bold"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/textView12" />
 
