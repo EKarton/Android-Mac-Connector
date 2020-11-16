@@ -1,5 +1,6 @@
 package com.androidmacconnector.androidapp.sms.sender
 
+import android.Manifest
 import android.app.Activity
 import android.app.PendingIntent
 import android.content.BroadcastReceiver
@@ -20,6 +21,10 @@ import org.json.JSONObject
 class SendSmsReceiver: BroadcastReceiver() {
     companion object {
         private const val LOG_TAG = "SendSmsBR"
+
+        fun getRequiredPermissions(): List<String> {
+            return listOf(Manifest.permission.SEND_SMS)
+        }
     }
 
     /** This method is called when the BroadcastReceiver is receiving an Intent broadcast. **/

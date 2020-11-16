@@ -1,14 +1,14 @@
 package com.androidmacconnector.androidapp.auth
 
 import android.content.Intent
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
 import android.view.View
+import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.DataBindingUtil
-import com.androidmacconnector.androidapp.MainActivity
 import com.androidmacconnector.androidapp.R
 import com.androidmacconnector.androidapp.databinding.ActivitySignUpBinding
+import com.androidmacconnector.androidapp.devices.AddDeviceActivity
 import com.google.firebase.auth.FirebaseAuth
 
 class SignUpActivity : AppCompatActivity() {
@@ -54,10 +54,7 @@ class SignUpActivity : AppCompatActivity() {
             }
 
             Log.d(LOG_TAG, "Successfully signed up")
-
-            val intent = Intent(this, MainActivity::class.java)
-            intent.flags = intent.flags or Intent.FLAG_ACTIVITY_NO_HISTORY
-            startActivity(intent)
+            startActivity(Intent(this, AddDeviceActivity::class.java))
         }
     }
 }

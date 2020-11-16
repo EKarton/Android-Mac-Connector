@@ -20,7 +20,7 @@
         <activity android:name=".auth.SignUpActivity"></activity>
         <activity android:name=".auth.SignInActivity" />
         <activity android:name=".devices.DeviceDetailsActivity" />
-        <activity android:name=".devices.DeviceRegistrationActivity" />
+        <activity android:name=".devices.AddDeviceActivity" />
         <activity android:name=".MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

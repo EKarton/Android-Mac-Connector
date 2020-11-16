@@ -2,16 +2,20 @@ package com.androidmacconnector.androidapp.devices
 
 import android.Manifest
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.os.Bundle
+import android.provider.Settings
 import android.util.Log
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import com.androidmacconnector.androidapp.MainActivity
 import com.androidmacconnector.androidapp.R
-import com.androidmacconnector.androidapp.ping.PingDeviceService
+import com.androidmacconnector.androidapp.auth.SessionServiceImpl
 import com.androidmacconnector.androidapp.ping.PingDeviceServiceImpl
+import com.androidmacconnector.androidapp.sms.messages.GetSmsMessagesReceiver
 import com.androidmacconnector.androidapp.sms.receiver.ReceivedSmsReceiver
-import com.androidmacconnector.androidapp.utils.getOrCreateUniqueDeviceId
+import com.androidmacconnector.androidapp.sms.sender.SendSmsReceiver
+import com.androidmacconnector.androidapp.sms.threads.GetSmsThreadsReceiver
 import com.androidmacconnector.androidapp.utils.saveDeviceId
 import com.google.firebase.auth.FirebaseAuth
 import com.karumi.dexter.Dexter
@@ -23,26 +27,39 @@ import com.karumi.dexter.listener.multi.MultiplePermissionsListener
 /**
  * This activity is about registering this device to the server
  */
-class DeviceRegistrationActivity : AppCompatActivity() {
+class AddDeviceActivity : AppCompatActivity() {
+    private lateinit var sessionService: SessionServiceImpl
+    private lateinit var deviceService: DeviceWebService
+
     companion object {
-        private const val LOG_TAG = "DeviceRegisterActivity"
+        private const val LOG_TAG = "AddDeviceActivity"
         private val PERMISSIONS_TO_CAPABILITIES = mapOf(
             Manifest.permission.RECEIVE_SMS to "receive_sms",
             Manifest.permission.READ_SMS to "read_sms",
             Manifest.permission.READ_CONTACTS to "read_contacts",
-            Manifest.permission.SEND_SMS to "send_sms",
-            PingDeviceService.PERMISSION to "ping_device"
+            Manifest.permission.SEND_SMS to "send_sms"
         )
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_device_registration)
+        setContentView(R.layout.activity_add_device)
+
+        sessionService = SessionServiceImpl(FirebaseAuth.getInstance())
+        deviceService = DeviceWebService(this)
     }
 
-    fun onYesButtonClickedHandler(view: View) {
-        val requiredPermissions = ReceivedSmsReceiver.getRequiredPermissions() +
-                listOf(Manifest.permission.SEND_SMS, Manifest.permission.READ_SMS, Manifest.permission.READ_CONTACTS)
+    /** Called when the user clicks on the Register Device button **/
+    fun onAddDeviceButtonClicked(view: View) {
+        val permissions = hashSetOf<String>()
+
+        // Add SMS permissions if there is SMS functionality on this device
+        if (packageManager.hasSystemFeature(PackageManager.FEATURE_TELEPHONY)) {
+            permissions.addAll(ReceivedSmsReceiver.getRequiredPermissions())
+            permissions.addAll(SendSmsReceiver.getRequiredPermissions())
+            permissions.addAll(GetSmsMessagesReceiver.getRequiredPermissions())
+            permissions.addAll(GetSmsThreadsReceiver.getRequiredPermissions())
+        }
 
         val permsListener = object : MultiplePermissionsListener {
             override fun onPermissionsChecked(report: MultiplePermissionsReport) {
@@ -57,25 +74,17 @@ class DeviceRegistrationActivity : AppCompatActivity() {
         }
 
         Dexter.withContext(this)
-            .withPermissions(requiredPermissions)
+            .withPermissions(permissions)
             .withListener(permsListener)
-            .onSameThread()
             .check()
     }
 
-    fun onNoButtonClickedHandler(view: View) {
+    /** Called when the user clicks on the 'No Thanks' button **/
+    fun onCancelButtonClicked(view: View) {
         goToMainActivity()
     }
 
-    private fun goToMainActivity() {
-        val i = Intent(this, MainActivity::class.java)
-        startActivity(i)
-    }
-
     private fun onPermissionsGrantedHandler(report: MultiplePermissionsReport) {
-        val deviceId = getOrCreateUniqueDeviceId(this)
-        val deviceService = DeviceWebService(this)
-
         val capabilities = getCapabilities(report)
 
         // Set up the ping device notifications channel
@@ -83,28 +92,35 @@ class DeviceRegistrationActivity : AppCompatActivity() {
             PingDeviceServiceImpl(this).setupNotificationChannel()
         }
 
+        // Get the hardware id
+        val hardwareId = Settings.Secure.getString(this.contentResolver, Settings.Secure.ANDROID_ID);
+
         // Get the access token
         val context = this
-        val user = FirebaseAuth.getInstance().currentUser
-        user?.getIdToken(false)?.addOnCompleteListener { task ->
-            if (task.isSuccessful && task.result?.token != null) {
-                val accessToken = task.result?.token!!
-                Log.d(LOG_TAG, "Access token: $accessToken")
+        sessionService.getAuthToken { authToken, err ->
+            if (err != null) {
+                Log.d(LOG_TAG, "Error getting auth token: $err")
+                return@getAuthToken
+            }
 
-                // Register the device
-                deviceService.registerDevice(accessToken, deviceId, capabilities, object : RegisterDeviceHandler() {
-                    override fun onSuccess(deviceId: String) {
-                        saveDeviceId(context, deviceId)
-                        goToMainActivity()
-                    }
+            if (authToken.isNullOrBlank()) {
+                Log.d(LOG_TAG, "Auth token is blank")
+                return@getAuthToken
+            }
 
-                    override fun onError(exception: Exception) {
-                        throw exception
-                    }
-                })
+            deviceService.registerDevice2(authToken, "android_phone", hardwareId, capabilities) { deviceId, err ->
+                if (err != null) {
+                    Log.d(LOG_TAG, "Failed to register device, $err")
+                    return@registerDevice2
+                }
 
-            } else {
-                throw task.exception ?: Exception("Cannot get access token")
+                if (deviceId.isNullOrBlank()) {
+                    Log.d(LOG_TAG, "Device ID is blank")
+                    return@registerDevice2
+                }
+
+                saveDeviceId(context, deviceId)
+                goToMainActivity()
             }
         }
     }
@@ -122,5 +138,11 @@ class DeviceRegistrationActivity : AppCompatActivity() {
         newCapabilities.add("ping_device")
 
         return newCapabilities
+    }
+
+    private fun goToMainActivity() {
+        val intent = Intent(this, MainActivity::class.java)
+        intent.flags = intent.flags or Intent.FLAG_ACTIVITY_NO_HISTORY
+        startActivity(intent)
     }
 }

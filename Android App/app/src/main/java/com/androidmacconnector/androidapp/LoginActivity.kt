@@ -5,7 +5,7 @@ import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
-import com.androidmacconnector.androidapp.devices.DeviceRegistrationActivity
+import com.androidmacconnector.androidapp.devices.AddDeviceActivity
 import com.androidmacconnector.androidapp.devices.DeviceWebService
 import com.androidmacconnector.androidapp.devices.IsDeviceRegisteredHandler
 import com.androidmacconnector.androidapp.utils.getOrCreateUniqueDeviceId
@@ -79,7 +79,7 @@ class LoginActivity : AppCompatActivity() {
     }
 
     private fun goToDeviceRegistrationActivity() {
-        val i = Intent(this, DeviceRegistrationActivity::class.java)
+        val i = Intent(this, AddDeviceActivity::class.java)
         startActivity(i)
     }
 

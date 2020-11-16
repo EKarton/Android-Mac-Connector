@@ -13,6 +13,7 @@ import androidx.viewpager2.adapter.FragmentStateAdapter
 import androidx.viewpager2.widget.ViewPager2
 import com.androidmacconnector.androidapp.auth.SessionServiceImpl
 import com.androidmacconnector.androidapp.auth.SignInActivity
+import com.androidmacconnector.androidapp.devices.AddDeviceActivity
 import com.androidmacconnector.androidapp.devices.DeviceActionsFragment
 import com.androidmacconnector.androidapp.devices.DeviceListFragment
 import com.androidmacconnector.androidapp.devices.DeviceWebService
@@ -41,7 +42,9 @@ class MainActivity : AppCompatActivity() {
         sessionService = SessionServiceImpl(FirebaseAuth.getInstance())
 
         if (!sessionService.isSignedIn()) {
-            startActivity(Intent(this, SignInActivity::class.java))
+            val intent = Intent(this, SignInActivity::class.java)
+            intent.flags = intent.flags or Intent.FLAG_ACTIVITY_NO_HISTORY
+            startActivity(intent)
             return
         }
 

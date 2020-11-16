@@ -1,5 +1,6 @@
 package com.androidmacconnector.androidapp.sms.threads
 
+import android.Manifest
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
@@ -16,6 +17,9 @@ import org.json.JSONObject
 class GetSmsThreadsReceiver: BroadcastReceiver() {
     companion object {
         private const val LOG_TAG = "GetSmsThreadsBR"
+        fun getRequiredPermissions(): List<String> {
+            return listOf(Manifest.permission.READ_SMS, Manifest.permission.READ_CONTACTS)
+        }
     }
 
     /** This method is called when the BroadcastReceiver is receiving an Intent broadcast. **/
