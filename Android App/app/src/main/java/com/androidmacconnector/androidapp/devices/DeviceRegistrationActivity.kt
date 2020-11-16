@@ -42,7 +42,7 @@ class DeviceRegistrationActivity : AppCompatActivity() {
 
     fun onYesButtonClickedHandler(view: View) {
         val requiredPermissions = ReceivedSmsReceiver.getRequiredPermissions() +
-                listOf(Manifest.permission.SEND_SMS, Manifest.permission.READ_SMS, Manifest.permission.READ_CONTACTS, PingDeviceService.PERMISSION)
+                listOf(Manifest.permission.SEND_SMS, Manifest.permission.READ_SMS, Manifest.permission.READ_CONTACTS)
 
         val permsListener = object : MultiplePermissionsListener {
             override fun onPermissionsChecked(report: MultiplePermissionsReport) {

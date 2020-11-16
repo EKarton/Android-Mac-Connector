@@ -45,12 +45,7 @@ class LoginActivity : AppCompatActivity() {
     }
 
     private fun checkIfSignedIn(requestCode: Int, resultCode: Int): Boolean {
-        if (requestCode == RC_SIGN_IN) {
-            if (resultCode == Activity.RESULT_OK) {
-                return true
-            }
-        }
-        return false
+        return requestCode == RC_SIGN_IN && resultCode == Activity.RESULT_OK
     }
 
     private fun handleSigninSuccessful() {

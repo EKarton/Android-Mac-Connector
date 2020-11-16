@@ -4,11 +4,15 @@ import com.google.firebase.auth.FirebaseAuth
 
 interface SessionService {
     fun getAuthToken(handler: (String?, Exception?) -> Unit)
+    fun isSignedIn(): Boolean
+    fun signUp(email: String, password: String, handler: (Exception?) -> Unit)
+    fun signIn(email: String, password: String, handler: (Exception?) -> Unit)
+    fun signOut()
 }
 
-class SessionServiceImpl: SessionService {
+class SessionServiceImpl(private val firebaseAuth: FirebaseAuth): SessionService {
     override fun getAuthToken(handler: (String?, Exception?) -> Unit) {
-        val user = FirebaseAuth.getInstance().currentUser
+        val user = firebaseAuth.currentUser
         user?.getIdToken(false)?.addOnCompleteListener { task ->
 
             if (task.exception != null) {
@@ -24,5 +28,31 @@ class SessionServiceImpl: SessionService {
             val accessToken = task.result!!.token!!
             handler(accessToken, null)
         }
+    }
+
+    override fun isSignedIn(): Boolean {
+        return firebaseAuth.currentUser != null
+    }
+
+    override fun signUp(email: String, password: String, handler: (Exception?) -> Unit) {
+        firebaseAuth.createUserWithEmailAndPassword(email, password)
+            .addOnCompleteListener { task ->
+            }
+    }
+
+    override fun signIn(email: String, password: String, handler: (Exception?) -> Unit) {
+        firebaseAuth.signInWithEmailAndPassword(email, password)
+            .addOnCompleteListener { task ->
+                if (!task.isSuccessful) {
+                    handler(task.exception)
+                    return@addOnCompleteListener
+                }
+
+                handler(null)
+            }
+    }
+
+    override fun signOut() {
+        firebaseAuth.signOut()
     }
 }

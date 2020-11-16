@@ -17,6 +17,8 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.AndroidToMacContinuity">
+        <activity android:name=".auth.SignUpActivity"></activity>
+        <activity android:name=".auth.SignInActivity" />
         <activity android:name=".devices.DeviceDetailsActivity" />
         <activity android:name=".devices.DeviceRegistrationActivity" />
         <activity android:name=".MainActivity">

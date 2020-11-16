@@ -35,20 +35,16 @@
                 app:title="Actions" />
         </com.google.android.material.appbar.AppBarLayout>
 
-        <FrameLayout
+        <include
+            layout="@layout/device_actions_list"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            app:layout_behavior="@string/appbar_scrolling_view_behavior">
+            android:layout_marginStart="17dp"
+            app:layout_behavior="@string/appbar_scrolling_view_behavior"
+            bind:canPingDevice="@{hasPingableDevice}"
+            bind:handlers="@{listeners}"
+            bind:hideTitle="@{Boolean.TRUE}"
+            bind:noActionsText="@{`There are no devices you can interact with right now`}" />
 
-            <include
-                layout="@layout/device_actions_list"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="17dp"
-                bind:hideTitle="@{Boolean.TRUE}"
-                bind:canPingDevice="@{hasPingableDevice}"
-                bind:noActionsText="@{`There are no devices you can interact with right now`}"
-                bind:handlers="@{listeners}"/>
-        </FrameLayout>
     </androidx.coordinatorlayout.widget.CoordinatorLayout>
 </layout>

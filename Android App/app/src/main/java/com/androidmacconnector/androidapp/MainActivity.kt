@@ -12,6 +12,7 @@ import androidx.fragment.app.FragmentActivity
 import androidx.viewpager2.adapter.FragmentStateAdapter
 import androidx.viewpager2.widget.ViewPager2
 import com.androidmacconnector.androidapp.auth.SessionServiceImpl
+import com.androidmacconnector.androidapp.auth.SignInActivity
 import com.androidmacconnector.androidapp.devices.DeviceActionsFragment
 import com.androidmacconnector.androidapp.devices.DeviceListFragment
 import com.androidmacconnector.androidapp.devices.DeviceWebService
@@ -21,11 +22,14 @@ import com.google.android.gms.common.GoogleApiAvailability
 import com.google.android.gms.tasks.OnCompleteListener
 import com.google.android.material.tabs.TabLayout
 import com.google.android.material.tabs.TabLayoutMediator
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.messaging.FirebaseMessaging
 import java.lang.IllegalStateException
 
 
 class MainActivity : AppCompatActivity() {
+    private lateinit var sessionService: SessionServiceImpl
+
     companion object {
         private const val LOG_TAG = "MainActivity"
     }
@@ -34,15 +38,16 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        if (getDeviceIdSafely(this) == null) {
-            startActivity(Intent(this, LoginActivity::class.java))
+        sessionService = SessionServiceImpl(FirebaseAuth.getInstance())
+
+        if (!sessionService.isSignedIn()) {
+            startActivity(Intent(this, SignInActivity::class.java))
             return
         }
 
         setupTabs()
         setupNotifications()
         uploadFcmToken()
-
 
         Intent(this, MQTTService::class.java).also {
             startService(it)
@@ -96,8 +101,6 @@ class MainActivity : AppCompatActivity() {
 
             // Get the device id
             val deviceId = getDeviceIdSafely(this) ?: return@OnCompleteListener
-
-            val sessionService = SessionServiceImpl()
             sessionService.getAuthToken { authToken, err ->
                 if (err != null) {
                     Log.d(LOG_TAG, "Error getting auth token: $err")

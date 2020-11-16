@@ -15,6 +15,7 @@ import com.androidmacconnector.androidapp.R
 import com.androidmacconnector.androidapp.auth.SessionServiceImpl
 import com.androidmacconnector.androidapp.databinding.FragmentDeviceListBinding
 import com.androidmacconnector.androidapp.utils.getDeviceIdSafely
+import com.google.firebase.auth.FirebaseAuth
 
 
 class DeviceListFragment: Fragment() {
@@ -36,7 +37,7 @@ class DeviceListFragment: Fragment() {
 
         val context = this.requireContext()
 
-        SessionServiceImpl().getAuthToken { authToken, err ->
+        SessionServiceImpl(FirebaseAuth.getInstance()).getAuthToken { authToken, err ->
             if (authToken.isNullOrBlank() || err != null) {
                 Log.d(LOG_TAG, "Missing auth: $err")
                 return@getAuthToken

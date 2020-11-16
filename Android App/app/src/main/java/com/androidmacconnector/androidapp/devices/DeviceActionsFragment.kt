@@ -12,6 +12,7 @@ import com.androidmacconnector.androidapp.auth.SessionServiceImpl
 import com.androidmacconnector.androidapp.databinding.FragmentDeviceActionsBinding
 import com.androidmacconnector.androidapp.mqtt.MQTTService
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.google.firebase.auth.FirebaseAuth
 
 class DeviceActionsFragment : Fragment() {
 
@@ -27,7 +28,7 @@ class DeviceActionsFragment : Fragment() {
 
         val context = this.requireContext()
 
-        SessionServiceImpl().getAuthToken { authToken, err ->
+        SessionServiceImpl(FirebaseAuth.getInstance()).getAuthToken { authToken, err ->
             if (authToken.isNullOrBlank() || err != null) {
                 Log.d(LOG_TAG, "Missing auth: $err")
                 return@getAuthToken

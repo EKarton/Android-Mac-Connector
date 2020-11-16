@@ -11,13 +11,15 @@ import org.json.JSONArray
 import org.json.JSONException
 import org.json.JSONObject
 import java.io.Serializable
+import java.lang.IllegalArgumentException
 import java.lang.String.format
 
 interface DeviceService {
     fun isDeviceRegistered(authToken: String, androidDeviceId: String, handler: IsDeviceRegisteredHandler)
+    fun isDeviceRegistered2(authToken: String, deviceType: String, hardwareId: String, handler: (Boolean?, Throwable?) -> Unit)
     fun registerDevice(authToken: String, androidDeviceId: String, capabilities: List<String>, handler: RegisterDeviceHandler)
+    fun registerDevice2(authToken: String, deviceType: String, hardwareId: String, capabilities: List<String>, handler: (String?, Throwable?) -> Unit)
     fun getDevices(authToken: String, handler: (List<Device>, Throwable?) -> Unit)
-    fun updateDeviceCapabilities(authToken: String, deviceId: String, capabilities: List<String>, handler: UpdateDeviceCapabilitiesHandler)
     fun updatePushNotificationToken(authToken: String, deviceId: String, newToken: String, handler: UpdatePushNotificationTokenHandler)
     fun updatePushNotificationToken2(authToken: String, deviceId: String, newToken: String, handler: (Throwable?) -> Unit)
 }
@@ -32,6 +34,7 @@ class DeviceWebService(context: Context): WebService(context), DeviceService {
         private const val UPDATE_PUSH_NOTIFICATION_TOKEN_PATH = "/api/v1/devices/%s/token"
     }
 
+    @Deprecated("This is outdated", ReplaceWith("Please use isDeviceRegistered2()"), DeprecationLevel.WARNING)
     override fun isDeviceRegistered(authToken: String, androidDeviceId: String, handler: IsDeviceRegisteredHandler) {
         Log.d(LOG_TAG, "Checking if device is registered")
 
@@ -47,6 +50,35 @@ class DeviceWebService(context: Context): WebService(context), DeviceService {
         makeJsonObjectRequest(Request.Method.GET, uri.toString(), null, headers, handler)
     }
 
+    override fun isDeviceRegistered2(authToken: String, deviceType: String, hardwareId: String, handler: (Boolean?, Throwable?) -> Unit) {
+        Log.d(LOG_TAG, "Checking if device is registered")
+
+        val uri = Uri.Builder()
+            .scheme(getServerProtocol())
+            .encodedAuthority(getServerAuthority())
+            .encodedPath(IS_DEVICE_REGISTERED_PATH)
+            .appendQueryParameter("device_type", deviceType)
+            .appendQueryParameter("hardware_id", hardwareId)
+            .build()
+
+        val headers = mapOf("Authorization" to format("Bearer %s", authToken))
+        val jsonHandler = object: WebServiceResponseHandler {
+            override fun onResponse(response: JSONObject?) {
+                if (response != null && response.has("is_registered")) {
+                    handler(response.getBoolean("is_registered"), null)
+                    return
+                }
+                handler(null, IllegalArgumentException("No result for whether the device exists or not"))
+            }
+
+            override fun onErrorResponse(error: VolleyError?) {
+                handler(null, error)
+            }
+        }
+        makeJsonObjectRequest(Request.Method.GET, uri.toString(), null, headers, jsonHandler)
+    }
+
+    @Deprecated("This is outdated", ReplaceWith("Please use registerDevice2()"), DeprecationLevel.WARNING)
     override fun registerDevice(authToken: String, androidDeviceId: String, capabilities: List<String>, handler: RegisterDeviceHandler) {
         Log.d(LOG_TAG, "Registering device")
 
@@ -54,7 +86,7 @@ class DeviceWebService(context: Context): WebService(context), DeviceService {
         capabilities.forEach { capabilitiesJsonArray.put(it) }
 
         val jsonBody = JSONObject()
-        jsonBody.put("device_type", "android")
+        jsonBody.put("device_type", "android_phone")
         jsonBody.put("hardware_id", androidDeviceId)
         jsonBody.put("capabilities", capabilitiesJsonArray)
 
@@ -66,6 +98,46 @@ class DeviceWebService(context: Context): WebService(context), DeviceService {
 
         val headers = mapOf("Authorization" to format("Bearer %s", authToken))
         makeJsonObjectRequest(Request.Method.POST, uri.toString(), jsonBody, headers, handler)
+    }
+
+    override fun registerDevice2(
+        authToken: String,
+        deviceType: String,
+        hardwareId: String,
+        capabilities: List<String>,
+        handler: (String?, Throwable?) -> Unit)
+    {
+        Log.d(LOG_TAG, "Registering device")
+
+        val capabilitiesJsonArray = JSONArray()
+        capabilities.forEach { capabilitiesJsonArray.put(it) }
+
+        val jsonBody = JSONObject()
+            .put("device_type", deviceType)
+            .put("hardware_id", hardwareId)
+            .put("capabilities", capabilitiesJsonArray)
+
+        val uri = Uri.Builder()
+            .scheme(getServerProtocol())
+            .encodedAuthority(getServerAuthority())
+            .encodedPath(REGISTER_DEVICE_PATH)
+            .build()
+
+        val headers = mapOf("Authorization" to format("Bearer %s", authToken))
+        val jsonHandler = object: WebServiceResponseHandler {
+            override fun onResponse(response: JSONObject?) {
+                if (response != null && response.has("device_id")) {
+                    handler(response.getString("device_id"), null)
+                    return
+                }
+                handler(null, IllegalArgumentException("Cannot get device id!"))
+            }
+
+            override fun onErrorResponse(error: VolleyError?) {
+                handler(null, error)
+            }
+        }
+        makeJsonObjectRequest(Request.Method.POST, uri.toString(), jsonBody, headers, jsonHandler)
     }
 
     override fun getDevices(authToken: String, handler: (List<Device>, Throwable?) -> Unit) {
@@ -117,27 +189,6 @@ class DeviceWebService(context: Context): WebService(context), DeviceService {
         makeJsonObjectRequest(Request.Method.GET, uri.toString(), null, headers, jsonHandler)
     }
 
-    override fun updateDeviceCapabilities(authToken: String, deviceId: String, capabilities: List<String>, handler: UpdateDeviceCapabilitiesHandler) {
-        Log.d(LOG_TAG, "Registering device")
-
-        val capabilitiesJsonArray = JSONArray()
-        capabilities.forEach { capabilitiesJsonArray.put(it) }
-
-        val jsonBody = JSONObject()
-        jsonBody.put("capabilities", capabilitiesJsonArray)
-
-        val apiPath = UPDATE_DEVICE_CAPABILITIES_PATH.format(deviceId)
-
-        val uri = Uri.Builder()
-            .scheme(getServerProtocol())
-            .encodedAuthority(getServerAuthority())
-            .encodedPath(apiPath)
-            .build()
-
-        val headers = mapOf("Authorization" to format("Bearer %s", authToken))
-        makeJsonObjectRequest(Request.Method.PUT, uri.toString(), jsonBody, headers, handler)
-    }
-
     override fun updatePushNotificationToken(authToken: String, deviceId: String, newToken: String, handler: UpdatePushNotificationTokenHandler) {
         Log.d(LOG_TAG, "Updating device token")
 
@@ -184,22 +235,8 @@ class Device(
     val capabilities: List<String>
 ): Serializable {
 
-    companion object {
-        fun createDevicesList(numDevices: Int) : ArrayList<Device> {
-            val contacts = ArrayList<Device>()
-            for (i in 1..numDevices) {
-                contacts.add(Device("Device$i", "My Device", "Mac", listOf("read_sms")))
-            }
-            return contacts
-        }
-    }
-
     fun canPingDevice(): Boolean {
         return capabilities.contains("ping_device")
-    }
-
-    fun canReceiveFiles(): Boolean {
-        return capabilities.contains("receive_files")
     }
 
     fun canSendSms(): Boolean {
