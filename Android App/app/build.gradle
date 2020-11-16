@@ -50,7 +50,6 @@ dependencies {
     // Dependencies for FCM and Firebase auth
     implementation platform('com.google.firebase:firebase-bom:25.12.0')
     implementation 'com.google.firebase:firebase-messaging-ktx'
-    implementation 'com.firebaseui:firebase-ui-auth:6.2.0'
     implementation 'com.google.firebase:firebase-auth'
 
     // Dependencies for making HTTP requests

@@ -16,15 +16,15 @@
 
         <Button
             android:id="@+id/textButton"
+            style="@style/Widget.MaterialComponents.Button.TextButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
             android:onClick="@{handlers::onClickPingDeviceHandler}"
-            app:icon="@drawable/fui_ic_check_circle_black_128dp"
-            app:iconSize="30dp"
             android:text="@{actionName, default=`Action name`}"
-            style="@style/Widget.MaterialComponents.Button.TextButton" />
+            app:icon="@android:drawable/ic_popup_reminder"
+            app:iconSize="30dp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>
