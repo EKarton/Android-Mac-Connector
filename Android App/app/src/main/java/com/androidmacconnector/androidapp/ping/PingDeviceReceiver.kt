@@ -8,7 +8,8 @@ import android.util.Log
 class PingDeviceReceiver : BroadcastReceiver() {
 
     companion object {
-        private const val LOG_TAG = "PingDeviceBR"
+        const val LOG_TAG = "PingDeviceReceiver"
+        const val REQUESTS_TOPIC = "ping/requests"
     }
 
     /** This method is called when the BroadcastReceiver is receiving an Intent broadcast. **/

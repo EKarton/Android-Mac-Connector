@@ -11,9 +11,12 @@ import com.androidmacconnector.androidapp.utils.getDeviceId
 import org.json.JSONArray
 import org.json.JSONObject
 
-class GetSmsMessagesReceiver: BroadcastReceiver() {
+class ReadSmsMessagesReceiver: BroadcastReceiver() {
     companion object {
-        private const val LOG_TAG = "GetSmsMessagesBR"
+        const val LOG_TAG = "GetSmsMessagesReceiver"
+        const val REQUESTS_TOPIC = "sms/messages/query-requests"
+        const val RESULTS_TOPIC = "sms/messages/query-results"
+
         fun getRequiredPermissions(): List<String> {
             return listOf(Manifest.permission.READ_SMS, Manifest.permission.READ_CONTACTS)
         }
@@ -50,7 +53,7 @@ class GetSmsMessagesReceiver: BroadcastReceiver() {
             val threadId = inputData.getString("thread_id") ?: return Result.failure()
 
             val contentResolver = applicationContext.contentResolver
-            val service = GetSmsMessagesServiceImpl()
+            val service = ReadSmsMessagesServiceImpl()
             val messages = service.getSmsMessagesFromThread(contentResolver, threadId, limit, start)
 
             this.publishQueryResults(threadId, limit, start, messages)
@@ -85,7 +88,7 @@ class GetSmsMessagesReceiver: BroadcastReceiver() {
             // Submit a job to our MQTT service with details for publishing
             val startIntent = Intent(this.applicationContext, MQTTService::class.java)
             startIntent.action = MQTTService.PUBLISH_INTENT_ACTION
-            startIntent.putExtra("topic", "${getDeviceId(this.applicationContext)}/sms/messages/query-results")
+            startIntent.putExtra("topic", "${getDeviceId(this.applicationContext)}/$RESULTS_TOPIC")
             startIntent.putExtra("payload", payload.toString())
 
             this.applicationContext.startService(startIntent)

@@ -22,7 +22,7 @@
             android:onClick="@{handlers::onClickPingDeviceHandler}"
             android:text="@{actionName, default=`Action name`}"
             app:icon="@android:drawable/ic_popup_reminder"
-            app:iconSize="30dp"
+            app:iconSize="20dp"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 

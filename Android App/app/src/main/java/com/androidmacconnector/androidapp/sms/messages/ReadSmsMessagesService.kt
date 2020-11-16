@@ -13,7 +13,7 @@ data class SmsMessage(
     val type: String
 )
 
-interface GetSmsMessagesService {
+interface ReadSmsMessagesService {
     fun getSmsMessagesFromThread(
         contentResolver: ContentResolver,
         threadId: String,
@@ -25,7 +25,8 @@ interface GetSmsMessagesService {
 /**
  * A class used to handle all types of SMS-related tasks
  */
-class GetSmsMessagesServiceImpl : GetSmsMessagesService {
+class ReadSmsMessagesServiceImpl : ReadSmsMessagesService {
+
     /**
      * Returns a list of SMS messages from a particular thread
      */

@@ -5,9 +5,9 @@ import android.content.Intent
 import android.os.IBinder
 import android.util.Log
 import com.androidmacconnector.androidapp.ping.PingDeviceReceiver
-import com.androidmacconnector.androidapp.sms.messages.GetSmsMessagesReceiver
+import com.androidmacconnector.androidapp.sms.messages.ReadSmsMessagesReceiver
 import com.androidmacconnector.androidapp.sms.sender.SendSmsReceiver
-import com.androidmacconnector.androidapp.sms.threads.GetSmsThreadsReceiver
+import com.androidmacconnector.androidapp.sms.threads.ReadSmsThreadsReceiver
 import com.androidmacconnector.androidapp.utils.getDeviceIdSafely
 import com.google.firebase.auth.FirebaseAuth
 import org.eclipse.paho.client.mqttv3.MqttMessage
@@ -36,25 +36,25 @@ class MQTTService: Service() {
         this.client.setPassword(accessToken)
         this.client.connect()
 
-        this.client.subscribe("$deviceId/sms/send-message-requests", 2) { msg, err ->
+        this.client.subscribe("$deviceId/${SendSmsReceiver.REQUESTS_TOPIC}", 2) { msg, err ->
             if (msg != null && err == null) {
                 sendBroadcastIntent(SendSmsReceiver::class.java, msg)
             }
         }
 
-        this.client.subscribe("$deviceId/sms/threads/query-requests", 2) { msg, err ->
+        this.client.subscribe("$deviceId/${ReadSmsThreadsReceiver.REQUESTS_TOPIC}", 2) { msg, err ->
             if (msg != null && err == null) {
-                sendBroadcastIntent(GetSmsThreadsReceiver::class.java, msg)
+                sendBroadcastIntent(ReadSmsThreadsReceiver::class.java, msg)
             }
         }
 
-        this.client.subscribe("$deviceId/sms/messages/query-requests", 2) { msg, err ->
+        this.client.subscribe("$deviceId/${ReadSmsMessagesReceiver.REQUESTS_TOPIC}", 2) { msg, err ->
             if (msg != null && err == null) {
-                sendBroadcastIntent(GetSmsMessagesReceiver::class.java, msg)
+                sendBroadcastIntent(ReadSmsMessagesReceiver::class.java, msg)
             }
         }
 
-        this.client.subscribe("$deviceId/ping/requests", 2) { msg, err ->
+        this.client.subscribe("$deviceId/${PingDeviceReceiver.REQUESTS_TOPIC}", 2) { msg, err ->
             if (msg != null && err == null) {
                 sendBroadcastIntent(PingDeviceReceiver::class.java, msg)
             }

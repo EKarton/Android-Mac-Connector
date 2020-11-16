@@ -7,20 +7,17 @@ import android.os.Build
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.NotificationCompat
 import com.androidmacconnector.androidapp.R
-import com.androidmacconnector.androidapp.ping.PingDeviceService.Companion.CHANNEL_ID
-
 
 interface PingDeviceService {
-    companion object {
-        const val CHANNEL_ID = "1"
-        const val PERMISSION = "com.androidmacconnector.androidapp.permissions.ping_device"
-    }
-
     fun setupNotificationChannel()
     fun dispatchNotification()
 }
 
 class PingDeviceServiceImpl(private val context: Context): PingDeviceService {
+    companion object {
+        const val CHANNEL_ID = "1"
+    }
+
     override fun setupNotificationChannel() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             // Create the NotificationChannel

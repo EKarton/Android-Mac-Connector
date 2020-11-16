@@ -14,9 +14,13 @@ import org.json.JSONObject
 /**
  * A receiver used to receive requests to query sms threads on this device
  */
-class GetSmsThreadsReceiver: BroadcastReceiver() {
+class ReadSmsThreadsReceiver: BroadcastReceiver() {
     companion object {
-        private const val LOG_TAG = "GetSmsThreadsBR"
+        const val LOG_TAG = "GetSmsThreadsReceiver"
+        const val REQUESTS_TOPIC = "sms/threads/query-requests"
+        const val RESULTS_TOPIC = "sms/threads/query-results"
+
+
         fun getRequiredPermissions(): List<String> {
             return listOf(Manifest.permission.READ_SMS, Manifest.permission.READ_CONTACTS)
         }
@@ -51,7 +55,7 @@ class GetSmsThreadsReceiver: BroadcastReceiver() {
             val start = inputData.getInt("start", 0)
 
             val contentResolver = applicationContext.contentResolver
-            val service = GetSmsThreadsServiceImpl()
+            val service = ReadSmsThreadsServiceImpl()
             val threads = service.getSmsThreadsSummary(contentResolver, limit, start)
 
             this.publishQueryResults(limit, start, threads)
@@ -83,7 +87,7 @@ class GetSmsThreadsReceiver: BroadcastReceiver() {
             // Submit a job to our MQTT service with details for publishing
             val startIntent = Intent(this.applicationContext, MQTTService::class.java)
             startIntent.action = MQTTService.PUBLISH_INTENT_ACTION
-            startIntent.putExtra("topic", "${getDeviceId(this.applicationContext)}/sms/threads/query-results")
+            startIntent.putExtra("topic", "${getDeviceId(this.applicationContext)}/$RESULTS_TOPIC")
             startIntent.putExtra("payload", payload.toString())
 
             this.applicationContext.startService(startIntent)

@@ -10,12 +10,12 @@ import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import com.androidmacconnector.androidapp.MainActivity
 import com.androidmacconnector.androidapp.R
-import com.androidmacconnector.androidapp.auth.SessionServiceImpl
+import com.androidmacconnector.androidapp.auth.SessionStoreImpl
 import com.androidmacconnector.androidapp.ping.PingDeviceServiceImpl
-import com.androidmacconnector.androidapp.sms.messages.GetSmsMessagesReceiver
+import com.androidmacconnector.androidapp.sms.messages.ReadSmsMessagesReceiver
 import com.androidmacconnector.androidapp.sms.receiver.ReceivedSmsReceiver
 import com.androidmacconnector.androidapp.sms.sender.SendSmsReceiver
-import com.androidmacconnector.androidapp.sms.threads.GetSmsThreadsReceiver
+import com.androidmacconnector.androidapp.sms.threads.ReadSmsThreadsReceiver
 import com.androidmacconnector.androidapp.utils.saveDeviceId
 import com.google.firebase.auth.FirebaseAuth
 import com.karumi.dexter.Dexter
@@ -28,7 +28,7 @@ import com.karumi.dexter.listener.multi.MultiplePermissionsListener
  * This activity is about registering this device to the server
  */
 class AddDeviceActivity : AppCompatActivity() {
-    private lateinit var sessionService: SessionServiceImpl
+    private lateinit var sessionStore: SessionStoreImpl
     private lateinit var deviceService: DeviceWebService
 
     companion object {
@@ -45,7 +45,7 @@ class AddDeviceActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_add_device)
 
-        sessionService = SessionServiceImpl(FirebaseAuth.getInstance())
+        sessionStore = SessionStoreImpl(FirebaseAuth.getInstance())
         deviceService = DeviceWebService(this)
     }
 
@@ -57,8 +57,8 @@ class AddDeviceActivity : AppCompatActivity() {
         if (packageManager.hasSystemFeature(PackageManager.FEATURE_TELEPHONY)) {
             permissions.addAll(ReceivedSmsReceiver.getRequiredPermissions())
             permissions.addAll(SendSmsReceiver.getRequiredPermissions())
-            permissions.addAll(GetSmsMessagesReceiver.getRequiredPermissions())
-            permissions.addAll(GetSmsThreadsReceiver.getRequiredPermissions())
+            permissions.addAll(ReadSmsMessagesReceiver.getRequiredPermissions())
+            permissions.addAll(ReadSmsThreadsReceiver.getRequiredPermissions())
         }
 
         val permsListener = object : MultiplePermissionsListener {
@@ -97,26 +97,21 @@ class AddDeviceActivity : AppCompatActivity() {
 
         // Get the access token
         val context = this
-        sessionService.getAuthToken { authToken, err ->
+        sessionStore.getAuthToken { authToken, err ->
             if (err != null) {
                 Log.d(LOG_TAG, "Error getting auth token: $err")
                 return@getAuthToken
             }
 
-            if (authToken.isNullOrBlank()) {
-                Log.d(LOG_TAG, "Auth token is blank")
-                return@getAuthToken
-            }
-
-            deviceService.registerDevice2(authToken, "android_phone", hardwareId, capabilities) { deviceId, err ->
+            deviceService.registerDevice(authToken, "android_phone", hardwareId, capabilities) { deviceId, err ->
                 if (err != null) {
                     Log.d(LOG_TAG, "Failed to register device, $err")
-                    return@registerDevice2
+                    return@registerDevice
                 }
 
                 if (deviceId.isNullOrBlank()) {
                     Log.d(LOG_TAG, "Device ID is blank")
-                    return@registerDevice2
+                    return@registerDevice
                 }
 
                 saveDeviceId(context, deviceId)

@@ -16,7 +16,7 @@ import com.google.firebase.auth.FirebaseAuth
 
 class SignInActivity : AppCompatActivity() {
     private lateinit var binding: ActivitySignInBinding
-    private lateinit var sessionStore: SessionServiceImpl
+    private lateinit var sessionStore: SessionStoreImpl
     private lateinit var deviceService: DeviceWebService
 
     companion object {
@@ -27,7 +27,7 @@ class SignInActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = DataBindingUtil.setContentView(this, R.layout.activity_sign_in)
 
-        sessionStore = SessionServiceImpl(FirebaseAuth.getInstance())
+        sessionStore = SessionStoreImpl(FirebaseAuth.getInstance())
         deviceService = DeviceWebService(this)
     }
 
@@ -75,23 +75,17 @@ class SignInActivity : AppCompatActivity() {
                 return@getAuthToken
             }
 
-            if (authToken.isNullOrBlank()) {
-                Log.d(LOG_TAG, "Failed to get auth token: $err")
-                binding.errorMessage = "Error 2 - Please try again"
-                return@getAuthToken
-            }
-
-            deviceService.isDeviceRegistered2(authToken, "android_phone", hardwareId) { isRegistered, err2 ->
+            deviceService.isDeviceRegistered(authToken, "android_phone", hardwareId) { isRegistered, err2 ->
                 if (err2 != null) {
                     Log.d(LOG_TAG, "Failed to check if device is registered: $err2")
                     binding.errorMessage = "Error 3 - Please try again"
-                    return@isDeviceRegistered2
+                    return@isDeviceRegistered
                 }
 
                 if (isRegistered == null) {
                     Log.d(LOG_TAG, "isRegistered is null")
                     binding.errorMessage = "Error 4 - Please try again"
-                    return@isDeviceRegistered2
+                    return@isDeviceRegistered
                 }
 
                 if (isRegistered) {

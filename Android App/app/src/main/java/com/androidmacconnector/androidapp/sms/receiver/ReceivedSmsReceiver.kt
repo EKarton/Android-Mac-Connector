@@ -16,7 +16,8 @@ import org.json.JSONObject
  */
 class ReceivedSmsReceiver : BroadcastReceiver() {
     companion object {
-        private const val LOG_TAG = "ReceivedSmsBR"
+        const val LOG_TAG = "ReceivedSmsReceiver"
+        const val NEW_MESSAGES_TOPIC = "sms/new-messages"
 
         fun getRequiredPermissions(): List<String> {
             return arrayListOf(Manifest.permission.RECEIVE_SMS)
@@ -48,7 +49,7 @@ class ReceivedSmsReceiver : BroadcastReceiver() {
                 // Submit a job to our MQTT service with details for publishing
                 val startIntent = Intent(context, MQTTService::class.java)
                 startIntent.action = PUBLISH_INTENT_ACTION
-                startIntent.putExtra("topic", "${getDeviceId(context)}/sms/new-messages")
+                startIntent.putExtra("topic", "${getDeviceId(context)}/$NEW_MESSAGES_TOPIC")
                 startIntent.putExtra("payload", payload.toString())
 
                 context.startService(startIntent)

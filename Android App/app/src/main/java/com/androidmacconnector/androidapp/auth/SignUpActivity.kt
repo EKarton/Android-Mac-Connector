@@ -13,7 +13,7 @@ import com.google.firebase.auth.FirebaseAuth
 
 class SignUpActivity : AppCompatActivity() {
     private lateinit var binding: ActivitySignUpBinding
-    private lateinit var sessionStore: SessionServiceImpl
+    private lateinit var sessionStore: SessionStoreImpl
 
     companion object {
         private const val LOG_TAG = "SignUpActivity"
@@ -23,7 +23,7 @@ class SignUpActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = DataBindingUtil.setContentView(this, R.layout.activity_sign_up)
 
-        sessionStore = SessionServiceImpl(FirebaseAuth.getInstance())
+        sessionStore = SessionStoreImpl(FirebaseAuth.getInstance())
     }
 
     fun onSignUpButtonClicked(view: View) {

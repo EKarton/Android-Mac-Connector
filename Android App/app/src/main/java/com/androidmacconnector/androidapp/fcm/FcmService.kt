@@ -2,8 +2,8 @@ package com.androidmacconnector.androidapp.fcm
 
 import android.content.Intent
 import android.util.Log
+import com.androidmacconnector.androidapp.auth.SessionStoreImpl
 import com.androidmacconnector.androidapp.devices.DeviceWebService
-import com.androidmacconnector.androidapp.devices.UpdatePushNotificationTokenHandler
 import com.androidmacconnector.androidapp.mqtt.MQTTService
 import com.androidmacconnector.androidapp.utils.getDeviceIdSafely
 import com.google.firebase.auth.FirebaseAuth
@@ -12,6 +12,7 @@ import com.google.firebase.messaging.RemoteMessage
 
 
 class FcmService : FirebaseMessagingService() {
+    private lateinit var sessionStore: SessionStoreImpl
     private lateinit var deviceService: DeviceWebService
 
     companion object {
@@ -20,7 +21,8 @@ class FcmService : FirebaseMessagingService() {
 
     override fun onCreate() {
         super.onCreate()
-        this.deviceService = DeviceWebService(this.applicationContext)
+        deviceService = DeviceWebService(this.applicationContext)
+        sessionStore = SessionStoreImpl(FirebaseAuth.getInstance())
     }
 
     override fun onNewToken(token: String) {
@@ -29,24 +31,18 @@ class FcmService : FirebaseMessagingService() {
         // Get device id
         val deviceId = getDeviceIdSafely(this) ?: return
 
-        // Get the access token
-        val user = FirebaseAuth.getInstance().currentUser
-        user?.getIdToken(false)?.addOnCompleteListener { task ->
-            if (!task.isSuccessful || task.result?.token == null) {
-                Log.w(LOG_TAG, "Failed to get access token")
-                return@addOnCompleteListener
+        sessionStore.getAuthToken { authToken, err ->
+            if (err != null) {
+                Log.w(LOG_TAG, "Error when getting access token: $err")
+                return@getAuthToken
             }
 
-            val accessToken = task.result!!.token!!
-
             // Upload the fcm token to our server
-            deviceService.updatePushNotificationToken(accessToken, deviceId, token, object : UpdatePushNotificationTokenHandler() {
-                override fun onSuccess() {}
-
-                override fun onError(exception: Exception) {
-                    Log.d(LOG_TAG, "Failed to update token: $exception")
+            deviceService.updatePushNotificationToken(authToken, deviceId, token) { err ->
+                if (err != null) {
+                    Log.d(LOG_TAG, "Failed to update token: $err")
                 }
-            })
+            }
         }
     }
 

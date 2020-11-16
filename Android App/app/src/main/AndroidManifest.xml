@@ -69,11 +69,11 @@
             android:enabled="true"
             android:exported="true" />
         <receiver
-            android:name=".sms.threads.GetSmsThreadsReceiver"
+            android:name=".sms.threads.ReadSmsThreadsReceiver"
             android:enabled="true"
             android:exported="true" />
         <receiver
-            android:name=".sms.messages.GetSmsMessagesReceiver"
+            android:name=".sms.messages.ReadSmsMessagesReceiver"
             android:enabled="true"
             android:exported="true" />
     </application>

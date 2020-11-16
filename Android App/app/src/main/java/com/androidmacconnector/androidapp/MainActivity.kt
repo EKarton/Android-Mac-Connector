@@ -11,9 +11,8 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
 import androidx.viewpager2.adapter.FragmentStateAdapter
 import androidx.viewpager2.widget.ViewPager2
-import com.androidmacconnector.androidapp.auth.SessionServiceImpl
+import com.androidmacconnector.androidapp.auth.SessionStoreImpl
 import com.androidmacconnector.androidapp.auth.SignInActivity
-import com.androidmacconnector.androidapp.devices.AddDeviceActivity
 import com.androidmacconnector.androidapp.devices.DeviceActionsFragment
 import com.androidmacconnector.androidapp.devices.DeviceListFragment
 import com.androidmacconnector.androidapp.devices.DeviceWebService
@@ -29,7 +28,7 @@ import java.lang.IllegalStateException
 
 
 class MainActivity : AppCompatActivity() {
-    private lateinit var sessionService: SessionServiceImpl
+    private lateinit var sessionStore: SessionStoreImpl
 
     companion object {
         private const val LOG_TAG = "MainActivity"
@@ -39,9 +38,9 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        sessionService = SessionServiceImpl(FirebaseAuth.getInstance())
+        sessionStore = SessionStoreImpl(FirebaseAuth.getInstance())
 
-        if (!sessionService.isSignedIn()) {
+        if (!sessionStore.isSignedIn()) {
             val intent = Intent(this, SignInActivity::class.java)
             intent.flags = intent.flags or Intent.FLAG_ACTIVITY_NO_HISTORY
             startActivity(intent)
@@ -104,19 +103,14 @@ class MainActivity : AppCompatActivity() {
 
             // Get the device id
             val deviceId = getDeviceIdSafely(this) ?: return@OnCompleteListener
-            sessionService.getAuthToken { authToken, err ->
+            sessionStore.getAuthToken { authToken, err ->
                 if (err != null) {
                     Log.d(LOG_TAG, "Error getting auth token: $err")
                     return@getAuthToken
                 }
 
-                if (authToken.isNullOrBlank()) {
-                    Log.d(LOG_TAG, "Token is blank!")
-                    return@getAuthToken
-                }
-
                 val deviceService = DeviceWebService(this)
-                deviceService.updatePushNotificationToken2(authToken, deviceId, token) { err2 ->
+                deviceService.updatePushNotificationToken(authToken, deviceId, token) { err2 ->
                     err2?.let {
                         Log.d(LOG_TAG, "Failed to update push notification: $it")
                     }

@@ -5,11 +5,28 @@ import android.net.Uri
 import android.provider.ContactsContract
 import android.provider.Telephony
 
-interface GetSmsThreadsService {
+data class SmsThread(
+    val threadId: String,
+    val numMessages: Int,
+    val msgSnippet: String
+)
+
+data class SmsThreadSummary(
+    val threadId: String,
+    val phoneNumber: String?,
+    val contactName: String?,
+    val numUnreadMessages: Int,
+    val numMessages: Int,
+    val lastMessageTime: Int,
+    val lastMessage: String
+)
+
+interface ReadSmsThreadsService {
     fun getSmsThreadsSummary(contentResolver: ContentResolver, limit: Int, start: Int): List<SmsThreadSummary>
 }
 
-class GetSmsThreadsServiceImpl: GetSmsThreadsService {
+class ReadSmsThreadsServiceImpl: ReadSmsThreadsService {
+
     /**
      * Returns a list of SMS conversation threads.
      * This is useful when making an SMS app with the list of conversations on the left panel
@@ -150,19 +167,3 @@ class GetSmsThreadsServiceImpl: GetSmsThreadsService {
         return contactName
     }
 }
-
-data class SmsThread(
-    val threadId: String,
-    val numMessages: Int,
-    val msgSnippet: String
-)
-
-data class SmsThreadSummary(
-    val threadId: String,
-    val phoneNumber: String?,
-    val contactName: String?,
-    val numUnreadMessages: Int,
-    val numMessages: Int,
-    val lastMessageTime: Int,
-    val lastMessage: String
-)

@@ -8,7 +8,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import com.androidmacconnector.androidapp.R
-import com.androidmacconnector.androidapp.auth.SessionServiceImpl
+import com.androidmacconnector.androidapp.auth.SessionStoreImpl
 import com.androidmacconnector.androidapp.databinding.FragmentDeviceActionsBinding
 import com.androidmacconnector.androidapp.mqtt.MQTTService
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
@@ -28,9 +28,9 @@ class DeviceActionsFragment : Fragment() {
 
         val context = this.requireContext()
 
-        SessionServiceImpl(FirebaseAuth.getInstance()).getAuthToken { authToken, err ->
-            if (authToken.isNullOrBlank() || err != null) {
-                Log.d(LOG_TAG, "Missing auth: $err")
+        SessionStoreImpl(FirebaseAuth.getInstance()).getAuthToken { authToken, err ->
+            if (err != null) {
+                Log.d(LOG_TAG, "Error when getting auth token: $err")
                 return@getAuthToken
             }
 
