@@ -9,13 +9,15 @@
 import SwiftUI
 
 struct DevicesListView: View {
+    var showSettingsAction: () -> Void
+    
     @EnvironmentObject var deviceService: DeviceService
     @EnvironmentObject var sessionStore: SessionStore
     
     @State private var devicesList = [Device]()
     
     var body: some View {
-        VStack {
+        NavigationView {
             List(self.devicesList, id: \.id) { device in
                 NavigationLink(destination: DeviceActionsList(device: device)) {
                     HStack {
@@ -24,7 +26,16 @@ struct DevicesListView: View {
                 }
             }
             .navigationBarTitle(Text("Devices"), displayMode: .large)
+            .navigationBarItems(trailing:
+                Button(action: {
+                    print("Settings button clicked")
+                    self.showSettingsAction()
+                }) {
+                    Image(systemName: "gear")
+                }
+            )
         }
+        .navigationViewStyle(DefaultNavigationViewStyle())
         .onAppear(perform: self.onAppearHandler)
     }
     
@@ -43,7 +54,9 @@ struct DevicesListView: View {
 #if DEBUG
 struct DevicesListViewPreview: PreviewProvider {
     static var previews: some View {
-        DevicesListView()
+        DevicesListView(showSettingsAction: {
+            print("Show settings button clicked")
+        })
     }
 }
 #endif
