@@ -15,8 +15,6 @@ export const createDeviceRouter = (service: DeviceService, authService: Authenti
     const deviceType = req.query.device_type.toString()
     const hardwareId = req.query.hardware_id.toString()
 
-    console.log(userId, deviceType, hardwareId)
-
     const result = await service.doesDeviceExist(userId, deviceType, hardwareId)
 
     res.setHeader('Content-Type', 'application/json');
@@ -31,8 +29,6 @@ export const createDeviceRouter = (service: DeviceService, authService: Authenti
     const deviceType = req.body["device_type"]
     const hardwareId = req.body["hardware_id"]
     const capabilities = <string[]>req.body["capabilities"]
-
-    console.log(userId, deviceType, hardwareId, capabilities)
 
     // Register the device
     const deviceId = await service.registerDevice(userId, deviceType, hardwareId, capabilities)
