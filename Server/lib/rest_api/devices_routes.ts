@@ -1,21 +1,21 @@
-import { json, Router } from "express";
+import { Router } from "express";
 import { Authenticator } from "../services/authenticator";
-import { createAuthenticateMiddleware, handleErrorsMiddleware } from "./middlewares";
+import { createAuthenticateMiddleware } from "./middlewares";
 import { DeviceService } from "../services/device_service";
 import { ResourcePolicyService } from "../services/resource_policy_service";
 
-export const createDeviceRouter = (service: DeviceService, authService: Authenticator, resourcePolicyService: ResourcePolicyService) => {
+export const createDeviceRouter = (authenticator: Authenticator, deviceService: DeviceService, resourcePolicyService: ResourcePolicyService) => {
   const router = Router();
 
   // Middleware to authenticate user
-  router.use(createAuthenticateMiddleware(authService))
+  router.use(createAuthenticateMiddleware(authenticator))
 
   router.get("/registered", async (req, res) => {
     const userId = req.header("user_id")
     const deviceType = req.query.device_type.toString()
     const hardwareId = req.query.hardware_id.toString()
 
-    const result = await service.doesDeviceExist(userId, deviceType, hardwareId)
+    const result = await deviceService.doesDeviceExist(userId, deviceType, hardwareId)
 
     res.setHeader('Content-Type', 'application/json');
     res.status(200).json({
@@ -31,7 +31,7 @@ export const createDeviceRouter = (service: DeviceService, authService: Authenti
     const capabilities = <string[]>req.body["capabilities"]
 
     // Register the device
-    const deviceId = await service.registerDevice(userId, deviceType, hardwareId, capabilities)
+    const deviceId = await deviceService.registerDevice(userId, deviceType, hardwareId, capabilities)
     
     // Add default resource policies
     const pendingResults1 = capabilities.map(capability => {
@@ -55,7 +55,7 @@ export const createDeviceRouter = (service: DeviceService, authService: Authenti
   router.get("/", async (req, res) => {
     const userId = req.header("user_id")
 
-    const devices = await service.getDevices(userId)
+    const devices = await deviceService.getDevices(userId)
 
     res.setHeader('Content-Type', 'application/json');
     res.status(200).json({
@@ -66,7 +66,7 @@ export const createDeviceRouter = (service: DeviceService, authService: Authenti
   router.delete("/:deviceId", async (req, res) => {
     const deviceId = req.params.deviceId
 
-    await service.removeDevice(deviceId)
+    await deviceService.removeDevice(deviceId)
     await resourcePolicyService.deletePermission(null, null, deviceId)
 
     res.setHeader('Content-Type', 'application/json');
@@ -77,7 +77,7 @@ export const createDeviceRouter = (service: DeviceService, authService: Authenti
 
   router.get("/:deviceId/capabilities", async (req, res) => {
     const deviceId = req.params.deviceId
-    const capabilities = await service.getDeviceCapabilities(deviceId)
+    const capabilities = await deviceService.getDeviceCapabilities(deviceId)
     
     res.setHeader('Content-Type', 'application/json');
     res.status(200).json({
@@ -89,7 +89,7 @@ export const createDeviceRouter = (service: DeviceService, authService: Authenti
     const deviceId = req.params.deviceId
     const newCapabilities = req.body["new_capabilities"]
 
-    await service.updateDeviceCapabilities(deviceId, newCapabilities)
+    await deviceService.updateDeviceCapabilities(deviceId, newCapabilities)
 
     res.setHeader('Content-Type', 'application/json');
     res.status(200).json({
@@ -101,7 +101,7 @@ export const createDeviceRouter = (service: DeviceService, authService: Authenti
     const deviceId = req.params.deviceId
     const newToken = req.body["new_token"]
 
-    await service.updatePushNotificationToken(deviceId, newToken)
+    await deviceService.updatePushNotificationToken(deviceId, newToken)
 
     res.setHeader('Content-Type', 'application/json');
     res.status(200).json({

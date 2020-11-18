@@ -1,26 +1,34 @@
 import express, { json } from "express";
-import admin from "firebase-admin";
-import { FirebaseDeviceService } from "../services/device_service";
-import { FirebaseAuthenticator } from "../services/authenticator";
+import { DeviceService } from "../services/device_service";
+import { Authenticator } from "../services/authenticator";
 import { createDeviceRouter } from "./devices_routes";
-import { FirebaseResourcePolicyService } from "../services/resource_policy_service";
+import { ResourcePolicyService } from "../services/resource_policy_service";
 import { handleErrorsMiddleware, logRequestsMiddleware } from "./middlewares";
 
-export class RestApiAppBuilder { 
-  private readonly firebaseApp: admin.app.App;
+export class RestApiAppBuilder {
+  private authenticator: Authenticator;
+  private deviceService: DeviceService;
+  private resourcePolicyService: ResourcePolicyService;
 
-  constructor(firebaseApp: admin.app.App) {
-    this.firebaseApp = firebaseApp
+  constructor() {}
+
+  public withAuthenticator(authenticator: Authenticator): RestApiAppBuilder {
+    this.authenticator = authenticator
+    return this
+  }
+
+  public withDeviceService(deviceService: DeviceService): RestApiAppBuilder {
+    this.deviceService = deviceService
+    return this
+  }
+
+  public withResourcePolicyService(resourcePolicyService: ResourcePolicyService): RestApiAppBuilder {
+    this.resourcePolicyService = resourcePolicyService
+    return this
   }
 
   public build(): express.Express {
     const app = express();
-
-    const firestore = this.firebaseApp.firestore();
-    const firebaseAuth = this.firebaseApp.auth();
-    const authService = new FirebaseAuthenticator(firebaseAuth, firestore)
-    const service = new FirebaseDeviceService(firestore)
-    const resourcePolicyService = new FirebaseResourcePolicyService(firestore)
 
     // Middleware to parse json body
     app.use(json());
@@ -28,7 +36,7 @@ export class RestApiAppBuilder {
     // Middleware to log requests
     app.use(logRequestsMiddleware)
 
-    app.use("/api/v1/devices", createDeviceRouter(service, authService, resourcePolicyService))
+    app.use("/api/v1/devices", createDeviceRouter(this.authenticator, this.deviceService, this.resourcePolicyService))
 
     // Middleware to handle errors
     app.use((err, req, res, next) => {

@@ -1,5 +1,4 @@
 import { messaging } from "firebase-admin";
-import { TokenMessage } from "firebase-admin/lib/messaging";
 
 export interface DeviceNotifier {
   notifyDevice(token: String)

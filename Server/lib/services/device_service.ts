@@ -5,6 +5,8 @@ export interface DeviceService {
   registerDevice(userId: string, deviceType: string, hardwareId: string, capabilities: String[]): Promise<string>
   removeDevice(deviceId: string)
   getDevices(userId: string): Promise<Device[]>
+  doesDeviceIdExist(deviceId: string): Promise<boolean>
+  getDeviceType(deviceId: string): Promise<string>
 	updateDeviceCapabilities(deviceId: string, capabilities: string[])
   getDeviceCapabilities(deviceId: string): Promise<string[]>
   updatePushNotificationToken(deviceId: string, newToken: string)

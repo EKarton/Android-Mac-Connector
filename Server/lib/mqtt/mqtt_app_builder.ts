@@ -1,10 +1,9 @@
 import aedes, { Aedes, AedesOptions, AedesPublishPacket, AuthenticateError, Client, PublishPacket, Subscription } from 'aedes'
-import { Authenticator, FirebaseAuthenticator } from '../services/authenticator'
-import { Authorizer, FirebaseAuthorizer } from '../services/authorizer'
+import { Authenticator } from '../services/authenticator'
+import { Authorizer } from '../services/authorizer'
 
-import * as admin from 'firebase-admin';
-import { AndroidDeviceNotifier } from '../services/device_notifier';
-import { FirebaseDeviceService } from '../services/device_service';
+import { DeviceNotifier } from '../services/device_notifier';
+import { DeviceService } from '../services/device_service';
 
 export interface MqttAppOptions {
   verifyAuthentication: boolean,
@@ -12,14 +11,32 @@ export interface MqttAppOptions {
 }
 
 export class MqttAppBuilder {
-  private readonly firebaseApp: admin.app.App;
-  private opts?: MqttAppOptions = null
+  private opts: MqttAppOptions = null
+  private authenticator: Authenticator = null;
+  private authorizer: Authorizer = null;
+  private androidDeviceNotifier: DeviceNotifier = null;
+  private deviceService: DeviceService = null;
   
-  /**
-   * Creates the app server
-   */
-  constructor(firebaseApp: admin.app.App) {
-    this.firebaseApp = firebaseApp
+  constructor() {}
+
+  public withAuthenticator(authenticator: Authenticator): MqttAppBuilder {
+    this.authenticator = authenticator
+    return this
+  }
+
+  public withAuthorizer(authorizer: Authorizer): MqttAppBuilder {
+    this.authorizer = authorizer
+    return this
+  }
+
+  public withAndroidDeviceNotifier(androidDeviceNotifier: DeviceNotifier): MqttAppBuilder {
+    this.androidDeviceNotifier = androidDeviceNotifier
+    return this
+  }
+
+  public withDeviceService(deviceService: DeviceService): MqttAppBuilder {
+    this.deviceService = deviceService
+    return this
   }
 
   public withOpts(opts: MqttAppOptions): MqttAppBuilder {
@@ -28,24 +45,15 @@ export class MqttAppBuilder {
   }
 
   public build(): Aedes {
-    const authServer = this.firebaseApp.auth();
-    const firestore = this.firebaseApp.firestore();
-    const fcmMessaging = this.firebaseApp.messaging();
-
-    const authenticator = new FirebaseAuthenticator(authServer, firestore)
-    const authorizer = new FirebaseAuthorizer(firestore)
-    const androidDeviceNotifier = new AndroidDeviceNotifier(fcmMessaging)
-    const deviceService = new FirebaseDeviceService(firestore)
-
-    const mqttAppOptions = this.createOptions(authenticator, authorizer)
+    const mqttAppOptions = this.createOptions()
     const mqttServer = aedes(mqttAppOptions)
 
-    this.attachHooksToMqttApp(mqttServer, deviceService, androidDeviceNotifier)
+    this.attachHooksToMqttApp(mqttServer)
 
     return mqttServer
   }
 
-  private createOptions(authenticator: Authenticator, authorizer: Authorizer): AedesOptions {
+  private createOptions(): AedesOptions {
     const mqttServerOpts: AedesOptions = {
       authenticate: (client: Client, username: string, password: Buffer, done: (error: AuthenticateError | null, success: boolean | null) => void) => {
         if (!(this.opts?.verifyAuthentication)) {
@@ -58,7 +66,7 @@ export class MqttAppBuilder {
           return
         }
 
-        authenticator.authenticate(client.id, username, password.toString())
+        this.authenticator.authenticate(client.id, username, password.toString())
           .then((isAuthenticated: boolean) => {
             done(null, isAuthenticated)
           })
@@ -75,7 +83,8 @@ export class MqttAppBuilder {
           callback(null)
           return
         }
-        authorizer.isPublishAuthorized(packet.topic, client.id)
+
+        this.authorizer.isPublishAuthorized(packet.topic, client.id)
           .then((isAuthorized: boolean) => {
             isAuthorized ? callback(null) : callback(new Error('Unauthorized'))
           })
@@ -90,7 +99,7 @@ export class MqttAppBuilder {
           return
         }
         
-        authorizer.isSubscriptionAuthorized(subscription.topic, client.id)
+        this.authorizer.isSubscriptionAuthorized(subscription.topic, client.id)
           .then((isAuthorized: boolean) => {
             isAuthorized ? callback(null, subscription) : callback(new Error('Unauthorized'), null)
           })
@@ -103,7 +112,7 @@ export class MqttAppBuilder {
     return mqttServerOpts
   }
 
-  private attachHooksToMqttApp(mqttServer: Aedes, deviceService: FirebaseDeviceService, androidDeviceNotifier: AndroidDeviceNotifier) {
+  private attachHooksToMqttApp(mqttServer: Aedes) {
     mqttServer.on("publish", async (packet: AedesPublishPacket, client: Client) => {
       console.log(`Publish from ${client ? client.id : "null"}: ${packet.topic} | ${packet.dup} | ${packet.qos}`)
 
@@ -115,12 +124,13 @@ export class MqttAppBuilder {
 
       let deviceId = topicParts[0]
 
-      if (await deviceService.doesDeviceIdExist(deviceId)) {
-        let token = await deviceService.getPushNotificationToken(deviceId)
-        let deviceType = await deviceService.getDeviceType(deviceId)
+      if (await this.deviceService.doesDeviceIdExist(deviceId)) {
+        let token = await this.deviceService.getPushNotificationToken(deviceId)
+        let deviceType = await this.deviceService.getDeviceType(deviceId)
 
-        if (deviceType == "android") {
-          await androidDeviceNotifier.notifyDevice(token)
+        if (deviceType == "android_phone") {
+          await this.androidDeviceNotifier.notifyDevice(token)
+
         } else {
           console.log(`Unsupported push notification for device ${deviceType}`)
         }
