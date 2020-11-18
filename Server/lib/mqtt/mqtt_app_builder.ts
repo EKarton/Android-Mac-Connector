@@ -57,24 +57,24 @@ export class MqttAppBuilder {
     const mqttServerOpts: AedesOptions = {
       authenticate: (client: Client, username: string, password: Buffer, done: (error: AuthenticateError | null, success: boolean | null) => void) => {
         if (!(this.opts?.verifyAuthentication)) {
-          console.log('Authenticated? ${true}')
+          console.log(`${client.id} authenticated? true`)
           done(null, true)
           return
         }
         
         if (password.length == 0 || username.length == 0) {
-          console.log('Authenticated? false')
+          console.log(`${client.id} authenticated? false`)
           done(null, false)
           return
         }
 
         this.authenticator.authenticate(client.id, username, password.toString())
           .then((isAuthenticated: boolean) => {
-            console.log(`Authenticated? ${isAuthenticated}`)
+            console.log(`${client.id} authenticated? ${isAuthenticated}`)
             done(null, isAuthenticated)
           })
           .catch((err: Error) => {
-            console.log('Authenticated? false')
+            console.log(`${client.id} Authenticated? false`)
             const wrappedError: AuthenticateError = {
               returnCode: 4,
               ...err,
@@ -84,18 +84,18 @@ export class MqttAppBuilder {
       },
       authorizePublish: (client: Client, packet: PublishPacket, callback: (error?: Error | null) => void) => {
         if (!(this.opts?.verifyAuthorization)) {
-          console.log(`Authorize ${client.id} publish? true`)
+          console.log(`Authorize ${client.id} publish to ${packet.topic}? true`)
           callback(null)
           return
         }
 
         this.authorizer.isPublishAuthorized(packet.topic, client.id)
           .then((isAuthorized: boolean) => {
-            console.log(`Authorize ${client.id} publish? ${isAuthorized}`)
+            console.log(`Authorize ${client.id} publish to ${packet.topic}? ${isAuthorized}`)
             isAuthorized ? callback(null) : callback(new Error('Unauthorized'))
           })
           .catch((err: Error) => {
-            console.log(`Authorize ${client.id} publish? false`)
+            console.log(`Authorize ${client.id} publish to ${packet.topic}? false`)
             console.error(err)
             callback(err)
           })
@@ -145,14 +145,6 @@ export class MqttAppBuilder {
           console.log(`Unsupported push notification for device ${deviceType}`)
         }
       }
-    })
-
-    mqttServer.on("subscribe", (subscriptions: Subscription[], client: Client) => {
-      console.log(`Subscribe from ${client}: ${subscriptions.map(sub => sub.topic)} | ${subscriptions.map(sub => sub.qos)}`)
-    })
-    
-    mqttServer.on("unsubscribe", (unsubscriptions: string[], client: Client) => {
-      console.log(`Unsubscribe from ${client}: ${unsubscriptions}`)
     })
   }
 }

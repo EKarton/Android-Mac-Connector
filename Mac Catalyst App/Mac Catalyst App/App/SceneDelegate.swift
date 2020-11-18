@@ -29,6 +29,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
                 .environmentObject(appDelegate.sms.smsSenderService)
                 .environmentObject(appDelegate.sms.getSmsThreadsService)
                 .environmentObject(appDelegate.sms.getSmsMessageService)
+                .environmentObject(appDelegate.ping.pingDeviceService)
                             
             let window = UIWindow(windowScene: windowScene)
             window.rootViewController = UIHostingController(rootView: contentView)

@@ -60,6 +60,7 @@ struct SmsMessagesView: View {
                 .padding(.leading, 20)
                 .padding(.trailing, 20)
                 .padding(.top, 10)
+                .id(UUID())
             }
             
             VStack {

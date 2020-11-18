@@ -100,10 +100,10 @@ class MockedDeviceWebService: DeviceWebService {
 // This class is used to interface with the rest api
 //
 class DeviceWebServiceImpl: DeviceWebService {
-    private let isDeviceRegisteredUrl = "http://localhost:8080/api/v1/devices/registered"
-    private let getDevicesUrl = "http://localhost:8080/api/v1/devices"
-    private let registerDeviceUrl = "http://localhost:8080/api/v1/devices/register"
-    private let removeDeviceUrl = "http://localhost:8080/api/v1/devices/%@"
+    private let isDeviceRegisteredUrl = "http://192.168.0.102:3000/api/v1/devices/registered"
+    private let getDevicesUrl = "http://192.168.0.102:3000/api/v1/devices"
+    private let registerDeviceUrl = "http://192.168.0.102:3000/api/v1/devices/register"
+    private let removeDeviceUrl = "http://192.168.0.102:3000/api/v1/devices/%@"
     
     private var jsonEncoder = JSONEncoder()
     private var jsonDecoder = JSONDecoder()

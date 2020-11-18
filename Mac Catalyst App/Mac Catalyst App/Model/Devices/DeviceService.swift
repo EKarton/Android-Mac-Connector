@@ -21,7 +21,7 @@ struct Devices: Decodable {
 class DeviceService: ObservableObject {
     func getDevices(_ accessToken: String, _ handler: @escaping ([Device], Error?) -> Void) {
         print("Getting devices")
-        guard let url = URL(string: "http://localhost:8080/api/v1/devices") else {
+        guard let url = URL(string: "http://192.168.0.102:3000/api/v1/devices") else {
             print("Invalid url")
             return
         }

@@ -17,12 +17,14 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     let auth: AuthAppDelegate
     let device: DeviceAppDelegate
     let sms: SmsAppDelegate
+    let ping: PingAppDelegate
     
     override init() {
         self.mqtt = MqttAppDelegate()
         self.auth = AuthAppDelegate()
         self.device = DeviceAppDelegate(mqtt)
         self.sms = SmsAppDelegate(mqtt, device)
+        self.ping = PingAppDelegate(mqtt)
     }
     
     // Override point for customization after application launch.
@@ -31,6 +33,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             && self.mqtt.application(application, didFinishLaunchingWithOptions: launchOptions)
             && self.device.application(application, didFinishLaunchingWithOptions: launchOptions)
             && self.sms.application(application, didFinishLaunchingWithOptions: launchOptions)
+            && self.ping.application(application, didFinishLaunchingWithOptions: launchOptions)
     }
 
     // Called when a new scene session is being created.

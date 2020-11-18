@@ -15,12 +15,18 @@ class MqttAppDelegate: NSObject, UIApplicationDelegate {
     let mqttPublisherClient: MQTTPublisherClient
     
     override init() {
-        self.mqttClient = MQTTClient("192.168.0.102", 8888, "client", "username", "password")
+        self.mqttClient = MQTTClient("192.168.0.102", 3000, "client", "username", "password")
         self.mqttSubscriptionClient = MQTTSubscriptionClient(self.mqttClient)
         self.mqttPublisherClient = MQTTPublisherClient(self.mqttClient)
     }
     
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
+        // Get the device ID from cache
+        guard let deviceId = UserDefaults.standard.string(forKey: "device_id") else {
+            print("Device is not registered")
+            return true
+        }
+        
         // Get the token immediately
         Auth.auth().currentUser?.getIDToken { (token: String?, err: Error?) in
             guard let token = token else {
@@ -33,6 +39,8 @@ class MqttAppDelegate: NSObject, UIApplicationDelegate {
                 return
             }
             
+            // Get the device ID
+            self.mqttClient.setClientId(deviceId)
             self.mqttClient.setPassword(token)
             let isConnected = self.mqttClient.connect()
             print("Is connected? \(isConnected) | access token: \(token)")

@@ -13,6 +13,13 @@ struct Device: Identifiable, Decodable {
     var capabilities: [String]
     var phoneNumber: String?
     
+    var hasPingDeviceCapability: Bool {
+        if (capabilities.contains("ping_device")) {
+            return true
+        }
+        return false
+    }
+    
     var hasSmsCapability: Bool {
         if (capabilities.contains("read_sms")) {
             return true

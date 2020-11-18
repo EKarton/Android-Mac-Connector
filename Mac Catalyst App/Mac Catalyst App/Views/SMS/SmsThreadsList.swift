@@ -35,6 +35,7 @@ struct SmsThreadsList: View {
                     )
                 }
             }
+            .id(UUID())
         }
         .onAppear(perform: self.onAppearHandler)
         .sheet(isPresented: $showingNewSmsMessageSheet) {

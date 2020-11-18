@@ -14,12 +14,14 @@ class DeviceAppDelegate: NSObject, UIApplicationDelegate {
     let deviceWebService: DeviceWebService
     let deviceViewModel: DeviceViewModel
     let mqttSubscriptionClient: MQTTSubscriptionClient
+    let receivedPingService: ReceivedPingService
     
     init(_ mqtt: MqttAppDelegate) {
         deviceService = DeviceService()
         deviceWebService = DeviceWebServiceImpl()
         deviceViewModel = DeviceViewModel(deviceWebService)
         mqttSubscriptionClient = mqtt.mqttSubscriptionClient
+        receivedPingService = ReceivedPingService()
     }
     
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
@@ -43,9 +45,33 @@ class DeviceAppDelegate: NSObject, UIApplicationDelegate {
                 devices.forEach { device in
                     self.setupSubscriptionsForDevice(device)
                 }
+                
+                if let deviceId = UserDefaults.standard.string(forKey: "device_id") {
+                    self.setupPingRequestSubscription(deviceId)
+                }
             }
         }
         return true
+    }
+    
+    private func setupPingRequestSubscription(_ deviceId: String) {
+        let topic = "\(deviceId)/ping/requests"
+        self.mqttSubscriptionClient.subscribe(topic) { err in
+            if let err = err {
+                fatalError(err.localizedDescription)
+            }
+            print("Successfully subscribed to \(topic)")
+        }
+        
+        let subscriber = MQTTSubscriber(topic)
+        subscriber.setHandler { (msg: String?, err: Error?) in
+            guard err == nil else {
+                return
+            }
+
+            self.receivedPingService.dispatchNotification()
+        }
+        self.mqttSubscriptionClient.addSubscriberHandle(subscriber)
     }
     
     private func setupSubscriptionsForDevice(_ device: Device) {

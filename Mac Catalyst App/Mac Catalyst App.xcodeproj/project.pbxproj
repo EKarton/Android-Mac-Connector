@@ -17,6 +17,9 @@
 		1324DDA4255DBA62009BCC0A /* MQTTClientAuthObserver.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1324DDA3255DBA62009BCC0A /* MQTTClientAuthObserver.swift */; };
 		1324DDA6255DC004009BCC0A /* MQTTPublisherClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1324DDA5255DC004009BCC0A /* MQTTPublisherClient.swift */; };
 		1324DDAA255E508C009BCC0A /* ReceivedSmsMessageService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1324DDA9255E508C009BCC0A /* ReceivedSmsMessageService.swift */; };
+		1332DC562565ACED00A65CE9 /* PingDeviceService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1332DC552565ACED00A65CE9 /* PingDeviceService.swift */; };
+		1332DC582565ADA600A65CE9 /* PingAppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1332DC572565ADA600A65CE9 /* PingAppDelegate.swift */; };
+		1332DC5B2565B39900A65CE9 /* ReceivedPingService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1332DC5A2565B39900A65CE9 /* ReceivedPingService.swift */; };
 		1357260F255E570F00F6E392 /* MqttAppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1357260E255E570F00F6E392 /* MqttAppDelegate.swift */; };
 		13572611255E58C200F6E392 /* SmsAppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 13572610255E58C200F6E392 /* SmsAppDelegate.swift */; };
 		13572613255E5AEF00F6E392 /* DeviceAppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 13572612255E5AEF00F6E392 /* DeviceAppDelegate.swift */; };
@@ -64,6 +67,9 @@
 		1324DDA3255DBA62009BCC0A /* MQTTClientAuthObserver.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MQTTClientAuthObserver.swift; sourceTree = "<group>"; };
 		1324DDA5255DC004009BCC0A /* MQTTPublisherClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MQTTPublisherClient.swift; sourceTree = "<group>"; };
 		1324DDA9255E508C009BCC0A /* ReceivedSmsMessageService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReceivedSmsMessageService.swift; sourceTree = "<group>"; };
+		1332DC552565ACED00A65CE9 /* PingDeviceService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PingDeviceService.swift; sourceTree = "<group>"; };
+		1332DC572565ADA600A65CE9 /* PingAppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PingAppDelegate.swift; sourceTree = "<group>"; };
+		1332DC5A2565B39900A65CE9 /* ReceivedPingService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReceivedPingService.swift; sourceTree = "<group>"; };
 		1357260E255E570F00F6E392 /* MqttAppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MqttAppDelegate.swift; sourceTree = "<group>"; };
 		13572610255E58C200F6E392 /* SmsAppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SmsAppDelegate.swift; sourceTree = "<group>"; };
 		13572612255E5AEF00F6E392 /* DeviceAppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeviceAppDelegate.swift; sourceTree = "<group>"; };
@@ -161,6 +167,15 @@
 			path = "Preview Content";
 			sourceTree = "<group>";
 		};
+		1332DC592565B1DF00A65CE9 /* Ping */ = {
+			isa = PBXGroup;
+			children = (
+				1332DC552565ACED00A65CE9 /* PingDeviceService.swift */,
+				1332DC5A2565B39900A65CE9 /* ReceivedPingService.swift */,
+			);
+			path = Ping;
+			sourceTree = "<group>";
+		};
 		139CF2FA255B954100F9EA05 /* App */ = {
 			isa = PBXGroup;
 			children = (
@@ -170,6 +185,7 @@
 				13572612255E5AEF00F6E392 /* DeviceAppDelegate.swift */,
 				13572610255E58C200F6E392 /* SmsAppDelegate.swift */,
 				13018995255B9246001BD60D /* SceneDelegate.swift */,
+				1332DC572565ADA600A65CE9 /* PingAppDelegate.swift */,
 			);
 			path = App;
 			sourceTree = "<group>";
@@ -212,6 +228,7 @@
 				139CF347255BA33A00F9EA05 /* Auth */,
 				139CF346255BA33400F9EA05 /* Devices */,
 				139CF348255BA34000F9EA05 /* MQTT */,
+				1332DC592565B1DF00A65CE9 /* Ping */,
 				139CF349255BA34700F9EA05 /* SMS */,
 			);
 			path = Model;
@@ -428,6 +445,7 @@
 				13A4D5B2255CB13700414751 /* GetSmsMessageService.swift in Sources */,
 				139CF340255BA16B00F9EA05 /* SmsMessageBubble.swift in Sources */,
 				136D2A02256465D300A09397 /* AddDeviceView.swift in Sources */,
+				1332DC562565ACED00A65CE9 /* PingDeviceService.swift in Sources */,
 				1324DD9E255D9E10009BCC0A /* MQTTSubscriptionClient.swift in Sources */,
 				1357260F255E570F00F6E392 /* MqttAppDelegate.swift in Sources */,
 				139CF305255B980200F9EA05 /* SignInView.swift in Sources */,
@@ -442,7 +460,9 @@
 				136D2A082564938800A09397 /* ContentViewModel.swift in Sources */,
 				1324DDA4255DBA62009BCC0A /* MQTTClientAuthObserver.swift in Sources */,
 				139CF342255BA18200F9EA05 /* SmsMessagesView.swift in Sources */,
+				1332DC582565ADA600A65CE9 /* PingAppDelegate.swift in Sources */,
 				136D2A062564692400A09397 /* DeviceWebService.swift in Sources */,
+				1332DC5B2565B39900A65CE9 /* ReceivedPingService.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

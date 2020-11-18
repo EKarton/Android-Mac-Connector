@@ -62,7 +62,6 @@ class SmsAppDelegate: NSObject, UIApplicationDelegate {
                     return
                 }
                 
-                
                 devices.forEach { device in
                     let handle: MQTTSubscriber = self.createOnNewSmsMessageSubscriberHandle(device)
                     self.mqttSubscriptionClient.addSubscriberHandle(handle)
