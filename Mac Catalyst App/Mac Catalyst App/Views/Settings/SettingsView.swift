@@ -12,6 +12,8 @@ struct SettingsView: View {
     @EnvironmentObject var contentViewModel: ContentViewModel
     @EnvironmentObject var sessionStore: SessionStore
     @EnvironmentObject var deviceViewModel: DeviceViewModel
+    
+    @State private var isDeviceRegistrationLoading = false
         
     var body: some View {
         NavigationView {
@@ -22,7 +24,7 @@ struct SettingsView: View {
                             "Remove this device from your account" :
                             "Add this device to your account"
                         )
-                    }
+                    }.disabled(self.isDeviceRegistrationLoading)
                 }
                 
                 Section(header: Text("Account settings (bla@gmail.com)")) {
@@ -52,6 +54,7 @@ struct SettingsView: View {
     }
     
     private func onAddRemoveDeviceButtonClicked() {
+        self.isDeviceRegistrationLoading = true
         if self.deviceViewModel.isRegistered {
             unregisterDevice()
             
@@ -65,6 +68,7 @@ struct SettingsView: View {
         deviceViewModel.unregisterDevice(authToken) { err in
             if let err = err {
                 print("Error when unregistering device: \(err.localizedDescription)")
+                self.isDeviceRegistrationLoading = false
                 return
             }
             self.refreshDevices()
@@ -76,6 +80,7 @@ struct SettingsView: View {
         deviceViewModel.registerDevice(authToken) { err in
             if let err = err {
                 print("Error when registering device: \(err.localizedDescription)")
+                self.isDeviceRegistrationLoading = false
                 return
             }
             self.refreshDevices()
@@ -87,8 +92,10 @@ struct SettingsView: View {
         self.deviceViewModel.fetchDevices(authToken) { err in
             if let err = err {
                 print("Error when fetching devices: \(err.localizedDescription)")
+                self.isDeviceRegistrationLoading = false
                 return
             }
+            self.isDeviceRegistrationLoading = false
             self.contentViewModel.hideSettingsDialog()
         }
     }
