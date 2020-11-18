@@ -1,70 +1,87 @@
 export interface Authorizer {
-  isPublishAuthorized(topic: string, clientId: string): Promise<boolean>
-  isSubscriptionAuthorized(topic: string, clientId: string): Promise<boolean>
-}
-
-export class FirebaseAuthorizer implements Authorizer {
-  private readonly firestoreClient: FirebaseFirestore.Firestore;
-
-  constructor(firestoreClient: FirebaseFirestore.Firestore) {
-    this.firestoreClient = firestoreClient
-  }
-
   /**
    * Checks if the client is authorized to publish to a topic
    * @param topic the topic
    * @param clientId the client id
    */
-  public isPublishAuthorized(topic: string, clientId: string): Promise<boolean> {
-    const topicLevels = topic.split('/')
-    if (topicLevels.length < 2) {
-      throw new Error('Invalid topic ' + topic)
-    }
-
-    const deviceId = topicLevels[0]
-    const action = `${topicLevels[1]}:publish`
-
-    // Refer to resource policies to see if the client is authorized to publish
-    return this.isActionAuthorized(deviceId, action, clientId)
-  }
+  isPublishAuthorized(topic: string, clientId: string): Promise<boolean>
 
   /**
    * Checks if the client is authorized to subscribe to a topic
    * @param topic the topic
    * @param clientId the client id
    */
-  public isSubscriptionAuthorized(topic: string, clientId: string): Promise<boolean> {
-    const topicLevels = topic.split('/')
-    if (topicLevels.length < 2) {
-      throw new Error('Invalid topic ' + topic)
-    }
+  isSubscriptionAuthorized(topic: string, clientId: string): Promise<boolean>
+}
 
-    const deviceId = topicLevels[0]
-    const action = `${topicLevels[1]}:subscribe`
-
-    return this.isActionAuthorized(deviceId, action, clientId)
+export class GrantAllAuthorizer implements Authorizer {
+  /**
+   * Checks if the client is authorized to publish to a topic
+   * It will return true
+   * 
+   * @param topic the topic
+   * @param clientId the client id
+   */
+  isPublishAuthorized(topic: string, clientId: string): Promise<boolean> {
+    return Promise.resolve(true)
   }
 
   /**
-   * Checks if an action under a resource is authorized for a principal
-   * If no resource policy is found, we assume that it is unauthorized
-   * @param resource the resource
-   * @param action the action
-   * @param principal the principal
+   * Checks if the client is authorized to subscribe to a topic
+   * It will return true
+   * 
+   * @param topic the topic
+   * @param clientId the client id
    */
-  private async isActionAuthorized(resource: string, action: string, principal: string): Promise<boolean> {
-    console.log(resource, action, principal)
-    const collection = this.firestoreClient.collection('resource-policies')
-    const allowQuery = collection
-      .where('resource', '==', resource)
-      .where('action', '==', action)
-      .where('principal', 'array-contains', principal)
+  isSubscriptionAuthorized(topic: string, clientId: string): Promise<boolean> {
+    return Promise.resolve(true)
+  }
+}
 
-    const results = await allowQuery.get()
-    if (results.empty) {
-      return false
+/**
+ * An authorizer that will grant devices that belong to the same user
+ */
+export class FirebaseUserBasedAuthorizer implements Authorizer {
+  private firestoreClient: FirebaseFirestore.Firestore;
+
+  constructor(firestoreClient: FirebaseFirestore.Firestore) {
+    this.firestoreClient = firestoreClient
+  }
+
+  isPublishAuthorized(topic: string, clientId: string): Promise<boolean> {
+    return this.isUserIdOfTopicSameAsClientId(topic, clientId)
+  }
+  
+  isSubscriptionAuthorized(topic: string, clientId: string): Promise<boolean> {
+    return this.isUserIdOfTopicSameAsClientId(topic, clientId)
+  }
+
+  private async isUserIdOfTopicSameAsClientId(topic: string, clientId: string): Promise<boolean> {
+    console.log(topic, clientId)
+    const resourceDevice = this.getDeviceIdOfTopic(topic)
+    const resourceDeviceUserId = await this.getUserIdOfDevice(resourceDevice)
+    const clientUserId = await this.getUserIdOfDevice(clientId)
+
+    return resourceDeviceUserId == clientUserId
+  }
+
+  private getDeviceIdOfTopic(topic: string): string {
+    const topicLevels = topic.split('/')
+    if (topicLevels.length < 2) {
+      throw new Error(`Invalid topic ${topic}`)
     }
 
-    return true
+    return topicLevels[0]
+  }
+
+  private async getUserIdOfDevice(deviceId: string): Promise<string> {
+    const collection = this.firestoreClient.collection('devices')
+    const doc = await collection.doc(deviceId).get()
+
+    if (!doc.exists) {
+      throw new Error(`Device id ${deviceId} does not exist`)
+    }
+
+    return doc.get("user_id")
   }
 }

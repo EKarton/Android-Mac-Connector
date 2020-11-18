@@ -2,9 +2,8 @@ import { Router } from "express";
 import { Authenticator } from "../services/authenticator";
 import { createAuthenticateMiddleware } from "./middlewares";
 import { DeviceService } from "../services/device_service";
-import { ResourcePolicyService } from "../services/resource_policy_service";
 
-export const createDeviceRouter = (authenticator: Authenticator, deviceService: DeviceService, resourcePolicyService: ResourcePolicyService) => {
+export const createDeviceRouter = (authenticator: Authenticator, deviceService: DeviceService) => {
   const router = Router();
 
   // Middleware to authenticate user
@@ -32,19 +31,6 @@ export const createDeviceRouter = (authenticator: Authenticator, deviceService: 
 
     // Register the device
     const deviceId = await deviceService.registerDevice(userId, deviceType, hardwareId, capabilities)
-    
-    // Add default resource policies
-    const pendingResults1 = capabilities.map(capability => {
-      const resource1 = `${capability}:publish`
-      return resourcePolicyService.addPermission(resource1, deviceId, deviceId)
-    });
-
-    const pendingResults2 = capabilities.map(capability => {
-      const resource1 = `${capability}:subscribe`
-      return resourcePolicyService.addPermission(resource1, deviceId, deviceId)
-    });
-
-    Promise.all([...pendingResults1, ...pendingResults2])
 
     res.setHeader('Content-Type', 'application/json');
     res.status(200).json({
@@ -67,7 +53,6 @@ export const createDeviceRouter = (authenticator: Authenticator, deviceService: 
     const deviceId = req.params.deviceId
 
     await deviceService.removeDevice(deviceId)
-    await resourcePolicyService.deletePermission(null, null, deviceId)
 
     res.setHeader('Content-Type', 'application/json');
     res.status(200).json({

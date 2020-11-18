@@ -84,6 +84,10 @@ export class FirebaseDeviceService implements DeviceService {
   }
 
   async doesDeviceIdExist(deviceId: string): Promise<boolean> {
+    if (!deviceId) {
+      return false
+    }
+
     const devicesCollection = this.firestoreClient.collection("devices")
     const doc = await devicesCollection.doc(deviceId).get()
 

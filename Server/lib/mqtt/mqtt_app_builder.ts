@@ -57,20 +57,24 @@ export class MqttAppBuilder {
     const mqttServerOpts: AedesOptions = {
       authenticate: (client: Client, username: string, password: Buffer, done: (error: AuthenticateError | null, success: boolean | null) => void) => {
         if (!(this.opts?.verifyAuthentication)) {
+          console.log('Authenticated? ${true}')
           done(null, true)
           return
         }
         
         if (password.length == 0 || username.length == 0) {
+          console.log('Authenticated? false')
           done(null, false)
           return
         }
 
         this.authenticator.authenticate(client.id, username, password.toString())
           .then((isAuthenticated: boolean) => {
+            console.log(`Authenticated? ${isAuthenticated}`)
             done(null, isAuthenticated)
           })
           .catch((err: Error) => {
+            console.log('Authenticated? false')
             const wrappedError: AuthenticateError = {
               returnCode: 4,
               ...err,
@@ -80,30 +84,36 @@ export class MqttAppBuilder {
       },
       authorizePublish: (client: Client, packet: PublishPacket, callback: (error?: Error | null) => void) => {
         if (!(this.opts?.verifyAuthorization)) {
+          console.log(`Authorize ${client.id} publish? true`)
           callback(null)
           return
         }
 
         this.authorizer.isPublishAuthorized(packet.topic, client.id)
           .then((isAuthorized: boolean) => {
+            console.log(`Authorize ${client.id} publish? ${isAuthorized}`)
             isAuthorized ? callback(null) : callback(new Error('Unauthorized'))
           })
           .catch((err: Error) => {
+            console.log(`Authorize ${client.id} publish? false`)
             console.error(err)
             callback(err)
           })
       },
       authorizeSubscribe: (client: Client, subscription: Subscription, callback: (error: Error | null, subscription?: Subscription | null) => void) => {
         if (!(this.opts.verifyAuthorization)) {
+          console.log(`Authorize ${client.id} subscribe? true`)
           callback(null, subscription)
           return
         }
         
         this.authorizer.isSubscriptionAuthorized(subscription.topic, client.id)
           .then((isAuthorized: boolean) => {
+            console.log(`Authorize ${client.id} subscribe? ${isAuthorized}`)
             isAuthorized ? callback(null, subscription) : callback(new Error('Unauthorized'), null)
           })
           .catch((err: Error) => {
+            console.log(`Authorize ${client.id} subscribe? false`)
             console.error(err)
             callback(err, null)
           })

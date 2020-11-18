@@ -5,10 +5,9 @@ import process from 'process'
 import { MqttAppBuilder } from './lib/mqtt/mqtt_app_builder';
 import { RestApiAppBuilder } from './lib/rest_api/rest_api_app_builder';
 import { FirebaseAuthenticator } from './lib/services/authenticator';
-import { FirebaseAuthorizer } from './lib/services/authorizer';
+import { FirebaseUserBasedAuthorizer } from './lib/services/authorizer';
 import { AndroidDeviceNotifier } from './lib/services/device_notifier';
 import { FirebaseDeviceService } from './lib/services/device_service';
-import { FirebaseResourcePolicyService } from './lib/services/resource_policy_service';
 
 let numRetries = 10
 
@@ -38,15 +37,13 @@ if (cluster.isMaster) {
   const fcmMessaging = firebaseApp.messaging();
 
   const authenticator = new FirebaseAuthenticator(authServer, firestore)
-  const authorizer = new FirebaseAuthorizer(firestore)
+  const authorizer = new FirebaseUserBasedAuthorizer(firestore)
   const androidDeviceNotifier = new AndroidDeviceNotifier(fcmMessaging)
   const deviceService = new FirebaseDeviceService(firestore)
-  const resourcePolicyService = new FirebaseResourcePolicyService(firestore)
 
   const httpApp = new RestApiAppBuilder()
     .withAuthenticator(authenticator)
     .withDeviceService(deviceService)
-    .withResourcePolicyService(resourcePolicyService)
     .build()
     
   const mqttApp = new MqttAppBuilder()
