@@ -19,7 +19,7 @@ class MQTTService: Service() {
 
     companion object {
         private const val LOG_TAG = "MqttClientService"
-        private const val SERVER_URL = "ws://192.168.0.102:8888"
+        private const val SERVER_URL = "ws://192.168.0.102:3000"
         const val PUBLISH_INTENT_ACTION = "com.androidmacconnector.androidapp.mqtt.intent.action.PUBLISH"
     }
 

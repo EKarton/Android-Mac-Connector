@@ -1,8 +1,9 @@
 import cluster from 'cluster'
 import admin from 'firebase-admin';
+import { createServer } from 'http';
 import process from 'process'
-import { MqttServerApp } from './lib/mqtt/mqtt_server_app';
-import { RestApiServerApp } from './lib/rest_api/rest_api_server_app';
+import { MqttAppBuilder } from './lib/mqtt/mqtt_app_builder';
+import { RestApiAppBuilder } from './lib/rest_api/rest_api_app_builder';
 
 let numRetries = 10
 
@@ -24,12 +25,22 @@ if (cluster.isMaster) {
   });
 } else {
   console.log("Child process #", process.pid, " has spawned");
+
   const firebaseApp = admin.initializeApp();
-  
-  new MqttServerApp(firebaseApp, {
-    verifyAuthorization: !(process.env.VERIFY_AUTHORIZATION == "false"),
-    verifyAuthentication: !(process.env.VERIFY_AUTHENTICATION == "false"),
-  }).startServer()
-  
-  new RestApiServerApp(firebaseApp).startServer()
+
+  const httpApp = new RestApiAppBuilder(firebaseApp).build()
+  const mqttApp = new MqttAppBuilder(firebaseApp)
+    .withOpts({
+      verifyAuthorization: !(process.env.VERIFY_AUTHORIZATION == "false"),
+      verifyAuthentication: !(process.env.VERIFY_AUTHENTICATION == "false"),
+    })
+    .build()
+
+  const server = createServer(httpApp);
+  require('websocket-stream').createServer({ server: server }, mqttApp.handle)
+
+  const port = process.env.PORT || 3000
+  server.listen(port, () => {
+    console.log(`Listening to port ${port}`)
+  });
 }
