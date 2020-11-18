@@ -2,8 +2,10 @@ package com.androidmacconnector.androidapp.mqtt
 
 import android.app.Service
 import android.content.Intent
+import android.net.Uri
 import android.os.IBinder
 import android.util.Log
+import com.androidmacconnector.androidapp.R
 import com.androidmacconnector.androidapp.ping.PingDeviceReceiver
 import com.androidmacconnector.androidapp.sms.messages.ReadSmsMessagesReceiver
 import com.androidmacconnector.androidapp.sms.sender.SendSmsReceiver
@@ -19,7 +21,6 @@ class MQTTService: Service() {
 
     companion object {
         private const val LOG_TAG = "MqttClientService"
-        private const val SERVER_URL = "ws://192.168.0.102:3000"
         const val PUBLISH_INTENT_ACTION = "com.androidmacconnector.androidapp.mqtt.intent.action.PUBLISH"
     }
 
@@ -31,7 +32,7 @@ class MQTTService: Service() {
 
         val deviceId = getDeviceIdSafely(this) ?: return
         val accessToken = getAccessToken() ?: return
-        this.client = MQTTClient(SERVER_URL, deviceId)
+        this.client = MQTTClient(getServerUrl(), deviceId)
         this.client.setUsername(deviceId)
         this.client.setPassword(accessToken)
         this.client.connect()
@@ -59,6 +60,22 @@ class MQTTService: Service() {
                 sendBroadcastIntent(PingDeviceReceiver::class.java, msg)
             }
         }
+    }
+
+    private fun getServerUrl(): String {
+        return Uri.Builder()
+            .scheme(getServerProtocol())
+            .encodedAuthority(getServerAuthority())
+            .build()
+            .toString()
+    }
+
+    private fun getServerProtocol(): String {
+        return this.applicationContext.getString(R.string.mqtt_protocol)
+    }
+
+    private fun getServerAuthority(): String {
+        return this.applicationContext.getString(R.string.mqtt_authority)
     }
 
     private fun getAccessToken(): String? {

@@ -224,11 +224,11 @@ class DeviceWebService(private val context: Context): DeviceService {
     }
 
     private fun getServerProtocol(): String {
-        return context.getString(R.string.protocol)
+        return context.getString(R.string.rest_protocol)
     }
 
     private fun getServerAuthority(): String {
-        return context.getString(R.string.authority)
+        return context.getString(R.string.rest_authority)
     }
 
     private fun makeJsonObjectRequest(method: Int, url: String, jsonBody: JSONObject?, headers: Map<String, String>?, handler: (JSONObject?, Throwable?) -> Unit) {

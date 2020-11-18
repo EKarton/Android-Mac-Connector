@@ -1,6 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name='protocol'>http</string>
-    <string name='hostname'>192.168.0.102</string>
-    <string name='port'>3000</string>
-    <string name="authority">192.168.0.102:3000</string>
+    <string name="rest_protocol">http</string>
+    <string name="rest_authority">192.168.0.102:3000</string>
 </resources>
