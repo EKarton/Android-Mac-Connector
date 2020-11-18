@@ -9,34 +9,27 @@
 import SwiftUI
 
 struct ContentView: View {
+    @EnvironmentObject var contentViewModel: ContentViewModel
     @EnvironmentObject var sessionStore: SessionStore
-    @State private var showSettingsModal = false
+    @EnvironmentObject var deviceViewModel: DeviceViewModel
             
     var body: some View {
-        let showSheet = Binding<Bool> (
-            get: {
-                return self.showSettingsModal
-            },
-            set: { (val: Bool) in }
-        )
-        
         return VStack {
             if (!self.sessionStore.currentSession.isSignedIn) {
                 SignInView()
-            } else {
-                DevicesListView(showSettingsAction: {
-                    self.showSettingsModal = true
-                })
-            }
-        }
-        .sheet(isPresented: showSheet) {
-            if (self.showSettingsModal) {
-                SettingsView(isPresent: self.$showSettingsModal)
-                    .environmentObject(self.sessionStore)
+                
+            } else if (self.contentViewModel.isAddDevicePagePresent) {
+                AddDeviceView()
                 
             } else {
-                Text("Error: view should not be here")
+                DevicesListView()
             }
+        }
+        .sheet(isPresented: self.$contentViewModel.isSettingsDialogPresent) {
+            SettingsView()
+                .environmentObject(self.contentViewModel)
+                .environmentObject(self.sessionStore)
+                .environmentObject(self.deviceViewModel)
         }
         .onAppear {
             self.sessionStore.bindListeners()

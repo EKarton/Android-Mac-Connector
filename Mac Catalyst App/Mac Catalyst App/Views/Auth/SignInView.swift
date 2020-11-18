@@ -9,7 +9,9 @@
 import SwiftUI
 
 struct SignInView: View {
+    @EnvironmentObject var contentViewModel: ContentViewModel
     @EnvironmentObject var sessionStore: SessionStore
+    @EnvironmentObject var deviceViewModel: DeviceViewModel
     
     @Environment(\.presentationMode) var presentation
     @State private var email = "";
@@ -76,7 +78,16 @@ struct SignInView: View {
             }
             
             print("Successfully signed in")
-            self.presentation.wrappedValue.dismiss()
+            
+            let authToken = self.sessionStore.currentSession.accessToken
+            self.deviceViewModel.checkIfCurrentDeviceIsRegistered(authToken) { err in
+                if let err = err {
+                    self.error = "An error occured: \(err.localizedDescription)"
+                    return
+                }
+                
+                self.presentation.wrappedValue.dismiss()
+            }
         }
     }
 }

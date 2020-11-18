@@ -22,8 +22,10 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         if let windowScene = scene as? UIWindowScene {
             let appDelegate = UIApplication.shared.delegate as! AppDelegate
             let contentView = ContentView()
+                .environmentObject(ContentViewModel())
                 .environmentObject(appDelegate.auth.sessionStore)
                 .environmentObject(appDelegate.device.deviceService)
+                .environmentObject(appDelegate.device.deviceViewModel)
                 .environmentObject(appDelegate.sms.smsSenderService)
                 .environmentObject(appDelegate.sms.getSmsThreadsService)
                 .environmentObject(appDelegate.sms.getSmsMessageService)

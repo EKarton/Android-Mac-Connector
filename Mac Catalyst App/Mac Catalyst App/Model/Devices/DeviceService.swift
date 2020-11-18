@@ -11,6 +11,7 @@ import SwiftUI
 enum DeviceServiceError: Error {
     case UnexpectedStatusCode(statusCode: Int)
     case UnexpectedError(errorMsg: String)
+    case UnexpectedError(error: Error)
 }
 
 struct Devices: Decodable {

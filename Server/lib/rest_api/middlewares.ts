@@ -12,8 +12,9 @@ export class HttpError extends Error {
   }
 }
 
-export function logRequestsMiddleware() {
-
+export function logRequestsMiddleware(req, res, next) {
+  console.log(`${req.method} ${req.url}: ${res.statusCode}`);
+  next();
 }
 
 export function handleErrorsMiddleware(err: Error, res) {

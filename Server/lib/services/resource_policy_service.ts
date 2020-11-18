@@ -43,6 +43,7 @@ export class FirebaseResourcePolicyService implements ResourcePolicyService {
   }
 
   async deletePermission(action?: string, principal?: string, resource?: string) {
+    console.log("resource:", resource)
     const collection = this.firestoreClient.collection("resource-policies")
     const docs = await this.getPermissions(action, principal, resource)
     const pendingResults = [];
@@ -65,7 +66,7 @@ export class FirebaseResourcePolicyService implements ResourcePolicyService {
   }
 
   private getPermissions(action?: string, principal?: string, resource?: string): Promise<FirebaseFirestore.QuerySnapshot<FirebaseFirestore.DocumentData>> {
-    if (!action || !principal || !resource) {
+    if (!action && !principal && !resource) {
       throw new Error("Specify at least an action, principal, or a resource to do a query!")
     }
 

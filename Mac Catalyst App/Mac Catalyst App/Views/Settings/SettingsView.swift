@@ -9,18 +9,16 @@
 import SwiftUI
 
 struct SettingsView: View {
-    @Binding var isPresent: Bool
-    
+    @EnvironmentObject var contentViewModel: ContentViewModel
     @EnvironmentObject var sessionStore: SessionStore
-    
-    var isRegistered: Bool = true
-    
+    @EnvironmentObject var deviceViewModel: DeviceViewModel
+        
     var body: some View {
         NavigationView {
             Form {
                 Section(header: Text("Device registration")) {
-                    Button(action: self.onRegisterDeviceAction) {
-                        Text(isRegistered ?
+                    Button(action: self.onAddRemoveDeviceButtonClicked) {
+                        Text(deviceViewModel.isRegistered ?
                             "Remove this device from your account" :
                             "Add this device to your account"
                         )
@@ -28,39 +26,88 @@ struct SettingsView: View {
                 }
                 
                 Section(header: Text("Account settings (bla@gmail.com)")) {
-                    Button(action: self.onSignOutAction) {
+                    Button(action: self.onSignOutButtonClicked) {
                         Text("Sign out")
                     }
                 }
             }
             .navigationBarTitle(Text("Settings"), displayMode: .inline)
             .navigationBarItems(trailing:
-                Button(action: self.onCloseAction) {
+                Button(action: self.onCloseButtonClicked) {
                     Text("Close")
                 }
             )
         }
+        .onAppear(perform: onAppear)
     }
     
-    private func onRegisterDeviceAction() {
-        isPresent = false
+    private func onAppear() {
+        let authToken = sessionStore.currentSession.accessToken
+        self.deviceViewModel.checkIfCurrentDeviceIsRegistered(authToken) { err in
+            if let err = err {
+                print("Error when trying to see if device is registered or not: \(err)")
+                return
+            }
+        }
     }
     
-    private func onSignOutAction() {
+    private func onAddRemoveDeviceButtonClicked() {
+        if self.deviceViewModel.isRegistered {
+            unregisterDevice()
+            
+        } else {
+            registerDevice()
+        }
+    }
+    
+    private func unregisterDevice() {
+        let authToken = sessionStore.currentSession.accessToken
+        deviceViewModel.unregisterDevice(authToken) { err in
+            if let err = err {
+                print("Error when unregistering device: \(err.localizedDescription)")
+                return
+            }
+            self.refreshDevices()
+        }
+    }
+    
+    private func registerDevice() {
+        let authToken = sessionStore.currentSession.accessToken
+        deviceViewModel.registerDevice(authToken) { err in
+            if let err = err {
+                print("Error when registering device: \(err.localizedDescription)")
+                return
+            }
+            self.refreshDevices()
+        }
+    }
+    
+    private func refreshDevices() {
+        let authToken = sessionStore.currentSession.accessToken
+        self.deviceViewModel.fetchDevices(authToken) { err in
+            if let err = err {
+                print("Error when fetching devices: \(err.localizedDescription)")
+                return
+            }
+            self.contentViewModel.hideSettingsDialog()
+        }
+    }
+    
+    private func onSignOutButtonClicked() {
         sessionStore.signOut()
-        isPresent = false
+        self.contentViewModel.hideSettingsDialog()
     }
     
-    private func onCloseAction() {
-        isPresent = false
+    private func onCloseButtonClicked() {
+        self.contentViewModel.hideSettingsDialog()
     }
 }
 
 struct SettingsView_Previews: PreviewProvider {
     static var previews: some View {
         Group {
-            SettingsView(isPresent: .constant(true))
-            SettingsView(isPresent: .constant(true))
+            SettingsView()
+            SettingsView()
         }
     }
 }

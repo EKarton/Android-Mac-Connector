@@ -1,7 +1,7 @@
 import { HttpError } from "../rest_api/middlewares";
 
 export interface DeviceService {
-  doesDeviceExist(userId: string, deviceType: string, hardwareId: string): Promise<boolean>
+  doesDeviceExist(userId: string, deviceType: string, hardwareId: string): Promise<string>
   registerDevice(userId: string, deviceType: string, hardwareId: string, capabilities: String[]): Promise<string>
   removeDevice(deviceId: string)
   getDevices(userId: string): Promise<Device[]>
@@ -25,7 +25,7 @@ export class FirebaseDeviceService implements DeviceService {
     this.firestoreClient = firestoreClient
   }
 
-  async doesDeviceExist(userId: string, deviceType: string, hardwareId: string): Promise<boolean> {
+  async doesDeviceExist(userId: string, deviceType: string, hardwareId: string): Promise<string> {
     const devicesCollection = this.firestoreClient.collection("devices")
     const query = devicesCollection
       .where("user_id", "==", userId)
@@ -34,10 +34,14 @@ export class FirebaseDeviceService implements DeviceService {
 
     const results = await query.get()
     if (results.empty) {
-      return false
+      return ""
     }
 
-    return true
+    if (results.docs.length > 1) {
+      return ""
+    }
+
+    return results.docs[0].id
   }
   
   async registerDevice(userId: string, deviceType: string, hardwareId: string, capabilities: String[]): Promise<string> {

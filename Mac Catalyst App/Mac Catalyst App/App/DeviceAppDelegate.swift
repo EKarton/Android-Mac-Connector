@@ -11,10 +11,14 @@ import FirebaseAuth
 
 class DeviceAppDelegate: NSObject, UIApplicationDelegate {
     let deviceService: DeviceService
+    let deviceWebService: DeviceWebService
+    let deviceViewModel: DeviceViewModel
     let mqttSubscriptionClient: MQTTSubscriptionClient
     
     init(_ mqtt: MqttAppDelegate) {
         deviceService = DeviceService()
+        deviceWebService = DeviceWebServiceImpl()
+        deviceViewModel = DeviceViewModel(deviceWebService)
         mqttSubscriptionClient = mqtt.mqttSubscriptionClient
     }
     

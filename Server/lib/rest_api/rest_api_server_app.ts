@@ -6,7 +6,7 @@ import { FirebaseDeviceService } from "../services/device_service";
 import { FirebaseAuthenticator } from "../services/authenticator";
 import { createDeviceRouter } from "./devices_routes";
 import { FirebaseResourcePolicyService } from "../services/resource_policy_service";
-import { handleErrorsMiddleware } from "./middlewares";
+import { handleErrorsMiddleware, logRequestsMiddleware } from "./middlewares";
 
 export class RestApiServerApp implements App {
   private readonly port = 8080
@@ -25,6 +25,9 @@ export class RestApiServerApp implements App {
 
     // Middleware to parse json body
     this.app.use(json());
+
+    // Middleware to log requests
+    this.app.use(logRequestsMiddleware)
 
     // Middleware to log requests
     // this.app.use((req, res, next) => {

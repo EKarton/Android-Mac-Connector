@@ -21,6 +21,10 @@
 		13572611255E58C200F6E392 /* SmsAppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 13572610255E58C200F6E392 /* SmsAppDelegate.swift */; };
 		13572613255E5AEF00F6E392 /* DeviceAppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 13572612255E5AEF00F6E392 /* DeviceAppDelegate.swift */; };
 		13572615255E5D6A00F6E392 /* AuthAppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 13572614255E5D6A00F6E392 /* AuthAppDelegate.swift */; };
+		136D2A0025645D2200A09397 /* DeviceViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 136D29FF25645D2200A09397 /* DeviceViewModel.swift */; };
+		136D2A02256465D300A09397 /* AddDeviceView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 136D2A01256465D300A09397 /* AddDeviceView.swift */; };
+		136D2A062564692400A09397 /* DeviceWebService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 136D2A052564692400A09397 /* DeviceWebService.swift */; };
+		136D2A082564938800A09397 /* ContentViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 136D2A072564938800A09397 /* ContentViewModel.swift */; };
 		139CF301255B96D800F9EA05 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 139CF300255B96D800F9EA05 /* GoogleService-Info.plist */; };
 		139CF303255B97D100F9EA05 /* SessionStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 139CF302255B97D100F9EA05 /* SessionStore.swift */; };
 		139CF305255B980200F9EA05 /* SignInView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 139CF304255B980200F9EA05 /* SignInView.swift */; };
@@ -64,6 +68,10 @@
 		13572610255E58C200F6E392 /* SmsAppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SmsAppDelegate.swift; sourceTree = "<group>"; };
 		13572612255E5AEF00F6E392 /* DeviceAppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeviceAppDelegate.swift; sourceTree = "<group>"; };
 		13572614255E5D6A00F6E392 /* AuthAppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthAppDelegate.swift; sourceTree = "<group>"; };
+		136D29FF25645D2200A09397 /* DeviceViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeviceViewModel.swift; sourceTree = "<group>"; };
+		136D2A01256465D300A09397 /* AddDeviceView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddDeviceView.swift; sourceTree = "<group>"; };
+		136D2A052564692400A09397 /* DeviceWebService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeviceWebService.swift; sourceTree = "<group>"; };
+		136D2A072564938800A09397 /* ContentViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentViewModel.swift; sourceTree = "<group>"; };
 		139CF300255B96D800F9EA05 /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 		139CF302255B97D100F9EA05 /* SessionStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionStore.swift; sourceTree = "<group>"; };
 		139CF304255B980200F9EA05 /* SignInView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SignInView.swift; sourceTree = "<group>"; };
@@ -169,6 +177,7 @@
 		139CF2FB255B954800F9EA05 /* Views */ = {
 			isa = PBXGroup;
 			children = (
+				136D2A072564938800A09397 /* ContentViewModel.swift */,
 				13018997255B9246001BD60D /* ContentView.swift */,
 				139CF32A255B9E6500F9EA05 /* Auth */,
 				139CF32B255B9E6A00F9EA05 /* Devices */,
@@ -183,6 +192,7 @@
 			children = (
 				139CF304255B980200F9EA05 /* SignInView.swift */,
 				139CF306255B981000F9EA05 /* SignUpView.swift */,
+				136D2A01256465D300A09397 /* AddDeviceView.swift */,
 			);
 			path = Auth;
 			sourceTree = "<group>";
@@ -225,6 +235,8 @@
 			children = (
 				139CF30C255B99E800F9EA05 /* Device.swift */,
 				139CF30E255B9A0800F9EA05 /* DeviceService.swift */,
+				136D2A052564692400A09397 /* DeviceWebService.swift */,
+				136D29FF25645D2200A09397 /* DeviceViewModel.swift */,
 			);
 			path = Devices;
 			sourceTree = "<group>";
@@ -401,6 +413,7 @@
 				13018996255B9246001BD60D /* SceneDelegate.swift in Sources */,
 				139CF334255B9F1D00F9EA05 /* SmsThread.swift in Sources */,
 				139CF33C255BA11500F9EA05 /* ReceivedSmsMessage.swift in Sources */,
+				136D2A0025645D2200A09397 /* DeviceViewModel.swift in Sources */,
 				139CF303255B97D100F9EA05 /* SessionStore.swift in Sources */,
 				139CF32E255B9E9600F9EA05 /* SmsThreadsList.swift in Sources */,
 				139CF338255BA0CB00F9EA05 /* SmsSenderService.swift in Sources */,
@@ -414,6 +427,7 @@
 				1324DDA6255DC004009BCC0A /* MQTTPublisherClient.swift in Sources */,
 				13A4D5B2255CB13700414751 /* GetSmsMessageService.swift in Sources */,
 				139CF340255BA16B00F9EA05 /* SmsMessageBubble.swift in Sources */,
+				136D2A02256465D300A09397 /* AddDeviceView.swift in Sources */,
 				1324DD9E255D9E10009BCC0A /* MQTTSubscriptionClient.swift in Sources */,
 				1357260F255E570F00F6E392 /* MqttAppDelegate.swift in Sources */,
 				139CF305255B980200F9EA05 /* SignInView.swift in Sources */,
@@ -425,8 +439,10 @@
 				139CF30B255B99C000F9EA05 /* DeviceActionsList.swift in Sources */,
 				139CF30F255B9A0800F9EA05 /* DeviceService.swift in Sources */,
 				139CF344255BA27200F9EA05 /* NewSmsMessageView.swift in Sources */,
+				136D2A082564938800A09397 /* ContentViewModel.swift in Sources */,
 				1324DDA4255DBA62009BCC0A /* MQTTClientAuthObserver.swift in Sources */,
 				139CF342255BA18200F9EA05 /* SmsMessagesView.swift in Sources */,
+				136D2A062564692400A09397 /* DeviceWebService.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

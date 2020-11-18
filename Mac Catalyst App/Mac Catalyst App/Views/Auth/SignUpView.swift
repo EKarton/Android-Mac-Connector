@@ -10,6 +10,7 @@ import SwiftUI
 
 struct SignUpView: View {
     @Environment(\.presentationMode) var presentation
+    @EnvironmentObject var sessionStore: SessionStore
     
     @State private var email = ""
     @State private var password1 = ""
@@ -69,8 +70,14 @@ struct SignUpView: View {
             return
         }
         
-        
-        self.presentation.wrappedValue.dismiss()
+        self.sessionStore.signUp(email: email, password: password1) { err in
+            if let err = err {
+                self.error = err.localizedDescription
+                return
+            }
+            
+            self.presentation.wrappedValue.dismiss()
+        }
     }
 }
 

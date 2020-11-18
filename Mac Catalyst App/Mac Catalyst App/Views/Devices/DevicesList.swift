@@ -9,16 +9,15 @@
 import SwiftUI
 
 struct DevicesListView: View {
-    var showSettingsAction: () -> Void
-    
-    @EnvironmentObject var deviceService: DeviceService
+    @EnvironmentObject var contentViewModel: ContentViewModel
+    @EnvironmentObject var deviceViewModel: DeviceViewModel
     @EnvironmentObject var sessionStore: SessionStore
     
     @State private var devicesList = [Device]()
     
     var body: some View {
         NavigationView {
-            List(self.devicesList, id: \.id) { device in
+            List(self.deviceViewModel.devices, id: \.id) { device in
                 NavigationLink(destination: DeviceActionsList(device: device)) {
                     HStack {
                         Text(device.name)
@@ -27,10 +26,7 @@ struct DevicesListView: View {
             }
             .navigationBarTitle(Text("Devices"), displayMode: .large)
             .navigationBarItems(trailing:
-                Button(action: {
-                    print("Settings button clicked")
-                    self.showSettingsAction()
-                }) {
+                Button(action: self.onSettingsButtonClicked) {
                     Image(systemName: "gear")
                 }
             )
@@ -40,23 +36,23 @@ struct DevicesListView: View {
     }
     
     private func onAppearHandler() {
-        self.deviceService.getDevices(sessionStore.currentSession.accessToken) { (devices: [Device], error: Error?) in
-            guard error == nil else {
-                print("Encountered error when fetching devices: \(error.debugDescription)")
-                return
+        self.deviceViewModel.fetchDevices(sessionStore.currentSession.accessToken) { err in
+            if let err = err {
+                print("Encountered error when fetching devices: \(err.localizedDescription)")
             }
-            
-            self.devicesList = devices
         }
+    }
+    
+    private func onSettingsButtonClicked() {
+        print("Settings button clicked")
+        self.contentViewModel.showSettingsDialog()
     }
 }
 
 #if DEBUG
 struct DevicesListViewPreview: PreviewProvider {
     static var previews: some View {
-        DevicesListView(showSettingsAction: {
-            print("Show settings button clicked")
-        })
+        DevicesListView()
     }
 }
 #endif

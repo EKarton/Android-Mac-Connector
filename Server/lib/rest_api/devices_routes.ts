@@ -15,11 +15,14 @@ export const createDeviceRouter = (service: DeviceService, authService: Authenti
     const deviceType = req.query.device_type.toString()
     const hardwareId = req.query.hardware_id.toString()
 
+    console.log(userId, deviceType, hardwareId)
+
     const result = await service.doesDeviceExist(userId, deviceType, hardwareId)
 
     res.setHeader('Content-Type', 'application/json');
     res.status(200).json({
-      "is_registered": result
+      "is_registered": result.length > 0,
+      "device_id": result
     })
   });
 
