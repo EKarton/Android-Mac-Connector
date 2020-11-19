@@ -7,8 +7,7 @@
     <androidx.drawerlayout.widget.DrawerLayout
         android:id="@+id/drawer"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        tools:openDrawer="start">
+        android:layout_height="match_parent">
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_height="match_parent"
@@ -33,10 +32,12 @@
                         android:id="@+id/mainToolbar"
                         android:layout_width="match_parent"
                         android:layout_height="?attr/actionBarSize"
+                        android:background="?android:attr/colorBackground"
                         app:navigationIcon="@drawable/ic_menu_24"
+                        app:titleTextColor="?attr/colorPrimaryVariant"
                         app:layout_scrollFlags="scroll|enterAlways|snap"
                         app:title="Actions"
-                        style="@style/Widget.MaterialComponents.Toolbar.Primary"/>
+                        style="@style/Widget.MaterialComponents.Toolbar.Surface" />
 
                 </com.google.android.material.appbar.AppBarLayout>
 
