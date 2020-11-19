@@ -6,6 +6,7 @@ import android.util.Log
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.DataBindingUtil
+import com.androidmacconnector.androidapp.MainActivity
 import com.androidmacconnector.androidapp.R
 import com.androidmacconnector.androidapp.databinding.ActivitySignUpBinding
 import com.androidmacconnector.androidapp.devices.AddDeviceActivity
@@ -24,6 +25,10 @@ class SignUpActivity : AppCompatActivity() {
         binding = DataBindingUtil.setContentView(this, R.layout.activity_sign_up)
 
         sessionStore = SessionStoreImpl(FirebaseAuth.getInstance())
+    }
+
+    fun onSignInButtonClicked(view: View) {
+        onBackPressed()
     }
 
     fun onSignUpButtonClicked(view: View) {
@@ -53,8 +58,9 @@ class SignUpActivity : AppCompatActivity() {
                 return@signUp
             }
 
-            Log.d(LOG_TAG, "Successfully signed up")
+            startActivity(Intent(this, MainActivity::class.java))
             startActivity(Intent(this, AddDeviceActivity::class.java))
+            finish()
         }
     }
 }

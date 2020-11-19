@@ -47,7 +47,7 @@ data class Device(
  * An interface for device management
  */
 interface DeviceService {
-    fun isDeviceRegistered(authToken: String, deviceType: String, hardwareId: String, handler: (Boolean?, Throwable?) -> Unit)
+    fun isDeviceRegistered(authToken: String, deviceType: String, hardwareId: String, handler: (Boolean, String, Throwable?) -> Unit)
     fun registerDevice(authToken: String, deviceType: String, hardwareId: String, capabilities: List<String>, handler: (String?, Throwable?) -> Unit)
     fun unregisterDevice(authToken: String, deviceId: String, handler: (Throwable?) -> Unit)
     fun getDevices(authToken: String, handler: (List<Device>, Throwable?) -> Unit)
@@ -69,7 +69,7 @@ class DeviceWebService(private val context: Context): DeviceService {
 
     private val requestQueue: RequestQueue = VolleyRequestQueue.getInstance(context.applicationContext).requestQueue
 
-    override fun isDeviceRegistered(authToken: String, deviceType: String, hardwareId: String, handler: (Boolean?, Throwable?) -> Unit) {
+    override fun isDeviceRegistered(authToken: String, deviceType: String, hardwareId: String, handler: (Boolean, String, Throwable?) -> Unit) {
         Log.d(LOG_TAG, "Checking if device is registered")
 
         val uri = Uri.Builder()
@@ -84,15 +84,15 @@ class DeviceWebService(private val context: Context): DeviceService {
         val headers = mapOf("Authorization" to format("Bearer %s", authToken))
         makeJsonObjectRequest(Request.Method.GET, uri, null, headers) { json, err ->
             if (err != null) {
-                handler(null, err)
+                handler(false, "", err)
                 return@makeJsonObjectRequest
             }
 
-            if (json != null && json.has("is_registered")) {
-                handler(json.getBoolean("is_registered"), null)
+            if (json != null && json.has("is_registered") && json.has("device_id")) {
+                handler(json.getBoolean("is_registered"), json.getString("device_id"), null)
                 return@makeJsonObjectRequest
             }
-            handler(null, IllegalArgumentException("No result for whether the device exists or not"))
+            handler(false, "", IllegalArgumentException("No result for whether the device exists or not"))
         }
     }
 

@@ -17,18 +17,20 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.AndroidToMacContinuity">
-        <activity android:name=".settings.SettingsActivity"></activity>
-        <activity android:name=".auth.SignUpActivity" />
-        <activity android:name=".auth.SignInActivity" />
-        <activity android:name=".devices.DeviceDetailsActivity" />
-        <activity android:name=".devices.AddDeviceActivity" />
+
         <activity android:name=".MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-        </activity> <!-- The broadcast receiver for SMS messages -->
+        </activity>
+        <activity android:name=".auth.SignInActivity" />
+        <activity android:name=".devices.AddDeviceActivity" />
+        <activity android:name=".auth.SignUpActivity" />
+        <activity android:name=".devices.DeviceDetailsActivity" />
+        <activity android:name=".settings.SettingsActivity" />
+
+        <!-- The broadcast receiver for SMS messages -->
         <receiver
             android:name=".sms.receiver.ReceivedSmsReceiver"
             android:enabled="true"

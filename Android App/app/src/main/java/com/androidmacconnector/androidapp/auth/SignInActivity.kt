@@ -12,6 +12,7 @@ import com.androidmacconnector.androidapp.R
 import com.androidmacconnector.androidapp.databinding.ActivitySignInBinding
 import com.androidmacconnector.androidapp.devices.AddDeviceActivity
 import com.androidmacconnector.androidapp.devices.DeviceWebService
+import com.androidmacconnector.androidapp.utils.saveDeviceId
 import com.google.firebase.auth.FirebaseAuth
 
 class SignInActivity : AppCompatActivity() {
@@ -75,27 +76,23 @@ class SignInActivity : AppCompatActivity() {
                 return@getAuthToken
             }
 
-            deviceService.isDeviceRegistered(authToken, "android_phone", hardwareId) { isRegistered, err2 ->
+            deviceService.isDeviceRegistered(authToken, "android_phone", hardwareId) { isRegistered, deviceId, err2 ->
                 if (err2 != null) {
                     Log.d(LOG_TAG, "Failed to check if device is registered: $err2")
                     binding.errorMessage = "Error 3 - Please try again"
                     return@isDeviceRegistered
                 }
 
-                if (isRegistered == null) {
-                    Log.d(LOG_TAG, "isRegistered is null")
-                    binding.errorMessage = "Error 4 - Please try again"
-                    return@isDeviceRegistered
-                }
+                startActivity(Intent(this, MainActivity::class.java))
 
                 if (isRegistered) {
-                    val intent = Intent(this, MainActivity::class.java)
-                    intent.flags = intent.flags or Intent.FLAG_ACTIVITY_NO_HISTORY
-                    startActivity(intent)
+                    saveDeviceId(this.applicationContext, deviceId)
 
                 } else {
                     startActivity(Intent(this, AddDeviceActivity::class.java))
                 }
+
+                finish()
             }
         }
     }

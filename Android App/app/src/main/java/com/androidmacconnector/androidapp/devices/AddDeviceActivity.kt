@@ -7,6 +7,7 @@ import android.os.Bundle
 import android.provider.Settings
 import android.util.Log
 import android.view.View
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.androidmacconnector.androidapp.MainActivity
 import com.androidmacconnector.androidapp.R
@@ -81,7 +82,7 @@ class AddDeviceActivity : AppCompatActivity() {
 
     /** Called when the user clicks on the 'No Thanks' button **/
     fun onCancelButtonClicked(view: View) {
-        goToMainActivity()
+        finish()
     }
 
     private fun onPermissionsGrantedHandler(report: MultiplePermissionsReport) {
@@ -114,8 +115,9 @@ class AddDeviceActivity : AppCompatActivity() {
                     return@registerDevice
                 }
 
+                Toast.makeText(this.applicationContext, "Successfully added device", Toast.LENGTH_LONG).show()
                 saveDeviceId(context, deviceId)
-                goToMainActivity()
+                finish()
             }
         }
     }
@@ -133,11 +135,5 @@ class AddDeviceActivity : AppCompatActivity() {
         newCapabilities.add("ping_device")
 
         return newCapabilities
-    }
-
-    private fun goToMainActivity() {
-        val intent = Intent(this, MainActivity::class.java)
-        intent.flags = intent.flags or Intent.FLAG_ACTIVITY_NO_HISTORY
-        startActivity(intent)
     }
 }

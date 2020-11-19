@@ -98,10 +98,8 @@ class SettingsActivity : AppCompatActivity() {
         sessionStore.signOut()
 
         // Go to the sign in page
-        val intent = Intent(this, SignInActivity::class.java)
-        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP)
-        startActivity(intent)
-        finish()
+        startActivity(Intent(this, SignInActivity::class.java))
+        finishAffinity()
     }
 
     /**
