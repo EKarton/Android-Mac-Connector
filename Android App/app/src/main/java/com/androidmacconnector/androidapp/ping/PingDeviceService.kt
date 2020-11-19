@@ -9,7 +9,6 @@ import androidx.core.app.NotificationCompat
 import com.androidmacconnector.androidapp.R
 
 interface PingDeviceService {
-    fun setupNotificationChannel()
     fun dispatchNotification()
 }
 
@@ -18,7 +17,15 @@ class PingDeviceServiceImpl(private val context: Context): PingDeviceService {
         const val CHANNEL_ID = "1"
     }
 
-    override fun setupNotificationChannel() {
+    init {
+        setupNotificationChannel()
+    }
+
+    /**
+     * Sets up the notification channel if needed
+     * Note: if the notification channel is already made, it will not do anything
+     */
+    private fun setupNotificationChannel() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             // Create the NotificationChannel
             val name = context.getString(R.string.ping_device_channel_name)

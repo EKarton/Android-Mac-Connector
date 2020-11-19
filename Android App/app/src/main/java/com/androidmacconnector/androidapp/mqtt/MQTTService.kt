@@ -62,7 +62,7 @@ class MQTTService: Service() {
             }
         }
 
-        Log.d(LOG_TAG, "onCreate() finished")
+        Log.d(LOG_TAG, "onCreate() finished: ${this.client}")
     }
 
     private fun getServerUrl(): String {

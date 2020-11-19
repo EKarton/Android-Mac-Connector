@@ -88,11 +88,6 @@ class AddDeviceActivity : AppCompatActivity() {
     private fun onPermissionsGrantedHandler(report: MultiplePermissionsReport) {
         val capabilities = getCapabilities(report)
 
-        // Set up the ping device notifications channel
-        if (capabilities.contains("ping_device")) {
-            PingDeviceServiceImpl(this).setupNotificationChannel()
-        }
-
         // Get the hardware id
         val hardwareId = Settings.Secure.getString(this.contentResolver, Settings.Secure.ANDROID_ID)
 
