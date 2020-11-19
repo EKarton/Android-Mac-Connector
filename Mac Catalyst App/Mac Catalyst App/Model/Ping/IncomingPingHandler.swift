@@ -1,19 +1,18 @@
 //
-//  ReceivedSmsMessageService.swift
+//  ReceivedPingService.swift
 //  Mac Catalyst App
 //
-//  Created by Emilio Kartono on 2020-11-13.
+//  Created by Emilio Kartono on 2020-11-18.
 //  Copyright © 2020 Emilio Kartono. All rights reserved.
 //
 
 import SwiftUI
 
-class ReceivedSmsMessageService {
-    func dispatchNotification(_ msg: ReceivedSmsMessage, _ device: Device) {
+class IncomingPingHandler {
+    func dispatchNotification() {
         let content = UNMutableNotificationContent()
-        content.title = msg.phoneNumber
-        content.subtitle = "From \(device.name)"
-        content.body = msg.body
+        content.title = "Ping!"
+        content.body = "Hello!"
         content.sound = UNNotificationSound.default
 
         // Show this notification 1 second from now

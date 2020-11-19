@@ -21,16 +21,22 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         // Use a UIHostingController as window root view controller.
         if let windowScene = scene as? UIWindowScene {
             let appDelegate = UIApplication.shared.delegate as! AppDelegate
+            
             let contentView = ContentView()
                 .environmentObject(ContentViewModel())
-                .environmentObject(appDelegate.auth.sessionStore)
-                .environmentObject(appDelegate.device.deviceService)
-                .environmentObject(appDelegate.device.deviceViewModel)
-                .environmentObject(appDelegate.sms.smsSenderService)
-                .environmentObject(appDelegate.sms.getSmsThreadsService)
-                .environmentObject(appDelegate.sms.getSmsMessageService)
-                .environmentObject(appDelegate.ping.pingDeviceService)
-                            
+                .environmentObject(appDelegate.context.sessionStore)
+                .environmentObject(DeviceViewModel(
+                    appDelegate.context.deviceWebService
+                ))
+                .environmentObject(appDelegate.context.pingDeviceService)
+                .environmentObject(SmsMessageViewModel(
+                    appDelegate.context.getSmsMessageService,
+                    appDelegate.context.smsSenderService
+                ))
+                .environmentObject(SmsThreadsViewModel(
+                    appDelegate.context.getSmsThreadsService
+                ))
+            
             let window = UIWindow(windowScene: windowScene)
             window.rootViewController = UIHostingController(rootView: contentView)
             self.window = window

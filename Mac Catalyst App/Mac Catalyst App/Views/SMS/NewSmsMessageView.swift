@@ -10,7 +10,7 @@ import SwiftUI
 
 struct NewSmsMessageView: View {
     var body: some View {
-        Text("Hello World")
+        Text("Todo")
     }
 }
 

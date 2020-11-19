@@ -9,13 +9,7 @@
 import SwiftUI
 import FirebaseCore
 
-class AuthAppDelegate: NSObject, UIApplicationDelegate {
-    let sessionStore: SessionStore
-
-    override init() {
-        self.sessionStore = SessionStore()
-    }
-
+class FirebaseAppDelegate: NSObject, UIApplicationDelegate {
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         FirebaseApp.configure()
         return true

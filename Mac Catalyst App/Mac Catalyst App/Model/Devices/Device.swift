@@ -20,19 +20,20 @@ struct Device: Identifiable, Decodable {
         return false
     }
     
+    var hasReadSmsCapability: Bool {
+        return capabilities.contains("read_sms")
+    }
+    
+    var hasSendSmsCapability: Bool {
+        return capabilities.contains("send_sms")
+    }
+    
+    var hasReceiveSmsCapability: Bool {
+        return capabilities.contains("receive_sms")
+    }
+    
     var hasSmsCapability: Bool {
-        if (capabilities.contains("read_sms")) {
-            return true
-        }
-
-        if (capabilities.contains("receive_sms")) {
-            return true
-        }
-
-        if (capabilities.contains("send_sms")) {
-            return true
-        }
-        return false
+        return hasReadSmsCapability || hasSendSmsCapability || hasReceiveSmsCapability
     }
 }
 

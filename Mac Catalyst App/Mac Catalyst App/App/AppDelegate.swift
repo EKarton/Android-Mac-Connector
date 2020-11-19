@@ -13,27 +13,27 @@ import FirebaseAuth
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate {
     
+    let context: AppContext
     let mqtt: MqttAppDelegate
-    let auth: AuthAppDelegate
-    let device: DeviceAppDelegate
-    let sms: SmsAppDelegate
-    let ping: PingAppDelegate
+    let firebase: FirebaseAppDelegate
     
     override init() {
-        self.mqtt = MqttAppDelegate()
-        self.auth = AuthAppDelegate()
-        self.device = DeviceAppDelegate(mqtt)
-        self.sms = SmsAppDelegate(mqtt, device)
-        self.ping = PingAppDelegate(mqtt)
+        self.context = AppContext()
+        self.mqtt = MqttAppDelegate(
+            context.mqttClient,
+            context.mqttSubscriber,
+            context.mqttPublisher,
+            context.deviceWebService,
+            context.receivedPingService,
+            context.receivedSmsMessageService
+        )
+        self.firebase = FirebaseAppDelegate()
     }
     
     // Override point for customization after application launch.
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
-        return self.auth.application(application, didFinishLaunchingWithOptions: launchOptions)
+        return self.firebase.application(application, didFinishLaunchingWithOptions: launchOptions)
             && self.mqtt.application(application, didFinishLaunchingWithOptions: launchOptions)
-            && self.device.application(application, didFinishLaunchingWithOptions: launchOptions)
-            && self.sms.application(application, didFinishLaunchingWithOptions: launchOptions)
-            && self.ping.application(application, didFinishLaunchingWithOptions: launchOptions)
     }
 
     // Called when a new scene session is being created.

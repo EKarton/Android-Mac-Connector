@@ -21,7 +21,7 @@ struct DeviceActionsList: View {
             }
             
             if device.hasSmsCapability {
-                NavigationLink(destination: SmsThreadsList(device: device)) {
+                NavigationLink(destination: SmsThreadsView(device: device)) {
                     Text("Send / Read SMS")
                 }
             }

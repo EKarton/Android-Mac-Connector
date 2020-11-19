@@ -28,6 +28,7 @@ class MQTTService: Service() {
      * This is called once
      */
     override fun onCreate() {
+        Log.d(LOG_TAG, "onCreate()")
         super.onCreate()
 
         val deviceId = getDeviceIdSafely(this) ?: return
@@ -60,6 +61,8 @@ class MQTTService: Service() {
                 sendBroadcastIntent(PingDeviceReceiver::class.java, msg)
             }
         }
+
+        Log.d(LOG_TAG, "onCreate() finished")
     }
 
     private fun getServerUrl(): String {
@@ -100,6 +103,10 @@ class MQTTService: Service() {
         applicationContext.sendBroadcast(intent)
     }
 
+    /**
+     * This is called when calling startService()
+     * Note: this may get called more than once
+     */
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         Log.d(LOG_TAG, "onStartCommand() with action ${intent?.action} and topic ${intent?.getStringExtra("topic")}")
 
