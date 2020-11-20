@@ -8,7 +8,7 @@ import androidx.appcompat.app.AppCompatActivity
 import com.androidmacconnector.androidapp.auth.SessionStoreImpl
 import com.androidmacconnector.androidapp.auth.SignInActivity
 import com.androidmacconnector.androidapp.databinding.ActivitySettingsBinding
-import com.androidmacconnector.androidapp.devices.AddDeviceActivity
+import com.androidmacconnector.androidapp.devices.RegisterDeviceActivity
 import com.androidmacconnector.androidapp.devices.DeviceRegistrationService
 import com.androidmacconnector.androidapp.devices.DeviceWebServiceImpl
 import com.androidmacconnector.androidapp.mqtt.MQTTService
@@ -69,7 +69,7 @@ class SettingsActivity : AppCompatActivity() {
 
                 // If it is unregistered, then register the device
                 if (deviceId.isNullOrBlank()) {
-                    startActivity(Intent(this, AddDeviceActivity::class.java))
+                    startActivity(Intent(this, RegisterDeviceActivity::class.java))
                     return@getDeviceId
                 }
 

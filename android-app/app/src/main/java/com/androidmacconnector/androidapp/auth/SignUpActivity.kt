@@ -9,7 +9,7 @@ import androidx.databinding.DataBindingUtil
 import com.androidmacconnector.androidapp.MainActivity
 import com.androidmacconnector.androidapp.R
 import com.androidmacconnector.androidapp.databinding.ActivitySignUpBinding
-import com.androidmacconnector.androidapp.devices.AddDeviceActivity
+import com.androidmacconnector.androidapp.devices.RegisterDeviceActivity
 import com.androidmacconnector.androidapp.mqtt.MQTTService
 import com.google.firebase.auth.FirebaseAuth
 
@@ -65,7 +65,7 @@ class SignUpActivity : AppCompatActivity() {
             }
 
             startActivity(Intent(this, MainActivity::class.java))
-            startActivity(Intent(this, AddDeviceActivity::class.java))
+            startActivity(Intent(this, RegisterDeviceActivity::class.java))
             finish()
         }
     }

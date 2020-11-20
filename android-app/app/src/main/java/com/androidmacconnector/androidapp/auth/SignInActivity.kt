@@ -9,7 +9,7 @@ import androidx.databinding.DataBindingUtil
 import com.androidmacconnector.androidapp.MainActivity
 import com.androidmacconnector.androidapp.R
 import com.androidmacconnector.androidapp.databinding.ActivitySignInBinding
-import com.androidmacconnector.androidapp.devices.AddDeviceActivity
+import com.androidmacconnector.androidapp.devices.RegisterDeviceActivity
 import com.androidmacconnector.androidapp.devices.DeviceRegistrationService
 import com.androidmacconnector.androidapp.devices.DeviceWebServiceImpl
 import com.androidmacconnector.androidapp.mqtt.MQTTService
@@ -82,7 +82,7 @@ class SignInActivity : AppCompatActivity() {
             startActivity(Intent(this, MainActivity::class.java))
 
             if (deviceId.isNullOrBlank()) {
-                startActivity(Intent(this, AddDeviceActivity::class.java))
+                startActivity(Intent(this, RegisterDeviceActivity::class.java))
             }
 
             finish()

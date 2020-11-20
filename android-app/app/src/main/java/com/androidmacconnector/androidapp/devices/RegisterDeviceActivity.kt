@@ -25,11 +25,11 @@ import com.karumi.dexter.listener.multi.MultiplePermissionsListener
 /**
  * This activity is about registering this device to the server
  */
-class AddDeviceActivity : AppCompatActivity() {
+class RegisterDeviceActivity : AppCompatActivity() {
     private lateinit var deviceRegistrationService: DeviceRegistrationService
 
     companion object {
-        private const val LOG_TAG = "AddDeviceActivity"
+        private const val LOG_TAG = "RegDeviceActivity"
         private val PERMISSIONS_TO_CAPABILITIES = mapOf(
             Manifest.permission.RECEIVE_SMS to "receive_sms",
             Manifest.permission.READ_SMS to "read_sms",
@@ -40,7 +40,7 @@ class AddDeviceActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_add_device)
+        setContentView(R.layout.activity_register_device)
 
         val sessionStore = SessionStoreImpl(FirebaseAuth.getInstance())
         val deviceWebService = DeviceWebServiceImpl(this)

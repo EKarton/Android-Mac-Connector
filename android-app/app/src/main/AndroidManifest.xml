@@ -25,7 +25,7 @@
             </intent-filter>
         </activity>
         <activity android:name=".auth.SignInActivity" />
-        <activity android:name=".devices.AddDeviceActivity" />
+        <activity android:name=".devices.RegisterDeviceActivity" />
         <activity android:name=".auth.SignUpActivity" />
         <activity android:name=".devices.DeviceDetailsActivity" />
         <activity android:name=".settings.SettingsActivity" />
