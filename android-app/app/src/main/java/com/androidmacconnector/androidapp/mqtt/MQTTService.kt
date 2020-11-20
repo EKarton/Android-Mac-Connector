@@ -143,7 +143,7 @@ class MQTTService: Service() {
         super.onDestroy()
         Log.d(LOG_TAG, "onDestroy()")
 
-        this.client.disconnect(null)
+        this.client.disconnect()
     }
 
     override fun onBind(intent: Intent?): IBinder? {

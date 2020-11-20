@@ -57,24 +57,24 @@ export class MqttAppBuilder {
     const mqttServerOpts: AedesOptions = {
       authenticate: (client: Client, username: string, password: Buffer, done: (error: AuthenticateError | null, success: boolean | null) => void) => {
         if (!(this.opts?.verifyAuthentication)) {
-          console.log(`${client.id} authenticated? true`)
+          console.log(`${client.id}: Authenticated? true`)
           done(null, true)
           return
         }
         
         if (password.length == 0 || username.length == 0) {
-          console.log(`${client.id} authenticated? false`)
+          console.log(`${client.id}: Authenticated? false`)
           done(null, false)
           return
         }
 
         this.authenticator.authenticate(client.id, username, password.toString())
           .then((isAuthenticated: boolean) => {
-            console.log(`${client.id} authenticated? ${isAuthenticated}`)
+            console.log(`${client.id}: Authenticated? ${isAuthenticated}`)
             done(null, isAuthenticated)
           })
           .catch((err: Error) => {
-            console.log(`${client.id} Authenticated? false`)
+            console.log(`${client.id}: Authenticated? false`)
             const wrappedError: AuthenticateError = {
               returnCode: 4,
               ...err,
@@ -84,36 +84,36 @@ export class MqttAppBuilder {
       },
       authorizePublish: (client: Client, packet: PublishPacket, callback: (error?: Error | null) => void) => {
         if (!(this.opts?.verifyAuthorization)) {
-          console.log(`Authorize ${client.id} publish to ${packet.topic}? true`)
+          console.log(`${client.id}: Authorize publish to ${packet.topic}? true`)
           callback(null)
           return
         }
 
         this.authorizer.isPublishAuthorized(packet.topic, client.id)
           .then((isAuthorized: boolean) => {
-            console.log(`Authorize ${client.id} publish to ${packet.topic}? ${isAuthorized}`)
+            console.log(`${client.id}: Authorize publish to ${packet.topic}? ${isAuthorized}`)
             isAuthorized ? callback(null) : callback(new Error('Unauthorized'))
           })
           .catch((err: Error) => {
-            console.log(`Authorize ${client.id} publish to ${packet.topic}? false`)
+            console.log(`${client.id}: Authorize publish to ${packet.topic}? false`)
             console.error(err)
             callback(err)
           })
       },
       authorizeSubscribe: (client: Client, subscription: Subscription, callback: (error: Error | null, subscription?: Subscription | null) => void) => {
         if (!(this.opts.verifyAuthorization)) {
-          console.log(`Authorize ${client.id} subscribe? true`)
+          console.log(`${client.id}: Authorize subscribe? true`)
           callback(null, subscription)
           return
         }
         
         this.authorizer.isSubscriptionAuthorized(subscription.topic, client.id)
           .then((isAuthorized: boolean) => {
-            console.log(`Authorize ${client.id} subscribe? ${isAuthorized}`)
+            console.log(`${client.id}: Authorize subscribe? ${isAuthorized}`)
             isAuthorized ? callback(null, subscription) : callback(new Error('Unauthorized'), null)
           })
           .catch((err: Error) => {
-            console.log(`Authorize ${client.id} subscribe? false`)
+            console.log(`${client.id}: Authorize subscribe? false`)
             console.error(err)
             callback(err, null)
           })
@@ -124,7 +124,7 @@ export class MqttAppBuilder {
 
   private attachHooksToMqttApp(mqttServer: Aedes) {
     mqttServer.on("publish", async (packet: AedesPublishPacket, client: Client) => {
-      console.log(`Publish from ${client ? client.id : "null"}: ${packet.topic} | ${packet.dup} | ${packet.qos}`)
+      console.log(`${client ? client.id : "null"}: Publish to ${packet.topic} | ${packet.dup} | ${packet.qos}`)
 
       let topicParts = packet.topic.split('/')
       if (topicParts.length == 0) {

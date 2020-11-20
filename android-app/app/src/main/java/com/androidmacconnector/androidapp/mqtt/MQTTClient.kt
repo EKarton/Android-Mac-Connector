@@ -96,17 +96,8 @@ class MQTTClient(url: String, clientId: String): MqttCallbackExtended {
         this.client.publish(topic, payload.toByteArray(), qos, retained, null, listener)
     }
 
-    fun disconnect(callback: ((Throwable?) -> Unit)?) {
-        val listener = object: IMqttActionListener {
-            override fun onSuccess(asyncActionToken: IMqttToken?) {
-                callback?.invoke(null)
-            }
-
-            override fun onFailure(asyncActionToken: IMqttToken?, exception: Throwable?) {
-                callback?.invoke(exception)
-            }
-        }
-        this.client.disconnect(null, listener)
+    fun disconnect() {
+        this.client.disconnect(null, null).waitForCompletion()
     }
 
     override fun connectionLost(cause: Throwable?) {

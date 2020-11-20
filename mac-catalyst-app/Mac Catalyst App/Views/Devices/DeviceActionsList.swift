@@ -26,7 +26,7 @@ struct DeviceActionsList: View {
                 }
             }
         }
-        .navigationBarTitle("\(self.device.name)", displayMode: .inline)
+        .navigationBarTitle("\(self.device.name) | \(self.device.id)", displayMode: .inline)
     }
     
     private func pingDevice() {

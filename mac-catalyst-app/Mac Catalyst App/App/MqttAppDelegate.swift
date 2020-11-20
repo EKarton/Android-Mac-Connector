@@ -8,6 +8,7 @@
 
 import SwiftUI
 import FirebaseAuth
+import BackgroundTasks
 
 class MqttAppDelegate: NSObject, UIApplicationDelegate {
     
@@ -17,7 +18,7 @@ class MqttAppDelegate: NSObject, UIApplicationDelegate {
     let deviceWebService: DeviceWebService
     let incomingPingHandler: IncomingPingHandler
     let incomingSmsHandler: IncomingSmsHandler
-    
+        
     init(
         _ mqttClient: MQTTClient,
         _ mqttSubscriber: MQTTSubscriptionClient,
@@ -36,9 +37,38 @@ class MqttAppDelegate: NSObject, UIApplicationDelegate {
     
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         self.startService()
+        
+        // Perform background fetch every 30 seconds
+        UIApplication.shared.setMinimumBackgroundFetchInterval(30)
+        
         return true
     }
     
+    // MARK: Background fetching
+    func application(_ application: UIApplication, performFetchWithCompletionHandler completionHandler: @escaping (UIBackgroundFetchResult) -> Void) {
+        let newData = false
+        let oldListener = self.mqttClient.mqttDidReceiveMessageListener
+        self.mqttClient.mqttDidReceiveMessageListener = MQTTDidReceiveMessageListener({ (mqtt, msg, id) in
+            oldListener?.handler?(mqtt, msg, id)
+        })
+        
+        self.startService()
+        
+        let seconds = 10.0
+        DispatchQueue.main.asyncAfter(deadline: .now() + seconds) {
+            self.mqttClient.mqttDidReceiveMessageListener = oldListener
+            
+            print("Done background fetching")
+            
+            if newData {
+                completionHandler(.newData)
+            } else {
+                completionHandler(.noData)
+            }
+        }
+    }
+    
+    // MARK: Start Service functions
     private func startService() {
         self.askNotificationPermission()
         
@@ -67,9 +97,9 @@ class MqttAppDelegate: NSObject, UIApplicationDelegate {
     private func askNotificationPermission() {
         UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .badge, .sound]) { (granted, error) in
             if granted {
-                print("allowed")
+                print("Notifications allowed")
             } else {
-                print("denied")
+                print("Notifications denied")
             }
         }
     }

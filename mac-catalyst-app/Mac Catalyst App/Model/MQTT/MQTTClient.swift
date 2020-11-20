@@ -84,6 +84,7 @@ class MQTTClient: CocoaMQTTDelegate {
         self.mqtt.willMessage = CocoaMQTTMessage(topic: "/will", string: "dieout")
         self.mqtt.keepAlive = 60
         self.mqtt.autoReconnect = true
+        self.mqtt.autoReconnectTimeInterval = 300
         self.mqtt.delegate = self
     }
     
