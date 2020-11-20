@@ -2,13 +2,19 @@ package com.androidmacconnector.androidapp.sms.receiver
 
 import android.Manifest
 import android.annotation.TargetApi
-import android.content.*
+import android.content.BroadcastReceiver
+import android.content.Context
+import android.content.Intent
 import android.os.Build
 import android.telephony.SmsMessage
 import android.util.Log
+import com.androidmacconnector.androidapp.auth.SessionStoreImpl
+import com.androidmacconnector.androidapp.devices.DeviceRegistrationService
+import com.androidmacconnector.androidapp.devices.DeviceWebServiceImpl
 import com.androidmacconnector.androidapp.mqtt.MQTTService
 import com.androidmacconnector.androidapp.mqtt.MQTTService.Companion.PUBLISH_INTENT_ACTION
-import com.androidmacconnector.androidapp.utils.getDeviceId
+import com.androidmacconnector.androidapp.sms.messages.ReadSmsMessagesReceiver
+import com.google.firebase.auth.FirebaseAuth
 import org.json.JSONObject
 
 /**
@@ -28,6 +34,11 @@ class ReceivedSmsReceiver : BroadcastReceiver() {
     @TargetApi(Build.VERSION_CODES.M)
     override fun onReceive(context: Context, intent: Intent) {
 
+        // Set up the services
+        val sessionStore = SessionStoreImpl(FirebaseAuth.getInstance())
+        val deviceWebService = DeviceWebServiceImpl(context)
+        val deviceRegistrationService = DeviceRegistrationService(context, sessionStore, deviceWebService)
+
         // Get the SMS message.
         val bundle = intent.extras
         val format = bundle!!.getString("format")
@@ -41,18 +52,7 @@ class ReceivedSmsReceiver : BroadcastReceiver() {
 
                 Log.d(LOG_TAG, "Received SMS message: $smsMessage")
 
-                val payload = JSONObject()
-                payload.put("phone_number", smsMessage.displayOriginatingAddress)
-                payload.put("body", smsMessage.messageBody)
-                payload.put("timestamp", (smsMessage.timestampMillis / 1000).toInt())
-
-                // Submit a job to our MQTT service with details for publishing
-                val startIntent = Intent(context, MQTTService::class.java)
-                startIntent.action = PUBLISH_INTENT_ACTION
-                startIntent.putExtra("topic", "${getDeviceId(context)}/$NEW_MESSAGES_TOPIC")
-                startIntent.putExtra("payload", payload.toString())
-
-                context.startService(startIntent)
+                publishResults(deviceRegistrationService, context, smsMessage)
             }
         }
     }
@@ -63,6 +63,33 @@ class ReceivedSmsReceiver : BroadcastReceiver() {
             return SmsMessage.createFromPdu(pdu, format)
         } else {
             return SmsMessage.createFromPdu(pdu)
+        }
+    }
+
+    private fun publishResults(service: DeviceRegistrationService, context: Context, smsMessage: SmsMessage) {
+        service.getDeviceId { deviceId, err ->
+            if (err != null) {
+                Log.d(ReadSmsMessagesReceiver.LOG_TAG, "Error getting device id: $err")
+                return@getDeviceId
+            }
+
+            if (deviceId.isNullOrBlank()) {
+                Log.d(ReadSmsMessagesReceiver.LOG_TAG, "Device is not registered")
+                return@getDeviceId
+            }
+
+            val payload = JSONObject()
+            payload.put("phone_number", smsMessage.displayOriginatingAddress)
+            payload.put("body", smsMessage.messageBody)
+            payload.put("timestamp", (smsMessage.timestampMillis / 1000).toInt())
+
+            // Submit a job to our MQTT service with details for publishing
+            val startIntent = Intent(context, MQTTService::class.java)
+            startIntent.action = PUBLISH_INTENT_ACTION
+            startIntent.putExtra("topic", "${deviceId}/$NEW_MESSAGES_TOPIC")
+            startIntent.putExtra("payload", payload.toString())
+
+            context.startService(startIntent)
         }
     }
 }

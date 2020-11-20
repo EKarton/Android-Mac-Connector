@@ -17,10 +17,10 @@ import com.androidmacconnector.androidapp.auth.SignInActivity
 import com.androidmacconnector.androidapp.databinding.ActivityMainBinding
 import com.androidmacconnector.androidapp.devices.DeviceActionsFragment
 import com.androidmacconnector.androidapp.devices.DeviceListFragment
-import com.androidmacconnector.androidapp.devices.DeviceWebService
+import com.androidmacconnector.androidapp.devices.DeviceRegistrationService
+import com.androidmacconnector.androidapp.devices.DeviceWebServiceImpl
 import com.androidmacconnector.androidapp.mqtt.MQTTService
 import com.androidmacconnector.androidapp.settings.SettingsActivity
-import com.androidmacconnector.androidapp.utils.getDeviceIdSafely
 import com.google.android.gms.common.GoogleApiAvailability
 import com.google.android.gms.tasks.OnCompleteListener
 import com.google.android.material.tabs.TabLayout
@@ -31,6 +31,8 @@ import com.google.firebase.messaging.FirebaseMessaging
 class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
     private lateinit var sessionStore: SessionStoreImpl
+    private lateinit var deviceService: DeviceWebServiceImpl
+    private lateinit var deviceRegistrationService: DeviceRegistrationService
 
     companion object {
         private const val LOG_TAG = "MainActivity"
@@ -44,6 +46,8 @@ class MainActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         sessionStore = SessionStoreImpl(FirebaseAuth.getInstance())
+        deviceService = DeviceWebServiceImpl(this)
+        deviceRegistrationService = DeviceRegistrationService(this, sessionStore, deviceService)
 
         if (!sessionStore.isSignedIn()) {
             val intent = Intent(this, SignInActivity::class.java)
@@ -143,17 +147,22 @@ class MainActivity : AppCompatActivity() {
             val token = task.result!!
 
             // Get the device id
-            val deviceId = getDeviceIdSafely(this) ?: return@OnCompleteListener
-            sessionStore.getAuthToken { authToken, err ->
-                if (err != null) {
-                    Log.d(LOG_TAG, "Error getting auth token: $err")
-                    return@getAuthToken
+            deviceRegistrationService.getDeviceId { deviceId, err ->
+                if (err != null || deviceId.isNullOrBlank()) {
+                    Log.d(LOG_TAG, "Error getting device id: $err")
+                    return@getDeviceId
                 }
 
-                val deviceService = DeviceWebService(this)
-                deviceService.updatePushNotificationToken(authToken, deviceId, token) { err2 ->
-                    err2?.let {
-                        Log.d(LOG_TAG, "Failed to update push notification: $it")
+                sessionStore.getAuthToken { authToken, err2 ->
+                    if (err2 != null || authToken.isBlank()) {
+                        Log.d(LOG_TAG, "Error getting auth token: $err")
+                        return@getAuthToken
+                    }
+
+                    deviceService.updatePushNotificationToken(authToken, deviceId, token) { err3 ->
+                        if (err3 != null) {
+                            Log.d(LOG_TAG, "Failed to update push notification: $err3")
+                        }
                     }
                 }
             }

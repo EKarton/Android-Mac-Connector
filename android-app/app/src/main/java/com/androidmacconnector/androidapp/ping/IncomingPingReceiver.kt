@@ -5,7 +5,7 @@ import android.content.Context
 import android.content.Intent
 import android.util.Log
 
-class PingDeviceReceiver : BroadcastReceiver() {
+class IncomingPingReceiver : BroadcastReceiver() {
 
     companion object {
         const val LOG_TAG = "PingDeviceReceiver"

@@ -18,8 +18,12 @@ interface SessionStore {
 class SessionStoreImpl(private val firebaseAuth: FirebaseAuth): SessionStore {
     override fun getAuthToken(handler: (String, Exception?) -> Unit) {
         val user = firebaseAuth.currentUser
-        user?.getIdToken(false)?.addOnCompleteListener { task ->
+        if (user == null) {
+            handler("", null)
+            return
+        }
 
+        user.getIdToken(false).addOnCompleteListener { task ->
             if (task.exception != null) {
                 handler("", task.exception)
                 return@addOnCompleteListener

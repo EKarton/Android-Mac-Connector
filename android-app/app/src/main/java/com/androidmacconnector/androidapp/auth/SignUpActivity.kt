@@ -10,6 +10,7 @@ import com.androidmacconnector.androidapp.MainActivity
 import com.androidmacconnector.androidapp.R
 import com.androidmacconnector.androidapp.databinding.ActivitySignUpBinding
 import com.androidmacconnector.androidapp.devices.AddDeviceActivity
+import com.androidmacconnector.androidapp.mqtt.MQTTService
 import com.google.firebase.auth.FirebaseAuth
 
 class SignUpActivity : AppCompatActivity() {
@@ -56,6 +57,11 @@ class SignUpActivity : AppCompatActivity() {
                 Log.d(LOG_TAG, "Error trying to sign up: $err")
                 binding.errorMessage = err.localizedMessage
                 return@signUp
+            }
+
+            Intent(this, MQTTService::class.java).also {
+                stopService(it)
+                startService(it)
             }
 
             startActivity(Intent(this, MainActivity::class.java))

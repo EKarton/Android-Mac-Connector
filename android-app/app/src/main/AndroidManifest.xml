@@ -61,7 +61,7 @@
         <service android:name=".mqtt.MQTTService" />
 
         <receiver
-            android:name=".ping.PingDeviceReceiver"
+            android:name=".ping.IncomingPingReceiver"
             android:enabled="true"
             android:exported="true" />
         <receiver

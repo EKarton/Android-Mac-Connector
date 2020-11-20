@@ -46,7 +46,7 @@ data class Device(
 /**
  * An interface for device management
  */
-interface DeviceService {
+interface DeviceWebService {
     fun isDeviceRegistered(authToken: String, deviceType: String, hardwareId: String, handler: (Boolean, String, Throwable?) -> Unit)
     fun registerDevice(authToken: String, deviceType: String, hardwareId: String, capabilities: List<String>, handler: (String?, Throwable?) -> Unit)
     fun unregisterDevice(authToken: String, deviceId: String, handler: (Throwable?) -> Unit)
@@ -57,7 +57,7 @@ interface DeviceService {
 /**
  * A class used to make REST calls to the server for managing devices
  */
-class DeviceWebService(private val context: Context): DeviceService {
+class DeviceWebServiceImpl(private val context: Context): DeviceWebService {
     companion object {
         private const val LOG_TAG = "DeviceWebService"
         private const val IS_DEVICE_REGISTERED_PATH = "/api/v1/devices/registered"

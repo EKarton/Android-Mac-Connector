@@ -6,7 +6,6 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import com.androidmacconnector.androidapp.R
 import com.androidmacconnector.androidapp.auth.SessionStoreImpl
@@ -26,29 +25,7 @@ class DeviceActionsFragment : Fragment() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
-        val context = this.requireContext()
-
-        SessionStoreImpl(FirebaseAuth.getInstance()).getAuthToken { authToken, err ->
-            if (err != null) {
-                Log.d(LOG_TAG, "Error when getting auth token: $err")
-                return@getAuthToken
-            }
-
-            DeviceWebService(context).getDevices(authToken) { newDevices, err2 ->
-                if (err2 != null) {
-                    Log.d(LOG_TAG, "Error when getting devices: $err2")
-                    return@getDevices
-                }
-
-                val pingableDevices = newDevices.filter { device ->
-                    device.canPingDevice()
-                }
-
-                devices = newDevices
-                dataBindings?.hasPingableDevice = pingableDevices.count() > 0
-            }
-        }
+        setupList()
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
@@ -65,6 +42,34 @@ class DeviceActionsFragment : Fragment() {
         }
 
         return view
+    }
+
+    override fun onResume() {
+        super.onResume()
+        setupList()
+    }
+
+    private fun setupList() {
+        SessionStoreImpl(FirebaseAuth.getInstance()).getAuthToken { authToken, err ->
+            if (err != null) {
+                Log.d(LOG_TAG, "Error when getting auth token: $err")
+                return@getAuthToken
+            }
+
+            DeviceWebServiceImpl(this.requireContext()).getDevices(authToken) { newDevices, err2 ->
+                if (err2 != null) {
+                    Log.d(LOG_TAG, "Error when getting devices: $err2")
+                    return@getDevices
+                }
+
+                val pingableDevices = newDevices.filter { device ->
+                    device.canPingDevice()
+                }
+
+                devices = newDevices
+                dataBindings?.hasPingableDevice = pingableDevices.count() > 0
+            }
+        }
     }
 
     private fun showPingDeviceDialog() {

@@ -9,14 +9,15 @@ import com.androidmacconnector.androidapp.auth.SessionStoreImpl
 import com.androidmacconnector.androidapp.auth.SignInActivity
 import com.androidmacconnector.androidapp.databinding.ActivitySettingsBinding
 import com.androidmacconnector.androidapp.devices.AddDeviceActivity
-import com.androidmacconnector.androidapp.devices.DeviceWebService
-import com.androidmacconnector.androidapp.utils.getDeviceIdSafely
-import com.androidmacconnector.androidapp.utils.removeDeviceId
+import com.androidmacconnector.androidapp.devices.DeviceRegistrationService
+import com.androidmacconnector.androidapp.devices.DeviceWebServiceImpl
+import com.androidmacconnector.androidapp.mqtt.MQTTService
 import com.google.firebase.auth.FirebaseAuth
 
 class SettingsActivity : AppCompatActivity() {
     private lateinit var sessionStore: SessionStoreImpl
-    private lateinit var deviceService: DeviceWebService
+    private lateinit var deviceService: DeviceWebServiceImpl
+    private lateinit var deviceRegistrationService: DeviceRegistrationService
     private lateinit var binding: ActivitySettingsBinding
 
     companion object {
@@ -30,7 +31,8 @@ class SettingsActivity : AppCompatActivity() {
 
         // Set up the services
         sessionStore = SessionStoreImpl(FirebaseAuth.getInstance())
-        deviceService = DeviceWebService(this)
+        deviceService = DeviceWebServiceImpl(this)
+        deviceRegistrationService = DeviceRegistrationService(this, sessionStore, deviceService)
 
         setupBackButton()
         setupSettingsContent()
@@ -43,7 +45,14 @@ class SettingsActivity : AppCompatActivity() {
     }
 
     private fun setupSettingsContent() {
-        binding.isRegistered = isDeviceRegistered()
+        deviceRegistrationService.getDeviceId { deviceId, err ->
+            if (err != null) {
+                Log.d(LOG_TAG, "Error getting device id while checking if device is registered or not")
+                return@getDeviceId
+            }
+
+            binding.isRegistered = !deviceId.isNullOrBlank()
+        }
 
         sessionStore.getUserDetails().let { user ->
             binding.accountName = user?.email
@@ -52,54 +61,41 @@ class SettingsActivity : AppCompatActivity() {
 
     private fun setupButtonListeners() {
         binding.addRemoveDeviceBttn.setOnClickListener { view ->
-            if (isDeviceRegistered()) {
-                removeDevice()
-            } else {
-                registerDevice()
-            }
-        }
-
-        binding.signOutButton.setOnClickListener { view -> signOut() }
-    }
-
-    private fun isDeviceRegistered(): Boolean {
-        return getDeviceIdSafely(this) != null
-    }
-
-    private fun registerDevice() {
-        startActivity(Intent(this, AddDeviceActivity::class.java))
-    }
-
-    private fun removeDevice() {
-        sessionStore.getAuthToken { authToken, err1 ->
-            if (err1 != null) {
-                Log.d(LOG_TAG, "Error getting auth token: $err1")
-                Toast.makeText(this, "Error unregistering device", Toast.LENGTH_LONG).show()
-                return@getAuthToken
-            }
-
-            val deviceId = getDeviceIdSafely(this) ?: throw IllegalStateException("Device id should be present here")
-            deviceService.unregisterDevice(authToken, deviceId) { err2 ->
-                if (err2 != null) {
-                    Log.d(LOG_TAG, "Error unregistering device: $err2")
-                    Toast.makeText(this, "Error unregistering device", Toast.LENGTH_LONG).show()
-                    return@unregisterDevice
+            deviceRegistrationService.getDeviceId { deviceId, err ->
+                if (err != null) {
+                    Log.d(LOG_TAG, "Error getting device id while checking if device is registered or not")
+                    return@getDeviceId
                 }
 
-                Log.d(LOG_TAG, "Successfully unregistered device")
+                // If it is unregistered, then register the device
+                if (deviceId.isNullOrBlank()) {
+                    startActivity(Intent(this, AddDeviceActivity::class.java))
+                    return@getDeviceId
+                }
 
-                binding.isRegistered = false
-                removeDeviceId(this)
+                deviceRegistrationService.unregisterDevice { err2 ->
+                    if (err2 != null) {
+                        Log.d(LOG_TAG, "Error getting device id while unregistering")
+                        return@unregisterDevice
+                    }
+
+                    stopService(Intent(this, MQTTService::class.java))
+
+                    binding.isRegistered = false
+
+                    Toast.makeText(this, "Device is unregistered", Toast.LENGTH_LONG).show()
+                }
             }
         }
-    }
 
-    private fun signOut() {
-        sessionStore.signOut()
+        binding.signOutButton.setOnClickListener { view ->
+            sessionStore.signOut()
+            stopService(Intent(this, MQTTService::class.java))
 
-        // Go to the sign in page
-        startActivity(Intent(this, SignInActivity::class.java))
-        finishAffinity()
+            // Go to the sign in page
+            startActivity(Intent(this, SignInActivity::class.java))
+            finishAffinity()
+        }
     }
 
     /**

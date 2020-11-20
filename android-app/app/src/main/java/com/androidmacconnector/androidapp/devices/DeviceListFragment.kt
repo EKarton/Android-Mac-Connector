@@ -8,7 +8,6 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
-import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -43,7 +42,7 @@ class DeviceListFragment: Fragment() {
                 return@getAuthToken
             }
 
-            DeviceWebService(context).getDevices(authToken) { newDevices, err2 ->
+            DeviceWebServiceImpl(context).getDevices(authToken) { newDevices, err2 ->
                 if (err2 != null) {
                     Log.d(LOG_TAG, "Error when getting devices: $err2")
                     return@getDevices

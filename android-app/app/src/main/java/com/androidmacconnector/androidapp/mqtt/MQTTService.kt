@@ -6,18 +6,21 @@ import android.net.Uri
 import android.os.IBinder
 import android.util.Log
 import com.androidmacconnector.androidapp.R
-import com.androidmacconnector.androidapp.ping.PingDeviceReceiver
+import com.androidmacconnector.androidapp.auth.SessionStoreImpl
+import com.androidmacconnector.androidapp.devices.DeviceRegistrationService
+import com.androidmacconnector.androidapp.devices.DeviceWebServiceImpl
+import com.androidmacconnector.androidapp.ping.IncomingPingReceiver
 import com.androidmacconnector.androidapp.sms.messages.ReadSmsMessagesReceiver
 import com.androidmacconnector.androidapp.sms.sender.SendSmsReceiver
 import com.androidmacconnector.androidapp.sms.threads.ReadSmsThreadsReceiver
-import com.androidmacconnector.androidapp.utils.getDeviceIdSafely
 import com.google.firebase.auth.FirebaseAuth
 import org.eclipse.paho.client.mqttv3.MqttMessage
 import java.util.concurrent.CountDownLatch
+import java.util.concurrent.TimeUnit
 
 
 class MQTTService: Service() {
-    private lateinit var client: MQTTClient
+    private var client: MQTTClient? = null
 
     companion object {
         private const val LOG_TAG = "MqttClientService"
@@ -31,48 +34,50 @@ class MQTTService: Service() {
         Log.d(LOG_TAG, "onCreate()")
         super.onCreate()
 
-        val deviceId = getDeviceIdSafely(this)
-        if (deviceId.isNullOrBlank()) {
-            Log.d(LOG_TAG, "Cannot find device id")
-            return
-        }
-
-        val accessToken = getAccessToken()
-        if (accessToken.isNullOrBlank()) {
-            Log.d(LOG_TAG, "Cannot find access token")
-            return
-        }
-
-        this.client = MQTTClient(getServerUrl(), deviceId)
-        this.client.setUsername(deviceId)
-        this.client.setPassword(accessToken)
-        this.client.connect()
-
-        this.client.subscribe("$deviceId/${SendSmsReceiver.REQUESTS_TOPIC}", 2) { msg, err ->
-            if (msg != null && err == null) {
-                sendBroadcastIntent(SendSmsReceiver::class.java, msg)
-            }
-        }
-
-        this.client.subscribe("$deviceId/${ReadSmsThreadsReceiver.REQUESTS_TOPIC}", 2) { msg, err ->
-            if (msg != null && err == null) {
-                sendBroadcastIntent(ReadSmsThreadsReceiver::class.java, msg)
-            }
-        }
-
-        this.client.subscribe("$deviceId/${ReadSmsMessagesReceiver.REQUESTS_TOPIC}", 2) { msg, err ->
-            if (msg != null && err == null) {
-                sendBroadcastIntent(ReadSmsMessagesReceiver::class.java, msg)
-            }
-        }
-
-        this.client.subscribe("$deviceId/${PingDeviceReceiver.REQUESTS_TOPIC}", 2) { msg, err ->
-            if (msg != null && err == null) {
-                sendBroadcastIntent(PingDeviceReceiver::class.java, msg)
-            }
-        }
+        initializeMqttClient()
 
         Log.d(LOG_TAG, "onCreate() finished: ${this.client}")
+    }
+
+    private fun initializeMqttClient() {
+        val sessionStore = SessionStoreImpl(FirebaseAuth.getInstance())
+        val deviceWebService = DeviceWebServiceImpl(this)
+        val deviceRegistrationService = DeviceRegistrationService(this, sessionStore, deviceWebService)
+
+        val authToken = getAccessToken()
+
+        var deviceId: String? = null
+        val deviceIdLatch = CountDownLatch(1)
+        deviceRegistrationService.getDeviceId { fetchedDeviceId, err2 ->
+            if (err2 != null) {
+                Log.d(LOG_TAG, "Cannot get device id: $err2")
+            } else {
+                deviceId = fetchedDeviceId
+            }
+
+            deviceIdLatch.countDown()
+        }
+
+        deviceIdLatch.await(2, TimeUnit.SECONDS)
+
+        if (!authToken.isNullOrBlank() && !deviceId.isNullOrBlank()) {
+            this.client = MQTTClient(getServerUrl(), deviceId!!)
+            this.client?.setUsername(deviceId!!)
+            this.client?.setPassword(authToken!!)
+            this.client?.connect()
+            initializeMqttSubscriptions(deviceId!!)
+        }
+    }
+
+    private fun getAccessToken(): String? {
+        val latch = CountDownLatch(1)
+        val tokenResult = FirebaseAuth.getInstance().currentUser?.getIdToken(false)?.addOnCompleteListener { _ ->
+            latch.countDown()
+        }
+        if (tokenResult != null && tokenResult.isSuccessful && tokenResult.result?.token != null) {
+            return tokenResult.result?.token!!
+        }
+        return null
     }
 
     private fun getServerUrl(): String {
@@ -91,15 +96,30 @@ class MQTTService: Service() {
         return this.applicationContext.getString(R.string.mqtt_authority)
     }
 
-    private fun getAccessToken(): String? {
-        val latch = CountDownLatch(1)
-        val tokenResult = FirebaseAuth.getInstance().currentUser?.getIdToken(false)?.addOnCompleteListener { _ ->
-            latch.countDown()
+    private fun initializeMqttSubscriptions(deviceId: String) {
+        this.client?.subscribe("$deviceId/${SendSmsReceiver.REQUESTS_TOPIC}", 2) { msg, err ->
+            if (msg != null && err == null) {
+                sendBroadcastIntent(SendSmsReceiver::class.java, msg)
+            }
         }
-        if (tokenResult != null && tokenResult.isSuccessful && tokenResult.result?.token != null) {
-            return tokenResult.result?.token!!
+
+        this.client?.subscribe("$deviceId/${ReadSmsThreadsReceiver.REQUESTS_TOPIC}", 2) { msg, err ->
+            if (msg != null && err == null) {
+                sendBroadcastIntent(ReadSmsThreadsReceiver::class.java, msg)
+            }
         }
-        return null
+
+        this.client?.subscribe("$deviceId/${ReadSmsMessagesReceiver.REQUESTS_TOPIC}", 2) { msg, err ->
+            if (msg != null && err == null) {
+                sendBroadcastIntent(ReadSmsMessagesReceiver::class.java, msg)
+            }
+        }
+
+        this.client?.subscribe("$deviceId/${IncomingPingReceiver.REQUESTS_TOPIC}", 2) { msg, err ->
+            if (msg != null && err == null) {
+                sendBroadcastIntent(IncomingPingReceiver::class.java, msg)
+            }
+        }
     }
 
     private fun sendBroadcastIntent(cls: Class<*>, message: MqttMessage) {
@@ -126,10 +146,10 @@ class MQTTService: Service() {
 
         val topic = intent.getStringExtra("topic") ?: return START_STICKY
 
-        if (intent.action == PUBLISH_INTENT_ACTION) {
+        if (intent.action == PUBLISH_INTENT_ACTION && this.client != null) {
             intent.getStringExtra("payload")?.let { payload ->
                 Log.d(LOG_TAG, "Publishing to topic $topic with payload $payload")
-                this.client.publish(topic, payload, 2, true, null)
+                this.client?.publish(topic, payload, 2, true, null)
             }
         }
 
@@ -143,7 +163,7 @@ class MQTTService: Service() {
         super.onDestroy()
         Log.d(LOG_TAG, "onDestroy()")
 
-        this.client.disconnect()
+        this.client?.disconnect()
     }
 
     override fun onBind(intent: Intent?): IBinder? {

@@ -4,20 +4,17 @@ import android.Manifest
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Bundle
-import android.provider.Settings
 import android.util.Log
 import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import com.androidmacconnector.androidapp.MainActivity
 import com.androidmacconnector.androidapp.R
 import com.androidmacconnector.androidapp.auth.SessionStoreImpl
-import com.androidmacconnector.androidapp.ping.PingDeviceServiceImpl
+import com.androidmacconnector.androidapp.mqtt.MQTTService
 import com.androidmacconnector.androidapp.sms.messages.ReadSmsMessagesReceiver
 import com.androidmacconnector.androidapp.sms.receiver.ReceivedSmsReceiver
 import com.androidmacconnector.androidapp.sms.sender.SendSmsReceiver
 import com.androidmacconnector.androidapp.sms.threads.ReadSmsThreadsReceiver
-import com.androidmacconnector.androidapp.utils.saveDeviceId
 import com.google.firebase.auth.FirebaseAuth
 import com.karumi.dexter.Dexter
 import com.karumi.dexter.MultiplePermissionsReport
@@ -29,8 +26,7 @@ import com.karumi.dexter.listener.multi.MultiplePermissionsListener
  * This activity is about registering this device to the server
  */
 class AddDeviceActivity : AppCompatActivity() {
-    private lateinit var sessionStore: SessionStoreImpl
-    private lateinit var deviceService: DeviceWebService
+    private lateinit var deviceRegistrationService: DeviceRegistrationService
 
     companion object {
         private const val LOG_TAG = "AddDeviceActivity"
@@ -46,8 +42,9 @@ class AddDeviceActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_add_device)
 
-        sessionStore = SessionStoreImpl(FirebaseAuth.getInstance())
-        deviceService = DeviceWebService(this)
+        val sessionStore = SessionStoreImpl(FirebaseAuth.getInstance())
+        val deviceWebService = DeviceWebServiceImpl(this)
+        deviceRegistrationService = DeviceRegistrationService(this, sessionStore, deviceWebService)
     }
 
     /** Called when the user clicks on the Register Device button **/
@@ -88,32 +85,18 @@ class AddDeviceActivity : AppCompatActivity() {
     private fun onPermissionsGrantedHandler(report: MultiplePermissionsReport) {
         val capabilities = getCapabilities(report)
 
-        // Get the hardware id
-        val hardwareId = Settings.Secure.getString(this.contentResolver, Settings.Secure.ANDROID_ID)
-
-        // Get the access token
-        val context = this
-        sessionStore.getAuthToken { authToken, err ->
+        deviceRegistrationService.registerDevice(capabilities) { err ->
             if (err != null) {
-                Log.d(LOG_TAG, "Error getting auth token: $err")
-                return@getAuthToken
+                Toast.makeText(this, "Failed to register device", Toast.LENGTH_LONG).show()
+                return@registerDevice
             }
 
-            deviceService.registerDevice(authToken, "android_phone", hardwareId, capabilities) { deviceId, err ->
-                if (err != null) {
-                    Log.d(LOG_TAG, "Failed to register device, $err")
-                    return@registerDevice
-                }
-
-                if (deviceId.isNullOrBlank()) {
-                    Log.d(LOG_TAG, "Device ID is blank")
-                    return@registerDevice
-                }
-
-                Toast.makeText(this.applicationContext, "Successfully added device", Toast.LENGTH_LONG).show()
-                saveDeviceId(context, deviceId)
-                finish()
+            Toast.makeText(this, "Successfully registered device", Toast.LENGTH_LONG).show()
+            Intent(this, MQTTService::class.java).also {
+                stopService(it)
+                startService(it)
             }
+            finish()
         }
     }
 

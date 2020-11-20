@@ -3,6 +3,7 @@ package com.androidmacconnector.androidapp.utils
 import android.content.Context
 import com.androidmacconnector.androidapp.R
 
+@Deprecated("This is dangerous", ReplaceWith("getDeviceIdSafely(context: Context)"), DeprecationLevel.WARNING)
 fun saveDeviceId(context: Context, deviceId: String) {
     val fileName = context.getString(R.string.app_data_file_key)
     val sharedPreferences = context.getSharedPreferences(fileName, Context.MODE_PRIVATE)
@@ -14,6 +15,7 @@ fun saveDeviceId(context: Context, deviceId: String) {
     }
 }
 
+@Deprecated("This is dangerous", ReplaceWith("getDeviceIdSafely(context: Context)"), DeprecationLevel.WARNING)
 fun removeDeviceId(context: Context) {
     val fileName = context.getString(R.string.app_data_file_key)
     val sharedPreferences = context.getSharedPreferences(fileName, Context.MODE_PRIVATE)
@@ -25,6 +27,7 @@ fun removeDeviceId(context: Context) {
     }
 }
 
+@Deprecated("This is dangerous", ReplaceWith("getDeviceIdSafely(context: Context)"), DeprecationLevel.WARNING)
 fun getDeviceIdSafely(context: Context): String? {
     val fileName = context.getString(R.string.app_data_file_key)
     val sharedPreferences = context.getSharedPreferences(fileName, Context.MODE_PRIVATE)

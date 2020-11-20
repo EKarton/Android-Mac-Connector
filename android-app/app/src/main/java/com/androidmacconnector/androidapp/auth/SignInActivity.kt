@@ -2,7 +2,6 @@ package com.androidmacconnector.androidapp.auth
 
 import android.content.Intent
 import android.os.Bundle
-import android.provider.Settings
 import android.util.Log
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
@@ -11,14 +10,15 @@ import com.androidmacconnector.androidapp.MainActivity
 import com.androidmacconnector.androidapp.R
 import com.androidmacconnector.androidapp.databinding.ActivitySignInBinding
 import com.androidmacconnector.androidapp.devices.AddDeviceActivity
-import com.androidmacconnector.androidapp.devices.DeviceWebService
-import com.androidmacconnector.androidapp.utils.saveDeviceId
+import com.androidmacconnector.androidapp.devices.DeviceRegistrationService
+import com.androidmacconnector.androidapp.devices.DeviceWebServiceImpl
+import com.androidmacconnector.androidapp.mqtt.MQTTService
 import com.google.firebase.auth.FirebaseAuth
 
 class SignInActivity : AppCompatActivity() {
     private lateinit var binding: ActivitySignInBinding
     private lateinit var sessionStore: SessionStoreImpl
-    private lateinit var deviceService: DeviceWebService
+    private lateinit var deviceRegistrationService: DeviceRegistrationService
 
     companion object {
         private const val LOG_TAG = "SignInActivity"
@@ -28,8 +28,9 @@ class SignInActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = DataBindingUtil.setContentView(this, R.layout.activity_sign_in)
 
+        val deviceService = DeviceWebServiceImpl(this)
         sessionStore = SessionStoreImpl(FirebaseAuth.getInstance())
-        deviceService = DeviceWebService(this)
+        deviceRegistrationService = DeviceRegistrationService(this, sessionStore, deviceService)
     }
 
     /** Called when the user clicks on the Create Account button **/
@@ -67,33 +68,24 @@ class SignInActivity : AppCompatActivity() {
     }
 
     private fun handleOnSigninSuccessful() {
-        val hardwareId = Settings.Secure.getString(this.contentResolver, Settings.Secure.ANDROID_ID);
-
-        sessionStore.getAuthToken { authToken, err ->
+        deviceRegistrationService.getDeviceId { deviceId, err ->
             if (err != null) {
-                Log.d(LOG_TAG, "Failed to get auth token: $err")
-                binding.errorMessage = "Error 1 - Please try again"
-                return@getAuthToken
+                Log.d(LOG_TAG, "Error checking if it is registered or not: $err")
+                return@getDeviceId
             }
 
-            deviceService.isDeviceRegistered(authToken, "android_phone", hardwareId) { isRegistered, deviceId, err2 ->
-                if (err2 != null) {
-                    Log.d(LOG_TAG, "Failed to check if device is registered: $err2")
-                    binding.errorMessage = "Error 3 - Please try again"
-                    return@isDeviceRegistered
-                }
-
-                startActivity(Intent(this, MainActivity::class.java))
-
-                if (isRegistered) {
-                    saveDeviceId(this.applicationContext, deviceId)
-
-                } else {
-                    startActivity(Intent(this, AddDeviceActivity::class.java))
-                }
-
-                finish()
+            Intent(this, MQTTService::class.java).also {
+                stopService(it)
+                startService(it)
             }
+
+            startActivity(Intent(this, MainActivity::class.java))
+
+            if (deviceId.isNullOrBlank()) {
+                startActivity(Intent(this, AddDeviceActivity::class.java))
+            }
+
+            finish()
         }
     }
 }
