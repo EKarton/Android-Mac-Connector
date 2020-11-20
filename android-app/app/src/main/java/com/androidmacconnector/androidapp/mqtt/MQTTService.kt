@@ -31,8 +31,18 @@ class MQTTService: Service() {
         Log.d(LOG_TAG, "onCreate()")
         super.onCreate()
 
-        val deviceId = getDeviceIdSafely(this) ?: return
-        val accessToken = getAccessToken() ?: return
+        val deviceId = getDeviceIdSafely(this)
+        if (deviceId.isNullOrBlank()) {
+            Log.d(LOG_TAG, "Cannot find device id")
+            return
+        }
+
+        val accessToken = getAccessToken()
+        if (accessToken.isNullOrBlank()) {
+            Log.d(LOG_TAG, "Cannot find access token")
+            return
+        }
+
         this.client = MQTTClient(getServerUrl(), deviceId)
         this.client.setUsername(deviceId)
         this.client.setPassword(accessToken)

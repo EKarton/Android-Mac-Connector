@@ -47,7 +47,7 @@ class FcmService : FirebaseMessagingService() {
     }
 
     override fun onMessageReceived(remoteMessage: RemoteMessage) {
-        Log.d(LOG_TAG, "Received new message: $remoteMessage")
+        Log.d(LOG_TAG, "Received new message: ${remoteMessage.originalPriority} ${remoteMessage.priority}")
 
         // It doesn't do much except for waking up the MQTT Service
         Intent(this, MQTTService::class.java).also {

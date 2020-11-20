@@ -127,10 +127,9 @@ class MqttAppDelegate: NSObject, UIApplicationDelegate {
         
         if device.hasReceiveSmsCapability {
             let topic = "\(device.id)/sms/new-messages"
-            
-            self.subscribeToTopic(topic)
             let subscriber = MQTTSubscriber(topic)
             subscriber.setHandler { (msg: String?, err: Error?) in
+                print("Received incoming sms message")
                 guard let msg = msg else {
                     return
                 }
@@ -145,6 +144,8 @@ class MqttAppDelegate: NSObject, UIApplicationDelegate {
                 
                 self.incomingSmsHandler.dispatchNotification(msgStruct, device)
             }
+            self.mqttSubscriber.addSubscriberHandle(subscriber)
+            self.subscribeToTopic(topic)
         }
         
         if device.hasSendSmsCapability {
