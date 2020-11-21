@@ -63,7 +63,7 @@ class MQTTService: Service() {
         if (!authToken.isNullOrBlank() && !deviceId.isNullOrBlank()) {
             this.client = MQTTClient(getServerUrl(), deviceId!!)
             this.client?.setUsername(deviceId!!)
-            this.client?.setPassword(authToken!!)
+            this.client?.setPassword(authToken)
             this.client?.connect()
             initializeMqttSubscriptions(deviceId!!)
         }

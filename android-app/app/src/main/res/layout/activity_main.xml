@@ -33,11 +33,10 @@
                         android:layout_width="match_parent"
                         android:layout_height="?attr/actionBarSize"
                         android:background="?android:attr/colorBackground"
-                        app:navigationIcon="@drawable/ic_menu_24"
-                        app:titleTextColor="?attr/colorPrimaryVariant"
                         app:layout_scrollFlags="scroll|enterAlways|snap"
                         app:title="Actions"
-                        style="@style/Widget.MaterialComponents.Toolbar.Surface" />
+                        app:titleTextColor="?attr/colorPrimaryVariant"
+                        style="@style/NavAppBar" />
 
                 </com.google.android.material.appbar.AppBarLayout>
 
