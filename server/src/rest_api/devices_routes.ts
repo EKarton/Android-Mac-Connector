@@ -1,4 +1,5 @@
 import { Router } from "express";
+import asyncHandler from "express-async-handler"
 import { Authenticator } from "../services/authenticator";
 import { createAuthenticateMiddleware } from "./middlewares";
 import { DeviceService } from "../services/device_service";
@@ -9,7 +10,7 @@ export const createDeviceRouter = (authenticator: Authenticator, deviceService: 
   // Middleware to authenticate user
   router.use(createAuthenticateMiddleware(authenticator))
 
-  router.get("/registered", async (req, res) => {
+  router.get("/registered", asyncHandler(async (req, res) => {
     const userId = req.header("user_id")
     const deviceType = req.query.device_type.toString()
     const hardwareId = req.query.hardware_id.toString()
@@ -21,9 +22,9 @@ export const createDeviceRouter = (authenticator: Authenticator, deviceService: 
       "is_registered": result.length > 0,
       "device_id": result
     })
-  });
+  }));
 
-  router.post("/register", async (req, res) => {
+  router.post("/register", asyncHandler(async (req, res) => {
     const userId = req.header("user_id")
     const deviceType = req.body["device_type"]
     const hardwareId = req.body["hardware_id"]
@@ -36,9 +37,9 @@ export const createDeviceRouter = (authenticator: Authenticator, deviceService: 
     res.status(200).json({
       "device_id": deviceId
     })
-  });
+  }));
 
-  router.get("/", async (req, res) => {
+  router.get("/", asyncHandler(async (req, res) => {
     const userId = req.header("user_id")
 
     const devices = await deviceService.getDevices(userId)
@@ -47,9 +48,9 @@ export const createDeviceRouter = (authenticator: Authenticator, deviceService: 
     res.status(200).json({
       "devices": devices
     })
-  })
+  }))
 
-  router.delete("/:deviceId", async (req, res) => {
+  router.delete("/:deviceId", asyncHandler(async (req, res) => {
     const deviceId = req.params.deviceId
 
     await deviceService.removeDevice(deviceId)
@@ -58,9 +59,9 @@ export const createDeviceRouter = (authenticator: Authenticator, deviceService: 
     res.status(200).json({
       "status": "success"
     })
-  });
+  }));
 
-  router.get("/:deviceId/capabilities", async (req, res) => {
+  router.get("/:deviceId/capabilities", asyncHandler(async (req, res) => {
     const deviceId = req.params.deviceId
     const capabilities = await deviceService.getDeviceCapabilities(deviceId)
     
@@ -68,9 +69,9 @@ export const createDeviceRouter = (authenticator: Authenticator, deviceService: 
     res.status(200).json({
       "capabilities": capabilities
     })
-  });
+  }));
 
-  router.put("/:deviceId/capabilities", async (req, res) => {
+  router.put("/:deviceId/capabilities", asyncHandler(async (req, res) => {
     const deviceId = req.params.deviceId
     const newCapabilities = req.body["new_capabilities"]
 
@@ -80,9 +81,9 @@ export const createDeviceRouter = (authenticator: Authenticator, deviceService: 
     res.status(200).json({
       "status": "success"
     })
-  });
+  }));
 
-  router.put("/:deviceId/token", async (req, res) => {
+  router.put("/:deviceId/token", asyncHandler(async (req, res) => {
     const deviceId = req.params.deviceId
     const newToken = req.body["new_token"]
 
@@ -92,7 +93,7 @@ export const createDeviceRouter = (authenticator: Authenticator, deviceService: 
     res.status(200).json({
       "status": "success"
     })
-  });
+  }));
 
   return router
 }

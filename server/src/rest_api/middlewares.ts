@@ -1,3 +1,4 @@
+import asyncHandler from "express-async-handler"
 import { Authenticator } from "../services/authenticator";
 
 export class HttpError extends Error {
@@ -34,7 +35,7 @@ export function handleErrorsMiddleware(err: Error, res) {
 }
 
 export function createAuthenticateMiddleware(authService: Authenticator) {
-  return async (req, res, next) => {
+  return asyncHandler(async (req, res, next) => {
     try {
       const authHeaderValue = req.header("Authorization")
 
@@ -58,5 +59,5 @@ export function createAuthenticateMiddleware(authService: Authenticator) {
     } catch (error) {
       next(new HttpError(401, "InvalidAuthorization", error.message))
     }
-  }
+  })
 }

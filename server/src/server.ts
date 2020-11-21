@@ -2,12 +2,12 @@ import cluster from 'cluster'
 import admin from 'firebase-admin';
 import { createServer } from 'http';
 import process from 'process'
-import { MqttAppBuilder } from './lib/mqtt/mqtt_app_builder';
-import { RestApiAppBuilder } from './lib/rest_api/rest_api_app_builder';
-import { FirebaseAuthenticator } from './lib/services/authenticator';
-import { FirebaseUserBasedAuthorizer } from './lib/services/authorizer';
-import { AndroidDeviceNotifier } from './lib/services/device_notifier';
-import { FirebaseDeviceService } from './lib/services/device_service';
+import { MqttAppBuilder } from './mqtt/mqtt_app_builder';
+import { RestApiAppBuilder } from './rest_api/rest_api_app_builder';
+import { FirebaseAuthenticator } from './services/authenticator';
+import { FirebaseUserBasedAuthorizer } from './services/authorizer';
+import { AndroidDeviceNotifier } from './services/device_notifier';
+import { FirebaseDeviceService } from './services/device_service';
 
 let numRetries = 10
 
