@@ -71,6 +71,7 @@ class SignInActivity : AppCompatActivity() {
         deviceRegistrationService.getDeviceId { deviceId, err ->
             if (err != null) {
                 Log.d(LOG_TAG, "Error checking if it is registered or not: $err")
+                binding.errorMessage = "Error: $err"
                 return@getDeviceId
             }
 

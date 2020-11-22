@@ -71,18 +71,21 @@ struct SettingsView: View {
                 self.isDeviceRegistrationLoading = false
                 return
             }
+            
+            print("Successfully unregistered device")
             self.refreshDevices()
         }
     }
     
     private func registerDevice() {
-        let authToken = sessionStore.currentSession.accessToken
-        deviceViewModel.registerDevice(authToken) { err in
+        deviceViewModel.registerDevice() { err in
             if let err = err {
                 print("Error when registering device: \(err.localizedDescription)")
                 self.isDeviceRegistrationLoading = false
                 return
             }
+            
+            print("Successfully registered device")
             self.refreshDevices()
         }
     }

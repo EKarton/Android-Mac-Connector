@@ -14,14 +14,15 @@ struct SmsMessagesView: View {
     var contactName: String
     var phoneNumber: String
     
-    @EnvironmentObject var viewModel: SmsMessageViewModel
+    @ObservedObject private var viewModel: SmsMessageViewModel
     @State private var messageToSend: String = ""
         
-    init(device: Device, threadId: String, contactName: String, phoneNumber: String) {
+    init(device: Device, threadId: String, contactName: String, phoneNumber: String, viewModel: SmsMessageViewModel) {
         self.device = device
         self.threadId = threadId
         self.contactName = contactName
         self.phoneNumber = phoneNumber
+        self.viewModel = viewModel
         
         // Remove separator lines from List
         UITableView.appearance().separatorStyle = .none
@@ -33,10 +34,11 @@ struct SmsMessagesView: View {
             VStack {
                 List {
                     // Note: the contents here are in reversed order
-                    ForEach(self.viewModel.messagesInFlight, id: \.self) { (sendingMsg: String) in
+                    ForEach(self.viewModel.messagesInFlight, id: \.self) { (msgInFlight: SmsMessagesInFlight) in
                         SmsMessageRow(
                             isCurrentUser: true,
-                            message: sendingMsg
+                            message: msgInFlight.body,
+                            isInFlight: true
                         )
                     }
                     .scaleEffect(x: 1, y: -1, anchor: .center)
@@ -44,7 +46,8 @@ struct SmsMessagesView: View {
                     ForEach(self.viewModel.messages, id: \.messageId) { (message: SmsMessage) in
                         SmsMessageRow(
                             isCurrentUser: message.isCurrentUser,
-                            message: message.body
+                            message: message.body,
+                            isInFlight: false
                         )
                     }
                     .scaleEffect(x: 1, y: -1, anchor: .center)
@@ -76,11 +79,30 @@ struct SmsMessagesView: View {
                 Image(systemName: "arrow.clockwise")
             }
         )
-        .onAppear(perform: self.refreshMessages)
+        .onAppear(perform: self.onAppear)
+        .onDisappear(perform: self.onDisappear)
+    }
+    
+    func onAppear() {
+        self.viewModel.subscribeToSmsMessages() {
+            self.viewModel.fetchMessages()
+        }
+        self.viewModel.subscribeToSentSmsResults {}
+        self.viewModel.listenToIncomingSms()
+    }
+    
+    func onDisappear() {
+        self.viewModel.unsubscribeToSmsMessages() {}
+        self.viewModel.unsubscribeFromSentSmsResults {}
+        self.viewModel.removeListeningFromIncomingSms()
+    }
+    
+    func refreshMessages() {
+        self.viewModel.fetchMessages()
     }
     
     func onSendSmsButtonClickHandler() {
-        viewModel.sendMessage(device, phoneNumber, messageToSend) { err in
+        viewModel.sendMessage(phoneNumber, messageToSend) { err in
             if let err = err {
                 print("Error when sending message: \(err)")
                 return
@@ -88,20 +110,5 @@ struct SmsMessagesView: View {
         }
         self.messageToSend = ""
     }
-    
-    func refreshMessages() {
-        viewModel.fetchMessages(device, threadId, 10000, 0) { err in
-            if let err = err {
-                print("Error while fetching messages: \(err)")
-            }
-        }
-    }
 }
 
-#if DEBUG
-struct SmsMessagesView_Previews: PreviewProvider {
-    static var previews: some View {
-        SmsMessagesView(device: devicesList[0], threadId: "1", contactName: "Bob Smith", phoneNumber: "123-456-7890")
-    }
-}
-#endif

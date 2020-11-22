@@ -84,7 +84,7 @@ class MQTTClient: CocoaMQTTDelegate {
         self.mqtt.willMessage = CocoaMQTTMessage(topic: "/will", string: "dieout")
         self.mqtt.keepAlive = 60
         self.mqtt.autoReconnect = true
-        self.mqtt.autoReconnectTimeInterval = 300
+        self.mqtt.maxAutoReconnectTimeInterval = 300 // 5 min
         self.mqtt.delegate = self
     }
     
@@ -109,8 +109,12 @@ class MQTTClient: CocoaMQTTDelegate {
     }
     
     internal func mqtt(_ mqtt: CocoaMQTT, didConnectAck ack: CocoaMQTTConnAck) {
-        print("didConnectAck")
+        print("didConnectAck: \(ack)")
         self.mqttDidConnectAckListener?.handler?(mqtt, ack)
+        
+        if !(ack == .accept) {
+            mqtt.disconnect()
+        }
     }
     
     internal func mqtt(_ mqtt: CocoaMQTT, didPublishMessage message: CocoaMQTTMessage, id: UInt16) {
@@ -151,5 +155,6 @@ class MQTTClient: CocoaMQTTDelegate {
     internal func mqttDidDisconnect(_ mqtt: CocoaMQTT, withError err: Error?) {
         print("mqttDidDisconnect: \(err?.localizedDescription ?? "")")
         self.mqttDidDisconnectListener?.handler?(mqtt, err)
+        self.connect()
     }
 }

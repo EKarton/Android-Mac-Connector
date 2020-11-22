@@ -14,7 +14,7 @@ enum MQTTClientErrors: Error {
     case SubscriptionClosed(topic: String)
 }
 
-class MQTTSubscriber: Hashable {
+class MQTTSubscriptionListener: Hashable {
     var id = UUID()
     var topic: String
     var handler: ((String?, Error?) -> Void)? = nil
@@ -31,7 +31,7 @@ class MQTTSubscriber: Hashable {
         hasher.combine(self.id)
     }
     
-    static func == (lhs: MQTTSubscriber, rhs: MQTTSubscriber) -> Bool {
+    static func == (lhs: MQTTSubscriptionListener, rhs: MQTTSubscriptionListener) -> Bool {
         return lhs.id == rhs.id
     }
 }
@@ -71,7 +71,7 @@ class MQTTSubscriptionClient: ObservableObject {
     private var topicToUnsubscribeCallbacks = Dictionary<String, Set<MQTTEventHandler>>()
     
     // Contains a map of topics to subscribers
-    private var topicToSubscribers = Dictionary<String, Set<MQTTSubscriber>>()
+    private var topicToSubscribers = Dictionary<String, Set<MQTTSubscriptionListener>>()
     
     private var client: MQTTClient
     
@@ -102,16 +102,20 @@ class MQTTSubscriptionClient: ObservableObject {
         client.mqtt.subscribe(topic, qos: .qos2)
     }
     
-    func addSubscriberHandle(_ subscriber: MQTTSubscriber) {
+    func addSubscriptionListener(_ subscriber: MQTTSubscriptionListener) {
         let topic = subscriber.topic
         
         if topicToSubscribers[topic] == nil {
-            topicToSubscribers[topic] = Set<MQTTSubscriber>()
+            topicToSubscribers[topic] = Set<MQTTSubscriptionListener>()
         }
         topicToSubscribers[topic]?.insert(subscriber)
     }
     
-    func removeSubscriberHandle(_ subscriber: MQTTSubscriber) {
+    func getNumSubscriptionListeners(_ topic: String) -> Int {
+        return topicToSubscribers[topic]?.count ?? 0
+    }
+    
+    func removeSubscriptionListener(_ subscriber: MQTTSubscriptionListener) {
         let topic = subscriber.topic
         
         topicToSubscribers[topic]?.remove(subscriber)

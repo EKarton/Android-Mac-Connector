@@ -23,7 +23,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             context.mqttClient,
             context.mqttSubscriber,
             context.mqttPublisher,
+            context.sessionStore,
             context.deviceWebService,
+            context.deviceRegistrationService,
             context.receivedPingService,
             context.receivedSmsMessageService
         )
@@ -76,12 +78,14 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     // You only have 5 seconds to run this method or else the OS will terminate it
     func applicationDidEnterBackground(_ application: UIApplication) {
         print("applicationDidEnterBackground")
+        self.mqtt.applicationDidEnterBackground(application)
     }
     
     // Called when your app is going to terminate
     // You only have 5 seconds to clean your app or the OS will terminate it
     func applicationWillTerminate(_ application: UIApplication) {
         print("applicationWillTerminate")
+        self.mqtt.applicationWillTerminate(application)
     }
 }
 

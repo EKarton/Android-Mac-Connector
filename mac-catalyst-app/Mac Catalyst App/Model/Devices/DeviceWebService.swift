@@ -8,6 +8,16 @@
 
 import SwiftUI
 
+enum DeviceServiceError: Error {
+    case UnexpectedStatusCode(statusCode: Int)
+    case UnexpectedError(errorMsg: String)
+    case UnexpectedError(error: Error)
+}
+
+struct Devices: Decodable {
+    var devices: [Device]
+}
+
 struct IsDeviceRegistered2xxResponse: Decodable {
     var isRegistered: Bool
     var deviceId: String?

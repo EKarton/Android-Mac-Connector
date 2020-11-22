@@ -31,6 +31,7 @@ class MQTTClient(url: String, clientId: String): MqttCallbackExtended {
         // Set up the connection options
         this.connectOptions = MqttConnectOptions()
         connectOptions.isCleanSession = false
+        connectOptions.maxInflight = 100
         connectOptions.isAutomaticReconnect = true
     }
 

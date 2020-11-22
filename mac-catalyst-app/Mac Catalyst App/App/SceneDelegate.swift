@@ -26,15 +26,16 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
                 .environmentObject(ContentViewModel())
                 .environmentObject(appDelegate.context.sessionStore)
                 .environmentObject(DeviceViewModel(
-                    appDelegate.context.deviceWebService
+                    appDelegate.context.deviceWebService,
+                    appDelegate.context.deviceRegistrationService
                 ))
                 .environmentObject(appDelegate.context.pingDeviceService)
-                .environmentObject(SmsMessageViewModel(
-                    appDelegate.context.getSmsMessageService,
-                    appDelegate.context.smsSenderService
+                .environmentObject(SmsMessageViewModelFactory(
+                    appDelegate.context.mqttSubscriber,
+                    appDelegate.context.mqttPublisher
                 ))
                 .environmentObject(SmsThreadsViewModel(
-                    appDelegate.context.getSmsThreadsService
+                    appDelegate.context.mqttSubscriber, appDelegate.context.mqttPublisher
                 ))
             
             let window = UIWindow(windowScene: windowScene)

@@ -10,10 +10,11 @@ import SwiftUI
 
 struct SmsThreadsView: View {
     @EnvironmentObject var viewModel: SmsThreadsViewModel
-    
-    var device: Device
+    @EnvironmentObject var viewModelFactory: SmsMessageViewModelFactory
     @State private var showingNewSmsMessageSheet = false
     
+    var device: Device
+            
     var body: some View {
         VStack {
             List(self.viewModel.threads, id: \.threadId) { (thread: SmsThread) in
@@ -21,7 +22,8 @@ struct SmsThreadsView: View {
                         device: self.device,
                         threadId: thread.threadId,
                         contactName: thread.contactName ?? thread.phoneNumber,
-                        phoneNumber: thread.phoneNumber
+                        phoneNumber: thread.phoneNumber,
+                        viewModel: self.viewModelFactory.createViewModel(self.device, thread.threadId, thread.phoneNumber)
                 )) {
                     SmsThreadsRow(
                         image: Image(systemName: "cloud.heavyrain.fill"),
@@ -34,23 +36,35 @@ struct SmsThreadsView: View {
             .id(UUID())
         }
         .onAppear(perform: self.onAppear)
+        .onDisappear(perform: self.onDisappear)
+        .navigationBarTitle("SMS via \(device.name)", displayMode: .inline)
+        .navigationBarItems(trailing:
+            HStack {
+                Button(action: self.onRefreshButtonClicked) {
+                    Image(systemName: "arrow.clockwise")
+                }
+                Button(action: self.onCreateNewMessageButtonClicked) {
+                    Image(systemName: "square.and.pencil")
+                }
+            }
+        )
         .sheet(isPresented: $showingNewSmsMessageSheet) {
             NewSmsMessageView()
         }
-        .navigationBarTitle("SMS via \(device.name)", displayMode: .inline)
-        .navigationBarItems(trailing:
-            Button(action: self.onCreateNewMessageButtonClicked) {
-                Image(systemName: "square.and.pencil")
-            }
-        )
     }
     
     private func onAppear() {
-        self.viewModel.fetchThreads(self.device, 100000, 0) { err in
-            if let err = err {
-                print("Error when refreshing threads: \(err.localizedDescription)")
-            }
+        self.viewModel.subscribeToSmsThreads(device) {
+            self.viewModel.fetchThreads(self.device, 10000, 0)
         }
+    }
+    
+    private func onDisappear() {
+        self.viewModel.unsubscribeToSmsThreads(device)
+    }
+    
+    private func onRefreshButtonClicked() {
+        self.viewModel.fetchThreads(self.device, 10000, 0)
     }
     
     private func onCreateNewMessageButtonClicked() {

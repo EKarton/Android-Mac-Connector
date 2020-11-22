@@ -21,10 +21,7 @@ struct SmsMessageBubble: View {
     }
     
     var foregroundColor: Color {
-        if (isCurrentUser) {
-            return Color.white
-        }
-        return Color.black
+        return isCurrentUser ? Color.white : Color.black
     }
     
     var backgroundColor: Color {
@@ -36,9 +33,11 @@ struct SmsMessageBubble: View {
 struct SmsMessageBubble_Previews: PreviewProvider {
     static var previews: some View {
         Group {
-            SmsMessageBubble(isCurrentUser: false, message: "Hi there!").previewLayout(.fixed(width: 300, height: 100))
+            SmsMessageBubble(isCurrentUser: false, message: "Hi there!")
+                .previewLayout(.fixed(width: 300, height: 100))
             
-            SmsMessageBubble(isCurrentUser: true, message: "Hey! What's up?").previewLayout(.fixed(width: 300, height: 100))
+            SmsMessageBubble(isCurrentUser: true, message: "Hey! What's up?")
+                .previewLayout(.fixed(width: 300, height: 100))
         }
     }
 }

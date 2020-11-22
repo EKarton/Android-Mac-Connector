@@ -26,8 +26,13 @@ struct DevicesListView: View {
             }
             .navigationBarTitle(Text("Devices"), displayMode: .large)
             .navigationBarItems(trailing:
-                Button(action: self.onSettingsButtonClicked) {
-                    Image(systemName: "gear")
+                HStack {
+                    Button(action: self.onRefreshButtonClicked) {
+                        Image(systemName: "arrow.clockwise")
+                    }
+                    Button(action: self.onSettingsButtonClicked) {
+                        Image(systemName: "gear")
+                    }
                 }
             )
         }
@@ -36,6 +41,14 @@ struct DevicesListView: View {
     }
     
     private func onAppearHandler() {
+        self.deviceViewModel.fetchDevices(sessionStore.currentSession.accessToken) { err in
+            if let err = err {
+                print("Encountered error when fetching devices: \(err.localizedDescription)")
+            }
+        }
+    }
+    
+    private func onRefreshButtonClicked() {
         self.deviceViewModel.fetchDevices(sessionStore.currentSession.accessToken) { err in
             if let err = err {
                 print("Encountered error when fetching devices: \(err.localizedDescription)")

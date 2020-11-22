@@ -30,7 +30,6 @@ class GetSmsThreadsService: ObservableObject {
         self.mqttPublisher = mqttPublisher
         
         self.jsonDecoder.keyDecodingStrategy = .convertFromSnakeCase
-        
     }
     
     func fetchSmsThreads(_ device: Device, _ limit: Int, _ start: Int, _ handler: @escaping ([SmsThread], Error?) -> Void) {
@@ -39,18 +38,18 @@ class GetSmsThreadsService: ObservableObject {
         let jsonData = try! JSONEncoder().encode(publishPayload)
         let jsonString = String(data: jsonData, encoding: .utf8)!
         
-        let subscriber = MQTTSubscriber("\(device.id)/sms/threads/query-results")
+        let subscriber = MQTTSubscriptionListener("\(device.id)/sms/threads/query-results")
         subscriber.setHandler { (msg, err) in
             print("Got sms threads results")
             
             guard err == nil else {
-                self.mqttSubcription.removeSubscriberHandle(subscriber)
+                self.mqttSubcription.removeSubscriptionListener(subscriber)
                 handler([SmsThread](), err)
                 return
             }
             
             guard let msg = msg else {
-                self.mqttSubcription.removeSubscriberHandle(subscriber)
+                self.mqttSubcription.removeSubscriptionListener(subscriber)
                 handler([SmsThread](), nil)
                 return
             }
@@ -69,11 +68,11 @@ class GetSmsThreadsService: ObservableObject {
                 return
             }
             
-            self.mqttSubcription.removeSubscriberHandle(subscriber)
+            self.mqttSubcription.removeSubscriptionListener(subscriber)
             handler(payload.threads, nil)
         }
         
-        self.mqttSubcription.addSubscriberHandle(subscriber)
+        self.mqttSubcription.addSubscriptionListener(subscriber)
         self.mqttPublisher.publish(publishTopic, jsonString)
     }
 }

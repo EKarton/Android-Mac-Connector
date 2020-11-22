@@ -67,7 +67,7 @@ struct AddDeviceView: View {
         print("Register device button clicked")
         let authToken = sessionStore.currentSession.accessToken
         
-        deviceViewModel.registerDevice(authToken) { err1 in
+        deviceViewModel.registerDevice() { err1 in
             if let err1 = err1 {
                 self.error = err1.localizedDescription
                 return
@@ -93,6 +93,5 @@ struct AddDeviceView: View {
 struct AddDeviceView_Previews: PreviewProvider {
     static var previews: some View {
         AddDeviceView()
-            .environmentObject(DeviceViewModel(MockedDeviceWebService()))
     }
 }

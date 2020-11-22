@@ -17,9 +17,11 @@ class DeviceViewModel: ObservableObject {
     @Published var devices: [Device] = [Device]()
     
     private var webService: DeviceWebService
+    private var deviceRegistrationService: DeviceRegistrationService
     
-    init(_ webService: DeviceWebService) {
+    init(_ webService: DeviceWebService, _ deviceRegistrationService: DeviceRegistrationService) {
         self.webService = webService
+        self.deviceRegistrationService = deviceRegistrationService
     }
     
     func fetchDevices(_ authToken: String, handler: @escaping (Error?) -> Void) {
@@ -37,78 +39,44 @@ class DeviceViewModel: ObservableObject {
     }
     
     func checkIfCurrentDeviceIsRegistered(_ authToken: String, _ handler: @escaping (Error?) -> Void) {
-        print("Checking if current device is registered")
-        if let deviceId = UserDefaults.standard.string(forKey: "device_id") {
-            print("Device is already registered via cache: \(deviceId)")
-            self.deviceId = deviceId
-            self.isRegistered = true
-            handler(nil)
-            return
+        self.deviceRegistrationService.getDeviceId() { deviceId, err in
+            DispatchQueue.main.async {
+                self.isRegistered = err != nil
+                self.deviceId = self.isRegistered ? deviceId : nil
+                handler(err)
+            }
         }
-        
-        let hardwareId = UIDevice.current.identifierForVendor!.uuidString
-        self.webService.isDeviceRegistered(authToken, "macbook", hardwareId) { (isRegistered, deviceId, err) in            
+    }
+    
+    func registerDevice(handler: @escaping (Error?) -> Void) {
+        self.deviceRegistrationService.registerDevice() { err in
             if let err = err {
                 handler(err)
                 return
             }
             
-            DispatchQueue.main.async {
-                self.isRegistered = isRegistered
-                self.deviceId = isRegistered ? deviceId : nil
-            }
-            
-            if isRegistered {
-                UserDefaults.standard.set(deviceId, forKey: "device_id")
-            }
-            handler(nil)
-        }
-    }
-    
-    func registerDevice(_ authToken: String, handler: @escaping (Error?) -> Void) {
-        let newDevice = RegisterDeviceRequest(
-            deviceType: "macbook",
-            hardwareId: UIDevice.current.identifierForVendor!.uuidString,
-            capabilities: ["ping_device"]
-        )
-        
-        self.webService.registerDevice(authToken, newDevice) { deviceId, err in
-            if let err = err {
-                handler(err)
-                return
-            }
-            
-            // Add it to the cache
-            UserDefaults.standard.set(deviceId, forKey: "device_id")
-            
-            DispatchQueue.main.async {
-                self.isRegistered = true
-                self.deviceId = deviceId
-                handler(nil)
-            }
-        }
-    }
-    
-    func unregisterDevice(_ authToken: String, handler: @escaping (Error?) -> Void) {
-        if let deviceId = self.deviceId {
-            self.webService.removeDevice(authToken, deviceId) { err in
+            self.deviceRegistrationService.getDeviceId() { deviceId, err in
                 if let err = err {
                     handler(err)
                     return
                 }
                 
-                // Remove it from the cache
-                UserDefaults.standard.removeObject(forKey: "device_id")
-                
                 DispatchQueue.main.async {
-                    self.isRegistered = false
-                    self.deviceId = nil
+                    self.isRegistered = true
+                    self.deviceId = deviceId
                     handler(nil)
                 }
             }
-            
-        } else {
-            handler(nil)
+        }
+    }
+    
+    func unregisterDevice(_ authToken: String, handler: @escaping (Error?) -> Void) {
+        self.deviceRegistrationService.unregisterDevice { err in
+            DispatchQueue.main.async {
+                self.isRegistered = false
+                self.deviceId = nil
+                handler(nil)
+            }
         }
     }
 }

@@ -6,31 +6,41 @@
 //  Copyright © 2020 Emilio Kartono. All rights reserved.
 //
 
+import os
 import SwiftUI
 import FirebaseAuth
 import BackgroundTasks
 
 class MqttAppDelegate: NSObject, UIApplicationDelegate {
+    private let mqttClient: MQTTClient
+    private let mqttSubscriber: MQTTSubscriptionClient
+    private let mqttPublisher: MQTTPublisherClient
     
-    let mqttClient: MQTTClient
-    let mqttSubscriber: MQTTSubscriptionClient
-    let mqttPublisher: MQTTPublisherClient
-    let deviceWebService: DeviceWebService
-    let incomingPingHandler: IncomingPingHandler
-    let incomingSmsHandler: IncomingSmsHandler
+    private let sessionStore: SessionStore
+    private let deviceWebService: DeviceWebService
+    private let deviceRegistrationService: DeviceRegistrationService
+    
+    private let incomingPingHandler: IncomingPingHandler
+    private let incomingSmsHandler: IncomingSmsHandler
         
     init(
         _ mqttClient: MQTTClient,
         _ mqttSubscriber: MQTTSubscriptionClient,
         _ mqttPublisher: MQTTPublisherClient,
+        _ sessionStore: SessionStore,
         _ deviceWebService: DeviceWebService,
+        _ deviceRegistrationService: DeviceRegistrationService,
         _ pingRequestHandler: IncomingPingHandler,
         _ incomingSmsHandler: IncomingSmsHandler
     ) {
         self.mqttClient = mqttClient
         self.mqttSubscriber = mqttSubscriber
         self.mqttPublisher = mqttPublisher
+        
+        self.sessionStore = sessionStore
         self.deviceWebService = deviceWebService
+        self.deviceRegistrationService = deviceRegistrationService
+        
         self.incomingPingHandler = pingRequestHandler
         self.incomingSmsHandler = incomingSmsHandler
     }
@@ -68,28 +78,36 @@ class MqttAppDelegate: NSObject, UIApplicationDelegate {
         }
     }
     
+    // MARK: This occurs when the application enters the background
+    // You only have 5 seconds to run this method or else the OS will terminate it
+    func applicationDidEnterBackground(_ application: UIApplication) {
+        self.stopService()
+    }
+    
+    func applicationWillTerminate(_ application: UIApplication) {
+        self.stopService()
+    }
+    
     // MARK: Start Service functions
     private func startService() {
         self.askNotificationPermission()
         
-        // Get the device ID from cache
-        let deviceId = UserDefaults.standard.string(forKey: "device_id") ?? "client"
-        
-        // Get the token immediately
-        Auth.auth().currentUser?.getIDToken { token, err in
-            guard let token = token else {
-                print("Token not found")
+        self.deviceRegistrationService.getDeviceId { deviceId, err in
+            if let err = err {
+                print("Error getting device id: \(err.localizedDescription)")
                 return
             }
             
-            guard err == nil else {
-                print("Encountered error: \(err.debugDescription)")
-                return
-            }
-            
-            self.connectMqtt(deviceId, token) {
-                self.subscribeToPingRequests(deviceId, token)
-                self.subscribeToDevices(token)
+            self.sessionStore.getAuthToken { authToken in
+                guard let authToken = authToken else {
+                    print("Error getting auth token")
+                    return
+                }
+                
+                self.connectMqtt(deviceId, authToken) {
+                    self.subscribeToPingRequests(deviceId, authToken)
+                    self.subscribeToDevices(authToken)
+                }
             }
         }
     }
@@ -125,7 +143,7 @@ class MqttAppDelegate: NSObject, UIApplicationDelegate {
             print("Successfully subscribed to \(topic)")
         }
         
-        let subscriber = MQTTSubscriber(topic)
+        let subscriber = MQTTSubscriptionListener(topic)
         subscriber.setHandler { (msg: String?, err: Error?) in
             guard err == nil else {
                 return
@@ -133,7 +151,7 @@ class MqttAppDelegate: NSObject, UIApplicationDelegate {
 
             self.incomingPingHandler.dispatchNotification()
         }
-        self.mqttSubscriber.addSubscriberHandle(subscriber)
+        self.mqttSubscriber.addSubscriptionListener(subscriber)
     }
     
     private func subscribeToDevices(_ authToken: String) {
@@ -150,14 +168,9 @@ class MqttAppDelegate: NSObject, UIApplicationDelegate {
     }
     
     private func subscribeToDevice(_ device: Device) {
-        if device.hasReadSmsCapability {
-            self.subscribeToTopic("\(device.id)/sms/messages/query-results")
-            self.subscribeToTopic("\(device.id)/sms/threads/query-results")
-        }
-        
         if device.hasReceiveSmsCapability {
             let topic = "\(device.id)/sms/new-messages"
-            let subscriber = MQTTSubscriber(topic)
+            let subscriber = MQTTSubscriptionListener(topic)
             subscriber.setHandler { (msg: String?, err: Error?) in
                 print("Received incoming sms message")
                 guard let msg = msg else {
@@ -174,12 +187,8 @@ class MqttAppDelegate: NSObject, UIApplicationDelegate {
                 
                 self.incomingSmsHandler.dispatchNotification(msgStruct, device)
             }
-            self.mqttSubscriber.addSubscriberHandle(subscriber)
+            self.mqttSubscriber.addSubscriptionListener(subscriber)
             self.subscribeToTopic(topic)
-        }
-        
-        if device.hasSendSmsCapability {
-            self.subscribeToTopic("\(device.id)/sms/send-message-results")
         }
     }
     

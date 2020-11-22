@@ -11,15 +11,26 @@ import SwiftUI
 struct SmsMessageRow: View {
     var isCurrentUser: Bool
     var message: String
+    var isInFlight: Bool
     
     var body: some View {
         HStack {
             if isCurrentUser {
                 Spacer()
-                SmsMessageBubble(isCurrentUser: isCurrentUser, message: message)
+                VStack(alignment: .trailing) {
+                    SmsMessageBubble(isCurrentUser: isCurrentUser, message: message)
+                    if isInFlight {
+                        Text("Sending")
+                    }
+                }
                 
             } else {
-                SmsMessageBubble(isCurrentUser: isCurrentUser, message: message)
+                VStack(alignment: .leading) {
+                    SmsMessageBubble(isCurrentUser: isCurrentUser, message: message)
+                    if isInFlight {
+                        Text("Sending")
+                    }
+                }
                 Spacer()
             }
         }
@@ -28,6 +39,6 @@ struct SmsMessageRow: View {
 
 struct SmsMessageRow_Previews: PreviewProvider {
     static var previews: some View {
-        SmsMessageRow(isCurrentUser: true, message: "Hi")
+        SmsMessageRow(isCurrentUser: true, message: "Hi", isInFlight: false)
     }
 }

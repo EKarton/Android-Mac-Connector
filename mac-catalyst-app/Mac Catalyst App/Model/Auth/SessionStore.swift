@@ -76,6 +76,29 @@ class SessionStore: ObservableObject {
         }
     }
     
+    func getAuthToken(handler: @escaping (String?) -> Void) {
+        guard let user = Auth.auth().currentUser else {
+            handler(nil)
+            return
+        }
+        
+        user.getIDToken { token, err in
+            guard let token = token else {
+                print("Token not found")
+                handler(nil)
+                return
+            }
+            
+            guard err == nil else {
+                print("Encountered error: \(err.debugDescription)")
+                handler(nil)
+                return
+            }
+            
+            handler(token)
+        }
+    }
+    
     private func updateSession(_ user: User) {
         user.getIDToken { (accessToken, error) in
             var newSession = Session(isSignedIn: false, accessToken: "")

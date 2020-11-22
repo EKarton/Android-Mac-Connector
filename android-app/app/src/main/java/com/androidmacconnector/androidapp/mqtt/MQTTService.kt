@@ -58,7 +58,7 @@ class MQTTService: Service() {
             deviceIdLatch.countDown()
         }
 
-        deviceIdLatch.await(2, TimeUnit.SECONDS)
+        deviceIdLatch.await(5, TimeUnit.SECONDS)
 
         if (!authToken.isNullOrBlank() && !deviceId.isNullOrBlank()) {
             this.client = MQTTClient(getServerUrl(), deviceId!!)
