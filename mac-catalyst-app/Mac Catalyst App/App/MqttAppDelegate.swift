@@ -13,8 +13,8 @@ import BackgroundTasks
 
 class MqttAppDelegate: NSObject, UIApplicationDelegate {
     private let mqttClient: MQTTClient
-    private let mqttSubscriber: MQTTSubscriptionClient
-    private let mqttPublisher: MQTTPublisherClient
+    private let mqttSubscriber: MQTTSubscriptionClientImpl
+    private let mqttPublisher: MQTTPublisherClientImpl
     
     private let sessionStore: SessionStore
     private let deviceWebService: DeviceWebService
@@ -24,8 +24,8 @@ class MqttAppDelegate: NSObject, UIApplicationDelegate {
         
     init(
         _ mqttClient: MQTTClient,
-        _ mqttSubscriber: MQTTSubscriptionClient,
-        _ mqttPublisher: MQTTPublisherClient,
+        _ mqttSubscriber: MQTTSubscriptionClientImpl,
+        _ mqttPublisher: MQTTPublisherClientImpl,
         _ sessionStore: SessionStore,
         _ deviceWebService: DeviceWebService,
         _ deviceRegistrationService: DeviceRegistrationService,

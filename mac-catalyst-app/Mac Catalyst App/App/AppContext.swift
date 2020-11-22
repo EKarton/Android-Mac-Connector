@@ -17,8 +17,8 @@ class AppContext {
     
     // MQTT
     let mqttClient: MQTTClient
-    let mqttSubscriber: MQTTSubscriptionClient
-    let mqttPublisher: MQTTPublisherClient
+    let mqttSubscriber: MQTTSubscriptionClientImpl
+    let mqttPublisher: MQTTPublisherClientImpl
         
     // Ping-pong
     let pingDeviceService: PingDeviceService
@@ -31,8 +31,8 @@ class AppContext {
         self.deviceRegistrationService = DeviceRegistrationService(sessionStore, deviceWebService)
         
         self.mqttClient = MQTTClient("192.168.0.102", 3000, "client", "username", "password")
-        self.mqttSubscriber = MQTTSubscriptionClient(self.mqttClient)
-        self.mqttPublisher = MQTTPublisherClient(self.mqttClient)
+        self.mqttSubscriber = MQTTSubscriptionClientImpl(self.mqttClient)
+        self.mqttPublisher = MQTTPublisherClientImpl(self.mqttClient)
                 
         self.pingDeviceService = PingDeviceService(mqttPublisher)
         self.receivedPingService = IncomingPingHandler()

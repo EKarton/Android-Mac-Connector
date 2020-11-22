@@ -17,12 +17,12 @@ struct SmsMessagesView: View {
     @ObservedObject private var viewModel: SmsMessageViewModel
     @State private var messageToSend: String = ""
         
-    init(device: Device, threadId: String, contactName: String, phoneNumber: String, viewModelFactory: SmsMessageViewModelFactory) {
+    init(device: Device, threadId: String, contactName: String, phoneNumber: String, viewModel: SmsMessageViewModel) {
         self.device = device
         self.threadId = threadId
         self.contactName = contactName
         self.phoneNumber = phoneNumber
-        self.viewModel = viewModelFactory.createViewModel(device, threadId, phoneNumber)
+        self.viewModel = viewModel
         
         // Remove separator lines from List
         UITableView.appearance().separatorStyle = .none
@@ -110,3 +110,9 @@ struct SmsMessagesView: View {
     }
 }
 
+
+struct SmsMessagesView_Previews: PreviewProvider {
+    static var previews: some View {
+        /*@START_MENU_TOKEN@*/Text("Hello, World!")/*@END_MENU_TOKEN@*/
+    }
+}

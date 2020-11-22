@@ -43,7 +43,8 @@ struct DeviceActionsList: View {
 #if DEBUG
 struct DeviceActionListPreview: PreviewProvider {
     static var previews: some View {
-        DeviceActionsList(device: devicesList[0])
+        Text("Hello world")
+//        DeviceActionsList(device: devicesList[0])
     }
 }
 #endif

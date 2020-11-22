@@ -92,6 +92,7 @@ struct AddDeviceView: View {
 
 struct AddDeviceView_Previews: PreviewProvider {
     static var previews: some View {
-        AddDeviceView()
+        Text("Hello world")
+//        AddDeviceView()
     }
 }

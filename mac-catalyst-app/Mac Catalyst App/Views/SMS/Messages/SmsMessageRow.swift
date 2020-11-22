@@ -17,7 +17,7 @@ struct SmsMessageRow: View {
         HStack {
             if isCurrentUser {
                 Spacer()
-                VStack(alignment: .trailing) {
+                VStack(alignment: .trailing, spacing: 10) {
                     SmsMessageBubble(isCurrentUser: isCurrentUser, message: message)
                     if isInFlight {
                         Text("Sending")
@@ -25,7 +25,7 @@ struct SmsMessageRow: View {
                 }
                 
             } else {
-                VStack(alignment: .leading) {
+                VStack(alignment: .leading, spacing: 10) {
                     SmsMessageBubble(isCurrentUser: isCurrentUser, message: message)
                     if isInFlight {
                         Text("Sending")
@@ -39,6 +39,15 @@ struct SmsMessageRow: View {
 
 struct SmsMessageRow_Previews: PreviewProvider {
     static var previews: some View {
-        SmsMessageRow(isCurrentUser: true, message: "Hi", isInFlight: false)
+        Group {
+            SmsMessageRow(isCurrentUser: false, message: "Hi", isInFlight: false)
+                .previewLayout(.fixed(width: 400, height: 100))
+            
+            SmsMessageRow(isCurrentUser: true, message: "Hi", isInFlight: false)
+                .previewLayout(.fixed(width: 400, height: 100))
+        
+            SmsMessageRow(isCurrentUser: true, message: "Hi", isInFlight: true)
+                .previewLayout(.fixed(width: 400, height: 100))
+        }
     }
 }

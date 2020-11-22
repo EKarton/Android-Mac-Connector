@@ -45,11 +45,26 @@ struct SmsThreadsRow: View {
 struct SmsThreadRowPreviews: PreviewProvider {
     static var previews: some View {
         Group {
-            SmsThreadsRow(image: Image(systemName: "cloud.heavyrain.fill"), name: "Bob Smith", lastMessage: "How are you?", timeLastMessageSent: "Now").previewLayout(.fixed(width: 300, height: 100))
+            SmsThreadsRow(
+                image: Image(systemName: "person.fill"),
+                name: "Bob Smith",
+                lastMessage: "How are you?",
+                timeLastMessageSent: "Now"
+            ).previewLayout(.fixed(width: 300, height: 100))
             
-            SmsThreadsRow(image: Image(systemName: "cloud.heavyrain.fill"), name: "ThisIsAVeryLongContactNameForThisThread", lastMessage: "How are you?", timeLastMessageSent: "Thursday").previewLayout(.fixed(width: 300, height: 100))
+            SmsThreadsRow(
+                image: Image(systemName: "person.fill"),
+                name: "ThisIsAVeryLongContactNameForThisThread",
+                lastMessage: "How are you?",
+                timeLastMessageSent: "Thursday"
+            ).previewLayout(.fixed(width: 300, height: 100))
             
-            SmsThreadsRow(image: Image(systemName: "cloud.heavyrain.fill"), name: "Bob Smith", lastMessage: "ThisIsAVeryLongMessageBody", timeLastMessageSent: "9:45 am").previewLayout(.fixed(width: 300, height: 100))
+            SmsThreadsRow(
+                image: Image(systemName: "person.fill"),
+                name: "Bob Smith",
+                lastMessage: "ThisIsAVeryLongMessageBody",
+                timeLastMessageSent: "9:45 am"
+            ).previewLayout(.fixed(width: 300, height: 100))
         }
     }
 }

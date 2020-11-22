@@ -36,6 +36,32 @@ class MQTTSubscriptionListener: Hashable {
     }
 }
 
+protocol MQTTSubscriptionClient {
+    func subscribe(_ topic: String, _ handler: @escaping (Error?) -> Void)
+    func addSubscriptionListener(_ subscriber: MQTTSubscriptionListener)
+    func getNumSubscriptionListeners(_ topic: String) -> Int
+    func removeSubscriptionListener(_ subscriber: MQTTSubscriptionListener)
+    func unsubscribe(_ topic: String, _ handler: @escaping (Error?) -> Void)
+}
+
+class MockMQTTSubscriptionClient: MQTTSubscriptionClient {
+    func subscribe(_ topic: String, _ handler: @escaping (Error?) -> Void) {
+        handler(nil)
+    }
+    
+    func addSubscriptionListener(_ subscriber: MQTTSubscriptionListener) {}
+    
+    func getNumSubscriptionListeners(_ topic: String) -> Int {
+        return 0
+    }
+    
+    func removeSubscriptionListener(_ subscriber: MQTTSubscriptionListener) {}
+    
+    func unsubscribe(_ topic: String, _ handler: @escaping (Error?) -> Void) {
+        handler(nil)
+    }
+}
+
 // This client is responsible for subscribing to topics only once
 // For instance, if we run this code:
 //    1. val client = MQTTOnlyOnceClient()
@@ -53,7 +79,7 @@ class MQTTSubscriptionListener: Hashable {
 //    5. client.subscribe("topic") { ... }
 // it will only call client.mqtt.unsubscribe("topic") once and wait until a unsubscribeAck
 
-class MQTTSubscriptionClient: ObservableObject {
+class MQTTSubscriptionClientImpl: MQTTSubscriptionClient {
     
     // Is a list of subscriptions that was called by this.mqttClient.subscribe() and received a subscribeAck
     private var currentSubscriptions = Set<String>()

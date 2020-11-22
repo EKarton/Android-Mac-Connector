@@ -9,9 +9,9 @@
 import SwiftUI
 
 class PingDeviceService: ObservableObject {
-    private var mqttPublisher: MQTTPublisherClient
+    private var mqttPublisher: MQTTPublisherClientImpl
     
-    init(_ mqttPublisher: MQTTPublisherClient) {
+    init(_ mqttPublisher: MQTTPublisherClientImpl) {
         self.mqttPublisher = mqttPublisher
     }
     

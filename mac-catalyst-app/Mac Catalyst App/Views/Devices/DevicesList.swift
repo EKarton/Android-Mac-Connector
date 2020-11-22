@@ -65,7 +65,8 @@ struct DevicesListView: View {
 #if DEBUG
 struct DevicesListViewPreview: PreviewProvider {
     static var previews: some View {
-        DevicesListView()
+        Text("Hello world")
+//        DevicesListView()
     }
 }
 #endif

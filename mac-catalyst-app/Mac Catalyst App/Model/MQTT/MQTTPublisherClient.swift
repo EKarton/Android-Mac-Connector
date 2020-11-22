@@ -8,8 +8,15 @@
 
 import SwiftUI
 
+protocol MQTTPublisherClient {
+    func publish(_ topic: String, _ message: String)
+}
 
-class MQTTPublisherClient {
+class MockMQTTPublisherClient: MQTTPublisherClient {
+    func publish(_ topic: String, _ message: String) {}
+}
+
+class MQTTPublisherClientImpl: MQTTPublisherClient {
     private var client: MQTTClient
     
     init(_ client: MQTTClient) {

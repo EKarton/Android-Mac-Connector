@@ -155,6 +155,6 @@ class MQTTClient: CocoaMQTTDelegate {
     internal func mqttDidDisconnect(_ mqtt: CocoaMQTT, withError err: Error?) {
         print("mqttDidDisconnect: \(err?.localizedDescription ?? "")")
         self.mqttDidDisconnectListener?.handler?(mqtt, err)
-        self.connect()
+        _ = self.connect()
     }
 }

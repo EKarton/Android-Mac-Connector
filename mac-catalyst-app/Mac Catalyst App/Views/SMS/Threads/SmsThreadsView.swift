@@ -18,15 +18,18 @@ struct SmsThreadsView: View {
     var body: some View {
         VStack {
             List(self.viewModel.threads, id: \.threadId) { (thread: SmsThread) in
-                NavigationLink(destination: NavigationLazyView(SmsMessagesView(
+                NavigationLink(destination: NavigationLazyView(
+                    SmsMessagesView(
                         device: self.device,
                         threadId: thread.threadId,
                         contactName: thread.contactName ?? thread.phoneNumber,
                         phoneNumber: thread.phoneNumber,
-                        viewModelFactory: self.viewModelFactory
-                ))) {
+                        viewModel: self.viewModelFactory.createViewModel(
+                            self.device, thread.threadId, thread.phoneNumber)
+                    )
+                )) {
                     SmsThreadsRow(
-                        image: Image(systemName: "cloud.heavyrain.fill"),
+                        image: Image(systemName: "person.fill"),
                         name: thread.contactName ?? thread.phoneNumber,
                         lastMessage: thread.lastMessageSent,
                         timeLastMessageSent: thread.formattedTimeLastMessageSent
@@ -75,8 +78,14 @@ struct SmsThreadsView: View {
 #if DEBUG
 struct SmsView_Previews: PreviewProvider {
     static var previews: some View {
-        Text("Hello world")
-//        SmsThreadsView(device: devicesList[0], )
+        SmsThreadsView(
+            viewModel: SmsThreadsViewModel(
+                MockMQTTSubscriptionClient(),
+                MockMQTTPublisherClient(),
+                devicesList[0]
+            ),
+            device: devicesList[0]
+        )
     }
 }
 #endif
