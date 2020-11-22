@@ -155,6 +155,7 @@
 				139CF2FA255B954100F9EA05 /* App */,
 				139CF32C255B9E7700F9EA05 /* Model */,
 				139CF2FB255B954800F9EA05 /* Views */,
+				135C40F9256B12F100CB5B2E /* ViewModels */,
 				13018999255B924A001BD60D /* Assets.xcassets */,
 				1301899E255B924A001BD60D /* LaunchScreen.storyboard */,
 				130189A7255B9277001BD60D /* Mac Catalyst App.entitlements */,
@@ -186,7 +187,6 @@
 			isa = PBXGroup;
 			children = (
 				139CF32D255B9E9600F9EA05 /* SmsThreadsView.swift */,
-				1332DC5C2565C20200A65CE9 /* SmsThreadsViewModel.swift */,
 				139CF32F255B9EC200F9EA05 /* SmsThreadsRow.swift */,
 			);
 			path = Threads;
@@ -196,7 +196,6 @@
 			isa = PBXGroup;
 			children = (
 				139CF341255BA18200F9EA05 /* SmsMessagesView.swift */,
-				1332DC602565C78600A65CE9 /* SmsMessagesViewModel.swift */,
 				13A4D5B3255CDC9A00414751 /* SmsMessageRow.swift */,
 				139CF33F255BA16B00F9EA05 /* SmsMessageBubble.swift */,
 			);
@@ -241,6 +240,17 @@
 			path = Sender;
 			sourceTree = "<group>";
 		};
+		135C40F9256B12F100CB5B2E /* ViewModels */ = {
+			isa = PBXGroup;
+			children = (
+				136D2A072564938800A09397 /* ContentViewModel.swift */,
+				136D29FF25645D2200A09397 /* DeviceViewModel.swift */,
+				1332DC5C2565C20200A65CE9 /* SmsThreadsViewModel.swift */,
+				1332DC602565C78600A65CE9 /* SmsMessagesViewModel.swift */,
+			);
+			path = ViewModels;
+			sourceTree = "<group>";
+		};
 		139CF2FA255B954100F9EA05 /* App */ = {
 			isa = PBXGroup;
 			children = (
@@ -256,7 +266,6 @@
 		139CF2FB255B954800F9EA05 /* Views */ = {
 			isa = PBXGroup;
 			children = (
-				136D2A072564938800A09397 /* ContentViewModel.swift */,
 				13018997255B9246001BD60D /* ContentView.swift */,
 				139CF32A255B9E6500F9EA05 /* Auth */,
 				139CF32B255B9E6A00F9EA05 /* Devices */,
@@ -281,7 +290,6 @@
 			children = (
 				139CF308255B999200F9EA05 /* DevicesList.swift */,
 				139CF30A255B99C000F9EA05 /* DeviceActionsList.swift */,
-				136D29FF25645D2200A09397 /* DeviceViewModel.swift */,
 			);
 			path = Devices;
 			sourceTree = "<group>";

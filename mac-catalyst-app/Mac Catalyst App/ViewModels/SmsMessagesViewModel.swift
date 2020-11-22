@@ -41,12 +41,14 @@ class SmsMessageViewModel: ObservableObject {
     @Published var messages = [SmsMessage]()
     @Published var messagesInFlight = [SmsMessagesInFlight]()
     
-    private var mqttSubcription: MQTTSubscriptionClient
-    private var mqttPublisher: MQTTPublisherClient
+    private let mqttSubcription: MQTTSubscriptionClient
+    private let mqttPublisher: MQTTPublisherClient
+    private let sentSmsResultsTopic: String
+    private let smsMessagesQueryResultsTopic: String
     
-    private var device: Device
-    private var threadId: String
-    private var phoneNumber: String
+    private let device: Device
+    private let threadId: String
+    private let phoneNumber: String
         
     private let getSmsMessagesPublisher: GetSmsMessagesPublisher
     private let sendSmsPublisher: SendSmsPublisher
@@ -65,6 +67,9 @@ class SmsMessageViewModel: ObservableObject {
     init(_ mqttSubcription: MQTTSubscriptionClient, _ mqttPublisher: MQTTPublisherClient, _ device: Device, _ threadId: String, _ phoneNumber: String) {
         self.mqttSubcription = mqttSubcription
         self.mqttPublisher = mqttPublisher
+        
+        self.sentSmsResultsTopic = "\(device.id)/sms/send-message-results"
+        self.smsMessagesQueryResultsTopic = "\(device.id)/sms/messages/query-results"
         
         self.device = device
         self.threadId = threadId
@@ -151,8 +156,7 @@ class SmsMessageViewModel: ObservableObject {
     }
     
     func subscribeToSmsMessages(handler: @escaping () -> Void) {
-        let topic = "\(device.id)/sms/messages/query-results"
-        self.mqttSubcription.subscribe(topic) { err in
+        self.mqttSubcription.subscribe(smsMessagesQueryResultsTopic) { err in
             if let err = err {
                 self.error = err
             }
@@ -165,8 +169,7 @@ class SmsMessageViewModel: ObservableObject {
     }
     
     func unsubscribeToSmsMessages(handler: @escaping () -> Void) {
-        let topic = "\(device.id)/sms/messages/query-results"
-        self.mqttSubcription.unsubscribe(topic) { err in
+        self.mqttSubcription.unsubscribe(smsMessagesQueryResultsTopic) { err in
             if let err = err {
                 self.error = err
             }
@@ -175,8 +178,7 @@ class SmsMessageViewModel: ObservableObject {
     }
     
     func subscribeToSentSmsResults(handler: @escaping () -> Void) {
-        let topic = "\(device.id)/sms/send-message-results"
-        self.mqttSubcription.subscribe(topic) { err in
+        self.mqttSubcription.subscribe(sentSmsResultsTopic) { err in
             if let err = err {
                 self.error = err
             }
@@ -199,8 +201,7 @@ class SmsMessageViewModel: ObservableObject {
     }
     
     func unsubscribeFromSentSmsResults(handler: @escaping () -> Void) {
-        let topic = "\(device.id)/sms/send-message-results"
-        self.mqttSubcription.unsubscribe(topic) { err in
+        self.mqttSubcription.unsubscribe(sentSmsResultsTopic) { err in
             if let err = err {
                 self.error = err
             }

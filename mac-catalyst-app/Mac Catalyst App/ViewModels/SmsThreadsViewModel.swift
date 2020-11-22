@@ -27,12 +27,14 @@ class SmsThreadsViewModel: ObservableObject {
     @Published var threads = [SmsThread]()
     
     private var mqttSubscription: MQTTSubscriptionClient
+    private var topic: String
     
     private let getSmsThreadsPublisher: GetSmsThreadsPublisher
     private let getSmsThreadsListener: GetSmsThreadsListener
         
     init(_ mqttSubcription: MQTTSubscriptionClient, _ mqttPublisher: MQTTPublisherClient, _ device: Device) {
         self.mqttSubscription = mqttSubcription
+        self.topic = "\(device.id)/sms/threads/query-results"
         
         self.getSmsThreadsPublisher = GetSmsThreadsPublisher(mqttPublisher, device.id)
         
@@ -48,7 +50,7 @@ class SmsThreadsViewModel: ObservableObject {
     }
     
     func subscribeToSmsThreads(_ device: Device, handler: @escaping () -> Void) {
-        self.mqttSubscription.subscribe("\(device.id)/sms/threads/query-results") { err in
+        self.mqttSubscription.subscribe(topic) { err in
             if let err = err {
                 self.error = err
             }
@@ -61,7 +63,7 @@ class SmsThreadsViewModel: ObservableObject {
     }
     
     func unsubscribeToSmsThreads(_ device: Device) {
-        self.mqttSubscription.unsubscribe("\(device.id)/sms/threads/query-results"){ err in
+        self.mqttSubscription.unsubscribe(topic){ err in
             if let err = err {
                 self.error = err
             }
