@@ -31,7 +31,7 @@ class SentSmsResultsListener: MQTTSubscriptionListener {
     
     private func setHandler() {
         super.setHandler { (msg, err) in
-            print("Got sent sms results:", msg!)
+            print("Got sent sms results")
             
             if let err = err {
                 self.onErrorReceived(err)
