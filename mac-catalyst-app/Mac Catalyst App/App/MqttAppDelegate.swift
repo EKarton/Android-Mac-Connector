@@ -21,7 +21,6 @@ class MqttAppDelegate: NSObject, UIApplicationDelegate {
     private let deviceRegistrationService: DeviceRegistrationService
     
     private let incomingPingHandler: IncomingPingHandler
-    private let incomingSmsHandler: IncomingSmsHandler
         
     init(
         _ mqttClient: MQTTClient,
@@ -30,8 +29,7 @@ class MqttAppDelegate: NSObject, UIApplicationDelegate {
         _ sessionStore: SessionStore,
         _ deviceWebService: DeviceWebService,
         _ deviceRegistrationService: DeviceRegistrationService,
-        _ pingRequestHandler: IncomingPingHandler,
-        _ incomingSmsHandler: IncomingSmsHandler
+        _ pingRequestHandler: IncomingPingHandler
     ) {
         self.mqttClient = mqttClient
         self.mqttSubscriber = mqttSubscriber
@@ -42,7 +40,6 @@ class MqttAppDelegate: NSObject, UIApplicationDelegate {
         self.deviceRegistrationService = deviceRegistrationService
         
         self.incomingPingHandler = pingRequestHandler
-        self.incomingSmsHandler = incomingSmsHandler
     }
     
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
@@ -185,11 +182,26 @@ class MqttAppDelegate: NSObject, UIApplicationDelegate {
                     return
                 }
                 
-                self.incomingSmsHandler.dispatchNotification(msgStruct, device)
+                self.showNotification(msgStruct, device)
             }
             self.mqttSubscriber.addSubscriptionListener(subscriber)
             self.subscribeToTopic(topic)
         }
+    }
+    
+    private func showNotification(_ msg: ReceivedSmsMessage, _ device: Device) {
+        let content = UNMutableNotificationContent()
+        content.title = msg.phoneNumber
+        content.subtitle = "From \(device.name)"
+        content.body = msg.body
+        content.sound = UNNotificationSound.default
+
+        // Show this notification 1 second from now
+        let trigger = UNTimeIntervalNotificationTrigger(timeInterval: 1, repeats: false)
+
+        // Add our notification request
+        let request = UNNotificationRequest(identifier: UUID().uuidString, content: content, trigger: trigger)
+        UNUserNotificationCenter.current().add(request)
     }
     
     private func subscribeToTopic(_ topic: String) {

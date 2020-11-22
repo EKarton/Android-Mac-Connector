@@ -19,12 +19,7 @@ class AppContext {
     let mqttClient: MQTTClient
     let mqttSubscriber: MQTTSubscriptionClient
     let mqttPublisher: MQTTPublisherClient
-    
-    // SMS
-    let getSmsThreadsService: GetSmsThreadsService
-    
-    let receivedSmsMessageService: IncomingSmsHandler
-    
+        
     // Ping-pong
     let pingDeviceService: PingDeviceService
     let receivedPingService: IncomingPingHandler
@@ -38,10 +33,7 @@ class AppContext {
         self.mqttClient = MQTTClient("192.168.0.102", 3000, "client", "username", "password")
         self.mqttSubscriber = MQTTSubscriptionClient(self.mqttClient)
         self.mqttPublisher = MQTTPublisherClient(self.mqttClient)
-        
-        self.getSmsThreadsService = GetSmsThreadsService(mqttSubscriber, mqttPublisher)
-        self.receivedSmsMessageService = IncomingSmsHandler()
-        
+                
         self.pingDeviceService = PingDeviceService(mqttPublisher)
         self.receivedPingService = IncomingPingHandler()
     }

@@ -42,12 +42,18 @@ class SmsMessageViewModel: ObservableObject {
     @Published var messagesInFlight = [SmsMessagesInFlight]()
     
     private var mqttSubcription: MQTTSubscriptionClient
-    private var device: Device
-    private var phoneNumber: String
+    private var mqttPublisher: MQTTPublisherClient
     
-    private var smsSenderService: SendSmsClient
-    private var getSmsMessagesClient: GetSmsMessagesClient
-    private var incomingSmsClient: IncomingSmsClient
+    private var device: Device
+    private var threadId: String
+    private var phoneNumber: String
+        
+    private let getSmsMessagesPublisher: GetSmsMessagesPublisher
+    private let sendSmsPublisher: SendSmsPublisher
+    
+    private let getSmsMessagesListener: GetSmsMessagesListener
+    private let sentSmsResultsListener: SentSmsResultsListener
+    private let incomingSmsListener: ReceivedSmsListener
     
     // Are used to call refreshMessages() recursively with exponential backoff
     // when there are messages in flight
@@ -58,13 +64,36 @@ class SmsMessageViewModel: ObservableObject {
     
     init(_ mqttSubcription: MQTTSubscriptionClient, _ mqttPublisher: MQTTPublisherClient, _ device: Device, _ threadId: String, _ phoneNumber: String) {
         self.mqttSubcription = mqttSubcription
-        self.device = device
-        self.phoneNumber = phoneNumber
-        self.smsSenderService = SendSmsClient(mqttSubcription, mqttPublisher, device)
-        self.getSmsMessagesClient = GetSmsMessagesClient(mqttSubcription, mqttPublisher, device, threadId)
-        self.incomingSmsClient = IncomingSmsClient(mqttSubcription, mqttPublisher, device, phoneNumber)
+        self.mqttPublisher = mqttPublisher
         
-        self.getSmsMessagesClient.onResponseReceived = { payload in
+        self.device = device
+        self.threadId = threadId
+        self.phoneNumber = phoneNumber
+        
+        self.getSmsMessagesPublisher = GetSmsMessagesPublisher(mqttPublisher, device.id, threadId)
+        self.sendSmsPublisher = SendSmsPublisher(mqttPublisher, device.id, phoneNumber)
+                
+        self.getSmsMessagesListener = GetSmsMessagesListener(device.id, threadId)
+        self.sentSmsResultsListener = SentSmsResultsListener(device.id)
+        self.incomingSmsListener = ReceivedSmsListener(device.id, phoneNumber)
+
+        self.setupGetSmsMessagesListener()
+        self.setupSentSmsResultsListener()
+        self.setupIncomingSmsListener()
+        
+        self.mqttSubcription.addSubscriptionListener(self.getSmsMessagesListener)
+        self.mqttSubcription.addSubscriptionListener(self.sentSmsResultsListener)
+        self.mqttSubcription.addSubscriptionListener(self.incomingSmsListener)
+    }
+    
+    deinit {
+        self.mqttSubcription.removeSubscriptionListener(self.getSmsMessagesListener)
+        self.mqttSubcription.removeSubscriptionListener(self.sentSmsResultsListener)
+        self.mqttSubcription.removeSubscriptionListener(self.incomingSmsListener)
+    }
+    
+    private func setupGetSmsMessagesListener() {
+        self.getSmsMessagesListener.onResponseReceived = { payload in
             var i = 0
             while i < self.messagesInFlight.count {
                 let numNewMessages = payload.messages.count - self.messagesInFlight[i].index
@@ -95,32 +124,35 @@ class SmsMessageViewModel: ObservableObject {
             self.messages = payload.messages
         }
         
-        self.getSmsMessagesClient.onErrorReceived = { err in
+        self.getSmsMessagesListener.onErrorReceived = { err in
             print("Error when fetching messages: \(err.localizedDescription)")
             self.error = err
         }
-        
-        self.smsSenderService.onResultsReceived = { results in
+    }
+    
+    private func setupSentSmsResultsListener() {
+        self.sentSmsResultsListener.onResultsReceived = { results in
             print("Sms sent successfully? \(results.status) reason: \(String(describing: results.reason))")
         }
         
-        self.smsSenderService.onErrorReceived = { err in
+        self.sentSmsResultsListener.onErrorReceived = { err in
             print("Error when sending messages \(err.localizedDescription)")
             self.error = err
         }
-        
-        self.incomingSmsClient.onMessageReceived = { msg in
+    }
+    
+    private func setupIncomingSmsListener() {
+        self.incomingSmsListener.onMessageReceived = { msg in
             self.fetchMessages()
         }
-        
-        self.incomingSmsClient.onErrorReceived = { err in
-            print("Error when getting incoming messages \(err.localizedDescription)")
+        self.incomingSmsListener.onErrorReceived = { err in
             self.error = err
         }
     }
     
     func subscribeToSmsMessages(handler: @escaping () -> Void) {
-        self.getSmsMessagesClient.subscribeToSmsResults() { err in
+        let topic = "\(device.id)/sms/messages/query-results"
+        self.mqttSubcription.subscribe(topic) { err in
             if let err = err {
                 self.error = err
             }
@@ -129,11 +161,12 @@ class SmsMessageViewModel: ObservableObject {
     }
     
     func fetchMessages() {
-        self.getSmsMessagesClient.fetchSmsMessages(100000, 0)
+        self.getSmsMessagesPublisher.requestSmsMessages()
     }
     
     func unsubscribeToSmsMessages(handler: @escaping () -> Void) {
-        self.getSmsMessagesClient.unsubscribeToSmsResults() { err in
+        let topic = "\(device.id)/sms/messages/query-results"
+        self.mqttSubcription.unsubscribe(topic) { err in
             if let err = err {
                 self.error = err
             }
@@ -142,7 +175,8 @@ class SmsMessageViewModel: ObservableObject {
     }
     
     func subscribeToSentSmsResults(handler: @escaping () -> Void) {
-        smsSenderService.subscribeToSentSmsResults() { err in
+        let topic = "\(device.id)/sms/send-message-results"
+        self.mqttSubcription.subscribe(topic) { err in
             if let err = err {
                 self.error = err
             }
@@ -150,8 +184,9 @@ class SmsMessageViewModel: ObservableObject {
         }
     }
     
-    func sendMessage(_ phoneNumber: String, _ message: String, _ handler: @escaping (Error?) -> Void) {
-        self.smsSenderService.sendSms(phoneNumber, message)
+    func sendMessage(_ message: String, _ handler: @escaping (Error?) -> Void) {
+        print("Sending message \(message) to \(phoneNumber)")
+        sendSmsPublisher.sendMessage(message)
         
         self.fetchMessages()
         self.curAttempts = 0
@@ -164,19 +199,12 @@ class SmsMessageViewModel: ObservableObject {
     }
     
     func unsubscribeFromSentSmsResults(handler: @escaping () -> Void) {
-        smsSenderService.unsubscribeFromSentSmsResults() { err in
+        let topic = "\(device.id)/sms/send-message-results"
+        self.mqttSubcription.unsubscribe(topic) { err in
             if let err = err {
                 self.error = err
             }
             handler()
         }
-    }
-    
-    func listenToIncomingSms() {
-        self.incomingSmsClient.subscribeToIncomingSms()
-    }
-    
-    func removeListeningFromIncomingSms() {
-        self.incomingSmsClient.unsubscribeFromIncomingSms()
     }
 }

@@ -26,8 +26,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             context.sessionStore,
             context.deviceWebService,
             context.deviceRegistrationService,
-            context.receivedPingService,
-            context.receivedSmsMessageService
+            context.receivedPingService
         )
         self.firebase = FirebaseAppDelegate()
     }

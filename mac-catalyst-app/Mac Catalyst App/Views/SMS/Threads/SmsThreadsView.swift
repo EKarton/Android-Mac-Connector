@@ -9,22 +9,22 @@
 import SwiftUI
 
 struct SmsThreadsView: View {
-    @EnvironmentObject var viewModel: SmsThreadsViewModel
     @EnvironmentObject var viewModelFactory: SmsMessageViewModelFactory
     @State private var showingNewSmsMessageSheet = false
     
+    @ObservedObject var viewModel: SmsThreadsViewModel
     var device: Device
             
     var body: some View {
         VStack {
             List(self.viewModel.threads, id: \.threadId) { (thread: SmsThread) in
-                NavigationLink(destination: SmsMessagesView(
+                NavigationLink(destination: NavigationLazyView(SmsMessagesView(
                         device: self.device,
                         threadId: thread.threadId,
                         contactName: thread.contactName ?? thread.phoneNumber,
                         phoneNumber: thread.phoneNumber,
-                        viewModel: self.viewModelFactory.createViewModel(self.device, thread.threadId, thread.phoneNumber)
-                )) {
+                        viewModelFactory: self.viewModelFactory
+                ))) {
                     SmsThreadsRow(
                         image: Image(systemName: "cloud.heavyrain.fill"),
                         name: thread.contactName ?? thread.phoneNumber,
@@ -75,7 +75,8 @@ struct SmsThreadsView: View {
 #if DEBUG
 struct SmsView_Previews: PreviewProvider {
     static var previews: some View {
-        SmsThreadsView(device: devicesList[0])
+        Text("Hello world")
+//        SmsThreadsView(device: devicesList[0], )
     }
 }
 #endif

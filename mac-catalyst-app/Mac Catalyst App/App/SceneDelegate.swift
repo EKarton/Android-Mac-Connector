@@ -34,7 +34,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
                     appDelegate.context.mqttSubscriber,
                     appDelegate.context.mqttPublisher
                 ))
-                .environmentObject(SmsThreadsViewModel(
+                .environmentObject(SmsThreadsViewModelFactory(
                     appDelegate.context.mqttSubscriber, appDelegate.context.mqttPublisher
                 ))
             

@@ -8,6 +8,16 @@
 
 import SwiftUI
 
+struct NavigationLazyView<Content: View>: View {
+    let build: () -> Content
+    init(_ build: @autoclosure @escaping () -> Content) {
+        self.build = build
+    }
+    var body: Content {
+        build()
+    }
+}
+
 struct ContentView: View {
     @EnvironmentObject var contentViewModel: ContentViewModel
     @EnvironmentObject var sessionStore: SessionStore

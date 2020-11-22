@@ -9,6 +9,7 @@
 import SwiftUI
 
 struct DeviceActionsList: View {
+    @EnvironmentObject var viewModelFactory: SmsThreadsViewModelFactory
     @EnvironmentObject var pingDeviceService: PingDeviceService
     var device: Device
     
@@ -21,7 +22,12 @@ struct DeviceActionsList: View {
             }
             
             if device.hasSmsCapability {
-                NavigationLink(destination: SmsThreadsView(device: device)) {
+                NavigationLink(destination: NavigationLazyView(
+                    SmsThreadsView(
+                        viewModel: self.viewModelFactory.createViewModel(self.device),
+                        device: self.device
+                    )
+                )) {
                     Text("Send / Read SMS")
                 }
             }

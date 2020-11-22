@@ -17,12 +17,12 @@ struct SmsMessagesView: View {
     @ObservedObject private var viewModel: SmsMessageViewModel
     @State private var messageToSend: String = ""
         
-    init(device: Device, threadId: String, contactName: String, phoneNumber: String, viewModel: SmsMessageViewModel) {
+    init(device: Device, threadId: String, contactName: String, phoneNumber: String, viewModelFactory: SmsMessageViewModelFactory) {
         self.device = device
         self.threadId = threadId
         self.contactName = contactName
         self.phoneNumber = phoneNumber
-        self.viewModel = viewModel
+        self.viewModel = viewModelFactory.createViewModel(device, threadId, phoneNumber)
         
         // Remove separator lines from List
         UITableView.appearance().separatorStyle = .none
@@ -88,13 +88,11 @@ struct SmsMessagesView: View {
             self.viewModel.fetchMessages()
         }
         self.viewModel.subscribeToSentSmsResults {}
-        self.viewModel.listenToIncomingSms()
     }
     
     func onDisappear() {
         self.viewModel.unsubscribeToSmsMessages() {}
         self.viewModel.unsubscribeFromSentSmsResults {}
-        self.viewModel.removeListeningFromIncomingSms()
     }
     
     func refreshMessages() {
@@ -102,7 +100,7 @@ struct SmsMessagesView: View {
     }
     
     func onSendSmsButtonClickHandler() {
-        viewModel.sendMessage(phoneNumber, messageToSend) { err in
+        viewModel.sendMessage(messageToSend) { err in
             if let err = err {
                 print("Error when sending message: \(err)")
                 return
