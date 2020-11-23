@@ -56,10 +56,10 @@ Required programs and tools:
     export VERIFY_AUTHORIZATION=false
     ```
 
-4. Run the server by running ```npm start```. It should spawn up a new server process under port 3000
+4. Run the server by running ```$ npm start```. It should spawn up a new server process under port 3000
 
 #### Setting up Android device (```./android-app```)
-1. Open the folder ```android-app``` in Android Studio
+1. Open the ```android-app``` folder in Android Studio
 2. Add the Android app to Firebase by:
 
     1. Go to the [Firebase Console](https://console.firebase.google.com/), click on *Add App*, select *Android*, 
@@ -71,7 +71,7 @@ Required programs and tools:
 
 #### Setting up SwiftUI app (```./mac-catalyst-app```)
 1. Run ```$ pod install``` in the project's root directory
-2. Open ```Mac Catalyst App.xcworkspace``` in XCode
+2. Open ```./mac-catalyst-app/Mac Catalyst App.xcworkspace``` in XCode
 3. Add the SwiftUI app to Firebase by:
 
     1. Go to the [Firebase Console](https://console.firebase.google.com/), click on *Add App*, select *iOS*, 
