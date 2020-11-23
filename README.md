@@ -40,7 +40,7 @@ Required programs and tools:
     1. Go to your [GCP Console](https://console.cloud.google.com)
     2. Select your project
     3. Create a [custom role](https://cloud.google.com/iam/docs/creating-custom-roles) with ```cloudmessaging.messages.create``` and ```firebaseauth.users.get``` permissions
-    4. Create a new [service account](https://cloud.google.com/iam/docs/creating-managing-service-accounts#creating) with the role you have made from (3) and with the ``Cloud Datastore User``` role
+    4. Create a new [service account](https://cloud.google.com/iam/docs/creating-managing-service-accounts#creating) with the role you have made from (3) and with the ```Cloud Datastore User``` role
     5. Under the service account, create a new key (in JSON format), and save it as ```service-account-file.json``` in the project's root directory
 
 2. Export the path of the credentials file to an environment variable
