@@ -13,7 +13,7 @@ enum DeviceRegistrationServiceError: Error {
     case CannotGetDeviceIdError
 }
 
-/// This class is responsible for registering, unregistering, and obtaining the device ID with caching
+/// This class is a stateless service responsible for registering, unregistering, and obtaining the device ID with caching
 class DeviceRegistrationService {
     private var sessionStore: SessionStore
     private var deviceWebService: DeviceWebService
@@ -32,48 +32,45 @@ class DeviceRegistrationService {
             capabilities: ["ping_device"]
         )
         
-        self.sessionStore.getAuthToken { authToken in
-            guard let authToken = authToken else {
-                handler(DeviceRegistrationServiceError.NotLoggedInError)
+        guard let authToken = self.sessionStore.currentSession?.accessToken else {
+            handler(DeviceRegistrationServiceError.NotLoggedInError)
+            return
+        }
+            
+        self.deviceWebService.registerDevice(authToken, newDevice) { deviceId, err in
+            if let err = err {
+                handler(err)
                 return
             }
             
-            self.deviceWebService.registerDevice(authToken, newDevice) { deviceId, err in
-                if let err = err {
-                    handler(err)
-                    return
-                }
-                
-                // Add it to the cache
-                self.saveDeviceIdToCache(deviceId)
-                handler(nil)
-            }
+            // Add it to the cache
+            self.saveDeviceIdToCache(deviceId)
+            handler(nil)
         }
     }
     
     /// Unregisters a device
     /// - Parameter handler: async callback to when unregistering the device was successful or not
     func unregisterDevice(handler: @escaping (Error?) -> Void) {
-        self.sessionStore.getAuthToken { authToken in
-            guard let authToken = authToken else {
-                handler(DeviceRegistrationServiceError.NotLoggedInError)
+        guard let authToken = self.sessionStore.currentSession?.accessToken else {
+            handler(DeviceRegistrationServiceError.NotLoggedInError)
+            return
+        }
+        
+        self.getDeviceId { deviceId, err in
+            if let err = err {
+                handler(err)
                 return
             }
             
-            self.getDeviceId { deviceId, err in
+            self.deviceWebService.removeDevice(authToken, deviceId) { err in
                 if let err = err {
                     handler(err)
                     return
                 }
                 
-                self.deviceWebService.removeDevice(authToken, deviceId) { err in
-                    if let err = err {
-                        handler(err)
-                        return
-                    }
-                    
-                    self.removeDeviceIdInCache()
-                }
+                self.removeDeviceIdInCache()
+                handler(nil)
             }
         }
     }
@@ -94,22 +91,22 @@ class DeviceRegistrationService {
         let hardwareId = self.getHardwareId()
         let deviceType = self.getDeviceType()
         
-        self.sessionStore.getAuthToken { authToken in
-            guard let authToken = authToken else {
-                handler("", DeviceRegistrationServiceError.NotLoggedInError)
+        guard let authToken = self.sessionStore.currentSession?.accessToken else {
+            handler("", DeviceRegistrationServiceError.NotLoggedInError)
+            return
+        }
+        
+        self.deviceWebService.isDeviceRegistered(authToken, deviceType, hardwareId) { (isRegistered, deviceId, err) in
+            if let err = err {
+                handler("", err)
                 return
             }
-        
-            self.deviceWebService.isDeviceRegistered(authToken, deviceType, hardwareId) { (isRegistered, deviceId, err) in
-                if let err = err {
-                    handler("", err)
-                    return
-                }
-                                
-                if isRegistered {
-                    self.saveDeviceIdToCache(deviceId)
-                }
+                            
+            if isRegistered {
+                self.saveDeviceIdToCache(deviceId)
                 handler(deviceId, nil)
+            } else {
+                handler("", DeviceRegistrationServiceError.CannotGetDeviceIdError)
             }
         }
     }

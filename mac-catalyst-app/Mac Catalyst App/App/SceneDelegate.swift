@@ -23,12 +23,10 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
             let appDelegate = UIApplication.shared.delegate as! AppDelegate
             
             let contentView = ContentView()
-                .environmentObject(ContentViewModel())
+                .environmentObject(AppStateStore())
                 .environmentObject(appDelegate.context.sessionStore)
-                .environmentObject(DeviceViewModel(
-                    appDelegate.context.deviceWebService,
-                    appDelegate.context.deviceRegistrationService
-                ))
+                .environmentObject(appDelegate.context.devicesStore)
+                .environmentObject(appDelegate.context.deviceRegistrationStore)
                 .environmentObject(appDelegate.context.pingDeviceService)
                 .environmentObject(SmsMessageViewModelFactory(
                     appDelegate.context.mqttSubscriber,

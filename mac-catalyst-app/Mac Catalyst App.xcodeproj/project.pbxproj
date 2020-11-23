@@ -14,7 +14,6 @@
 		1301899D255B924A001BD60D /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 1301899C255B924A001BD60D /* Preview Assets.xcassets */; };
 		130189A0255B924A001BD60D /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 1301899E255B924A001BD60D /* LaunchScreen.storyboard */; };
 		1324DD9E255D9E10009BCC0A /* MQTTSubscriptionClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1324DD9D255D9E10009BCC0A /* MQTTSubscriptionClient.swift */; };
-		1324DDA4255DBA62009BCC0A /* MQTTClientAuthObserver.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1324DDA3255DBA62009BCC0A /* MQTTClientAuthObserver.swift */; };
 		1324DDA6255DC004009BCC0A /* MQTTPublisherClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1324DDA5255DC004009BCC0A /* MQTTPublisherClient.swift */; };
 		1332DC562565ACED00A65CE9 /* PingDeviceService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1332DC552565ACED00A65CE9 /* PingDeviceService.swift */; };
 		1332DC5B2565B39900A65CE9 /* IncomingPingHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1332DC5A2565B39900A65CE9 /* IncomingPingHandler.swift */; };
@@ -32,10 +31,10 @@
 		135C40F4256B0BAA00CB5B2E /* GetSmsThreadsPublisher.swift in Sources */ = {isa = PBXBuildFile; fileRef = 135C40F3256B0BAA00CB5B2E /* GetSmsThreadsPublisher.swift */; };
 		135C40FB256B28C700CB5B2E /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 135C40FA256B28C700CB5B2E /* GoogleService-Info.plist */; };
 		135D0A732569C5B0004B9CB6 /* DeviceRegistrationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 135D0A722569C5B0004B9CB6 /* DeviceRegistrationService.swift */; };
-		136D2A0025645D2200A09397 /* DeviceViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 136D29FF25645D2200A09397 /* DeviceViewModel.swift */; };
+		136D2A0025645D2200A09397 /* DevicesStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 136D29FF25645D2200A09397 /* DevicesStore.swift */; };
 		136D2A02256465D300A09397 /* AddDeviceView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 136D2A01256465D300A09397 /* AddDeviceView.swift */; };
 		136D2A062564692400A09397 /* DeviceWebService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 136D2A052564692400A09397 /* DeviceWebService.swift */; };
-		136D2A082564938800A09397 /* ContentViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 136D2A072564938800A09397 /* ContentViewModel.swift */; };
+		138E39A6256B8596007661B4 /* AppStateStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 138E39A5256B8596007661B4 /* AppStateStore.swift */; };
 		139CF303255B97D100F9EA05 /* SessionStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 139CF302255B97D100F9EA05 /* SessionStore.swift */; };
 		139CF305255B980200F9EA05 /* SignInView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 139CF304255B980200F9EA05 /* SignInView.swift */; };
 		139CF307255B981000F9EA05 /* SignUpView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 139CF306255B981000F9EA05 /* SignUpView.swift */; };
@@ -53,6 +52,8 @@
 		139CF344255BA27200F9EA05 /* NewSmsMessageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 139CF343255BA27200F9EA05 /* NewSmsMessageView.swift */; };
 		13A4D5B4255CDC9A00414751 /* SmsMessageRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 13A4D5B3255CDC9A00414751 /* SmsMessageRow.swift */; };
 		13A9AF04256377E3008F7A86 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 13A9AF03256377E3008F7A86 /* SettingsView.swift */; };
+		13BADB41256C31F000DA5BCE /* MQTTService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 13BADB40256C31F000DA5BCE /* MQTTService.swift */; };
+		13BADB43256C360B00DA5BCE /* DeviceRegistrationStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 13BADB42256C360B00DA5BCE /* DeviceRegistrationStore.swift */; };
 		851BC03AEA0E46F85139CE76 /* Pods_Mac_Catalyst_App.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7BCC7CACC89295CB3092844A /* Pods_Mac_Catalyst_App.framework */; };
 /* End PBXBuildFile section */
 
@@ -67,7 +68,6 @@
 		130189A1255B924A001BD60D /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		130189A7255B9277001BD60D /* Mac Catalyst App.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = "Mac Catalyst App.entitlements"; sourceTree = "<group>"; };
 		1324DD9D255D9E10009BCC0A /* MQTTSubscriptionClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MQTTSubscriptionClient.swift; sourceTree = "<group>"; };
-		1324DDA3255DBA62009BCC0A /* MQTTClientAuthObserver.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MQTTClientAuthObserver.swift; sourceTree = "<group>"; };
 		1324DDA5255DC004009BCC0A /* MQTTPublisherClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MQTTPublisherClient.swift; sourceTree = "<group>"; };
 		1332DC552565ACED00A65CE9 /* PingDeviceService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PingDeviceService.swift; sourceTree = "<group>"; };
 		1332DC5A2565B39900A65CE9 /* IncomingPingHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IncomingPingHandler.swift; sourceTree = "<group>"; };
@@ -85,10 +85,10 @@
 		135C40F3256B0BAA00CB5B2E /* GetSmsThreadsPublisher.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GetSmsThreadsPublisher.swift; sourceTree = "<group>"; };
 		135C40FA256B28C700CB5B2E /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 		135D0A722569C5B0004B9CB6 /* DeviceRegistrationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeviceRegistrationService.swift; sourceTree = "<group>"; };
-		136D29FF25645D2200A09397 /* DeviceViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeviceViewModel.swift; sourceTree = "<group>"; };
+		136D29FF25645D2200A09397 /* DevicesStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DevicesStore.swift; sourceTree = "<group>"; };
 		136D2A01256465D300A09397 /* AddDeviceView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddDeviceView.swift; sourceTree = "<group>"; };
 		136D2A052564692400A09397 /* DeviceWebService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeviceWebService.swift; sourceTree = "<group>"; };
-		136D2A072564938800A09397 /* ContentViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentViewModel.swift; sourceTree = "<group>"; };
+		138E39A5256B8596007661B4 /* AppStateStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppStateStore.swift; sourceTree = "<group>"; };
 		139CF302255B97D100F9EA05 /* SessionStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionStore.swift; sourceTree = "<group>"; };
 		139CF304255B980200F9EA05 /* SignInView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SignInView.swift; sourceTree = "<group>"; };
 		139CF306255B981000F9EA05 /* SignUpView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SignUpView.swift; sourceTree = "<group>"; };
@@ -106,6 +106,8 @@
 		139CF343255BA27200F9EA05 /* NewSmsMessageView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NewSmsMessageView.swift; sourceTree = "<group>"; };
 		13A4D5B3255CDC9A00414751 /* SmsMessageRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SmsMessageRow.swift; sourceTree = "<group>"; };
 		13A9AF03256377E3008F7A86 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
+		13BADB40256C31F000DA5BCE /* MQTTService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MQTTService.swift; sourceTree = "<group>"; };
+		13BADB42256C360B00DA5BCE /* DeviceRegistrationStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeviceRegistrationStore.swift; sourceTree = "<group>"; };
 		65F5BC7775227A7A85D48AEC /* Pods-Mac Catalyst App.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Mac Catalyst App.release.xcconfig"; path = "Target Support Files/Pods-Mac Catalyst App/Pods-Mac Catalyst App.release.xcconfig"; sourceTree = "<group>"; };
 		720D4BFC4F6479686F943906 /* Pods-Mac Catalyst App.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Mac Catalyst App.debug.xcconfig"; path = "Target Support Files/Pods-Mac Catalyst App/Pods-Mac Catalyst App.debug.xcconfig"; sourceTree = "<group>"; };
 		7BCC7CACC89295CB3092844A /* Pods_Mac_Catalyst_App.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_Mac_Catalyst_App.framework; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -154,6 +156,7 @@
 			children = (
 				139CF2FA255B954100F9EA05 /* App */,
 				139CF32C255B9E7700F9EA05 /* Model */,
+				13BADB44256C520200DA5BCE /* Stores */,
 				139CF2FB255B954800F9EA05 /* Views */,
 				135C40F9256B12F100CB5B2E /* ViewModels */,
 				13018999255B924A001BD60D /* Assets.xcassets */,
@@ -243,8 +246,6 @@
 		135C40F9256B12F100CB5B2E /* ViewModels */ = {
 			isa = PBXGroup;
 			children = (
-				136D2A072564938800A09397 /* ContentViewModel.swift */,
-				136D29FF25645D2200A09397 /* DeviceViewModel.swift */,
 				1332DC5C2565C20200A65CE9 /* SmsThreadsViewModel.swift */,
 				1332DC602565C78600A65CE9 /* SmsMessagesViewModel.swift */,
 			);
@@ -297,7 +298,6 @@
 		139CF32C255B9E7700F9EA05 /* Model */ = {
 			isa = PBXGroup;
 			children = (
-				139CF347255BA33A00F9EA05 /* Auth */,
 				139CF346255BA33400F9EA05 /* Devices */,
 				139CF348255BA34000F9EA05 /* MQTT */,
 				1332DC592565B1DF00A65CE9 /* Ping */,
@@ -326,21 +326,13 @@
 			path = Devices;
 			sourceTree = "<group>";
 		};
-		139CF347255BA33A00F9EA05 /* Auth */ = {
-			isa = PBXGroup;
-			children = (
-				139CF302255B97D100F9EA05 /* SessionStore.swift */,
-			);
-			path = Auth;
-			sourceTree = "<group>";
-		};
 		139CF348255BA34000F9EA05 /* MQTT */ = {
 			isa = PBXGroup;
 			children = (
 				139CF339255BA0F000F9EA05 /* MQTTClient.swift */,
-				1324DDA3255DBA62009BCC0A /* MQTTClientAuthObserver.swift */,
 				1324DD9D255D9E10009BCC0A /* MQTTSubscriptionClient.swift */,
 				1324DDA5255DC004009BCC0A /* MQTTPublisherClient.swift */,
+				13BADB40256C31F000DA5BCE /* MQTTService.swift */,
 			);
 			path = MQTT;
 			sourceTree = "<group>";
@@ -362,6 +354,17 @@
 				13A9AF03256377E3008F7A86 /* SettingsView.swift */,
 			);
 			path = Settings;
+			sourceTree = "<group>";
+		};
+		13BADB44256C520200DA5BCE /* Stores */ = {
+			isa = PBXGroup;
+			children = (
+				138E39A5256B8596007661B4 /* AppStateStore.swift */,
+				139CF302255B97D100F9EA05 /* SessionStore.swift */,
+				136D29FF25645D2200A09397 /* DevicesStore.swift */,
+				13BADB42256C360B00DA5BCE /* DeviceRegistrationStore.swift */,
+			);
+			path = Stores;
 			sourceTree = "<group>";
 		};
 		F4442BA6FF33F7C858BBE2E1 /* Pods */ = {
@@ -493,10 +496,12 @@
 				135C40F0256B074E00CB5B2E /* SendSmsPublisher.swift in Sources */,
 				13018994255B9246001BD60D /* AppDelegate.swift in Sources */,
 				13018996255B9246001BD60D /* SceneDelegate.swift in Sources */,
+				13BADB43256C360B00DA5BCE /* DeviceRegistrationStore.swift in Sources */,
 				139CF334255B9F1D00F9EA05 /* SmsThread.swift in Sources */,
 				139CF33C255BA11500F9EA05 /* ReceivedSmsMessage.swift in Sources */,
 				135D0A732569C5B0004B9CB6 /* DeviceRegistrationService.swift in Sources */,
-				136D2A0025645D2200A09397 /* DeviceViewModel.swift in Sources */,
+				13BADB41256C31F000DA5BCE /* MQTTService.swift in Sources */,
+				136D2A0025645D2200A09397 /* DevicesStore.swift in Sources */,
 				139CF303255B97D100F9EA05 /* SessionStore.swift in Sources */,
 				139CF32E255B9E9600F9EA05 /* SmsThreadsView.swift in Sources */,
 				135C40E8256AF90600CB5B2E /* ReceivedSmsListener.swift in Sources */,
@@ -525,9 +530,8 @@
 				1332DC632565E31B00A65CE9 /* AppContext.swift in Sources */,
 				139CF30B255B99C000F9EA05 /* DeviceActionsList.swift in Sources */,
 				139CF344255BA27200F9EA05 /* NewSmsMessageView.swift in Sources */,
-				136D2A082564938800A09397 /* ContentViewModel.swift in Sources */,
-				1324DDA4255DBA62009BCC0A /* MQTTClientAuthObserver.swift in Sources */,
 				139CF342255BA18200F9EA05 /* SmsMessagesView.swift in Sources */,
+				138E39A6256B8596007661B4 /* AppStateStore.swift in Sources */,
 				136D2A062564692400A09397 /* DeviceWebService.swift in Sources */,
 				1332DC5D2565C20200A65CE9 /* SmsThreadsViewModel.swift in Sources */,
 				1332DC5B2565B39900A65CE9 /* IncomingPingHandler.swift in Sources */,

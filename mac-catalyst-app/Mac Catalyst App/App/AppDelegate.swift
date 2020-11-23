@@ -19,16 +19,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     
     override init() {
         self.context = AppContext()
-        self.mqtt = MqttAppDelegate(
-            context.mqttClient,
-            context.mqttSubscriber,
-            context.mqttPublisher,
-            context.sessionStore,
-            context.deviceWebService,
-            context.deviceRegistrationService,
-            context.receivedPingService
-        )
-        self.firebase = FirebaseAppDelegate()
+        self.mqtt = MqttAppDelegate(context.mqttService)
+        self.firebase = FirebaseAppDelegate(context.sessionStore)
     }
     
     // Override point for customization after application launch.

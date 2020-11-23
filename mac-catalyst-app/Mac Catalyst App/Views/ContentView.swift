@@ -19,30 +19,46 @@ struct NavigationLazyView<Content: View>: View {
 }
 
 struct ContentView: View {
-    @EnvironmentObject var contentViewModel: ContentViewModel
+    @EnvironmentObject var appState: AppStateStore
     @EnvironmentObject var sessionStore: SessionStore
-    @EnvironmentObject var deviceViewModel: DeviceViewModel
+    @EnvironmentObject var devicesStore: DevicesStore
+    @EnvironmentObject var deviceRegistrationStore: DeviceRegistrationStore
             
     var body: some View {
-        return VStack {
-            if (!self.sessionStore.currentSession.isSignedIn) {
+        HStack {
+            if self.sessionStore.currentSession == nil {
                 SignInView()
                 
-            } else if (self.contentViewModel.isAddDevicePagePresent) {
+            } else if self.appState.curState == .DeviceRegistration {
                 AddDeviceView()
                 
             } else {
                 DevicesListView()
             }
         }
-        .sheet(isPresented: self.$contentViewModel.isSettingsDialogPresent) {
+        .sheet(isPresented: self.$appState.showSettingsDialog) {
             SettingsView()
-                .environmentObject(self.contentViewModel)
                 .environmentObject(self.sessionStore)
-                .environmentObject(self.deviceViewModel)
+                .environmentObject(self.devicesStore)
+                .environmentObject(self.deviceRegistrationStore)
         }
         .onAppear {
-            self.sessionStore.bindListeners()
+            self.deviceRegistrationStore.checkIfCurrentDeviceIsRegistered() { err in
+                if let err = err {
+                    print("Error: \(err.localizedDescription)")
+                    return
+                }
+                                    
+                if !self.sessionStore.isSignedIn() {
+                    self.appState.curState = .Auth
+                    
+                } else if !self.deviceRegistrationStore.isRegistered {
+                    self.appState.curState = .DeviceRegistration
+                    
+                } else {
+                    self.appState.curState = .DevicesList
+                }
+            }
         }
     }
 }

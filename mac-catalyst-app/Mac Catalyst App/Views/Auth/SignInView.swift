@@ -9,9 +9,11 @@
 import SwiftUI
 
 struct SignInView: View {
-    @EnvironmentObject var contentViewModel: ContentViewModel
+    @EnvironmentObject var appState: AppStateStore
     @EnvironmentObject var sessionStore: SessionStore
-    @EnvironmentObject var deviceViewModel: DeviceViewModel
+    
+    
+    @EnvironmentObject var deviceRegistrationStore: DeviceRegistrationStore
     
     @Environment(\.presentationMode) var presentation
     @State private var email = "";
@@ -79,11 +81,16 @@ struct SignInView: View {
             
             print("Successfully signed in")
             
-            let authToken = self.sessionStore.currentSession.accessToken
-            self.deviceViewModel.checkIfCurrentDeviceIsRegistered(authToken) { err in
+            self.deviceRegistrationStore.checkIfCurrentDeviceIsRegistered() { err in
                 if let err = err {
                     self.error = "An error occured: \(err.localizedDescription)"
                     return
+                }
+                
+                if self.deviceRegistrationStore.isRegistered {
+                    self.appState.curState = .DevicesList
+                } else {
+                    self.appState.curState = .DeviceRegistration
                 }
                 
                 self.presentation.wrappedValue.dismiss()

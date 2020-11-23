@@ -112,7 +112,7 @@ class MQTTClient: CocoaMQTTDelegate {
         print("didConnectAck: \(ack)")
         self.mqttDidConnectAckListener?.handler?(mqtt, ack)
         
-        if !(ack == .accept) {
+        if ack != .accept && ack != .badUsernameOrPassword {
             mqtt.disconnect()
         }
     }
@@ -155,6 +155,5 @@ class MQTTClient: CocoaMQTTDelegate {
     internal func mqttDidDisconnect(_ mqtt: CocoaMQTT, withError err: Error?) {
         print("mqttDidDisconnect: \(err?.localizedDescription ?? "")")
         self.mqttDidDisconnectListener?.handler?(mqtt, err)
-        _ = self.connect()
     }
 }

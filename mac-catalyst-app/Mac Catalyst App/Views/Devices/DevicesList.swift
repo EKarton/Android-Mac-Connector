@@ -9,15 +9,15 @@
 import SwiftUI
 
 struct DevicesListView: View {
-    @EnvironmentObject var contentViewModel: ContentViewModel
-    @EnvironmentObject var deviceViewModel: DeviceViewModel
+    @EnvironmentObject var appState: AppStateStore
+    @EnvironmentObject var devicesStore: DevicesStore
     @EnvironmentObject var sessionStore: SessionStore
     
     @State private var devicesList = [Device]()
     
     var body: some View {
         NavigationView {
-            List(self.deviceViewModel.devices, id: \.id) { device in
+            List(self.devicesStore.devices, id: \.id) { device in
                 NavigationLink(destination: DeviceActionsList(device: device)) {
                     HStack {
                         Text(device.name)
@@ -41,15 +41,15 @@ struct DevicesListView: View {
     }
     
     private func onAppearHandler() {
-        self.deviceViewModel.fetchDevices(sessionStore.currentSession.accessToken) { err in
-            if let err = err {
-                print("Encountered error when fetching devices: \(err.localizedDescription)")
-            }
-        }
+        fetchDevicesList()
     }
     
     private func onRefreshButtonClicked() {
-        self.deviceViewModel.fetchDevices(sessionStore.currentSession.accessToken) { err in
+        fetchDevicesList()
+    }
+    
+    private func fetchDevicesList() {
+        self.devicesStore.fetchDevices() { err in
             if let err = err {
                 print("Encountered error when fetching devices: \(err.localizedDescription)")
             }
@@ -58,7 +58,7 @@ struct DevicesListView: View {
     
     private func onSettingsButtonClicked() {
         print("Settings button clicked")
-        self.contentViewModel.showSettingsDialog()
+        appState.showSettingsDialog = true
     }
 }
 

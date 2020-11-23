@@ -9,9 +9,10 @@
 import SwiftUI
 
 struct SettingsView: View {
-    @EnvironmentObject var contentViewModel: ContentViewModel
+    @EnvironmentObject var appState: AppStateStore
     @EnvironmentObject var sessionStore: SessionStore
-    @EnvironmentObject var deviceViewModel: DeviceViewModel
+    @EnvironmentObject var deviceRegistrationStore: DeviceRegistrationStore
+    @EnvironmentObject var deviceStore: DevicesStore
     
     @State private var isDeviceRegistrationLoading = false
         
@@ -20,14 +21,14 @@ struct SettingsView: View {
             Form {
                 Section(header: Text("Device registration")) {
                     Button(action: self.onAddRemoveDeviceButtonClicked) {
-                        Text(deviceViewModel.isRegistered ?
+                        Text(deviceRegistrationStore.isRegistered ?
                             "Remove this device from your account" :
                             "Add this device to your account"
                         )
                     }.disabled(self.isDeviceRegistrationLoading)
                 }
                 
-                Section(header: Text("Account settings (bla@gmail.com)")) {
+                Section(header: Text("Account settings \(sessionStore.currentSession?.email ?? "")")) {
                     Button(action: self.onSignOutButtonClicked) {
                         Text("Sign out")
                     }
@@ -44,8 +45,7 @@ struct SettingsView: View {
     }
     
     private func onAppear() {
-        let authToken = sessionStore.currentSession.accessToken
-        self.deviceViewModel.checkIfCurrentDeviceIsRegistered(authToken) { err in
+        self.deviceRegistrationStore.checkIfCurrentDeviceIsRegistered() { err in
             if let err = err {
                 print("Error when trying to see if device is registered or not: \(err)")
                 return
@@ -55,7 +55,7 @@ struct SettingsView: View {
     
     private func onAddRemoveDeviceButtonClicked() {
         self.isDeviceRegistrationLoading = true
-        if self.deviceViewModel.isRegistered {
+        if self.deviceRegistrationStore.isRegistered {
             unregisterDevice()
             
         } else {
@@ -64,8 +64,7 @@ struct SettingsView: View {
     }
     
     private func unregisterDevice() {
-        let authToken = sessionStore.currentSession.accessToken
-        deviceViewModel.unregisterDevice(authToken) { err in
+        deviceRegistrationStore.unregisterDevice() { err in
             if let err = err {
                 print("Error when unregistering device: \(err.localizedDescription)")
                 self.isDeviceRegistrationLoading = false
@@ -73,52 +72,32 @@ struct SettingsView: View {
             }
             
             print("Successfully unregistered device")
-            self.refreshDevices()
+            
+            self.deviceStore.fetchDevices() { err in
+                if let err = err {
+                    print("Error when fetching devices: \(err.localizedDescription)")
+                    self.isDeviceRegistrationLoading = false
+                    return
+                }
+                
+                self.isDeviceRegistrationLoading = false
+                self.appState.showSettingsDialog = false
+            }
         }
     }
     
     private func registerDevice() {
-        deviceViewModel.registerDevice() { err in
-            if let err = err {
-                print("Error when registering device: \(err.localizedDescription)")
-                self.isDeviceRegistrationLoading = false
-                return
-            }
-            
-            print("Successfully registered device")
-            self.refreshDevices()
-        }
-    }
-    
-    private func refreshDevices() {
-        let authToken = sessionStore.currentSession.accessToken
-        self.deviceViewModel.fetchDevices(authToken) { err in
-            if let err = err {
-                print("Error when fetching devices: \(err.localizedDescription)")
-                self.isDeviceRegistrationLoading = false
-                return
-            }
-            self.isDeviceRegistrationLoading = false
-            self.contentViewModel.hideSettingsDialog()
-        }
+        self.appState.curState = .DeviceRegistration
+        self.appState.showSettingsDialog = false
     }
     
     private func onSignOutButtonClicked() {
         sessionStore.signOut()
-        self.contentViewModel.hideSettingsDialog()
+        self.appState.curState = .Auth
+        self.appState.showSettingsDialog = false
     }
     
     private func onCloseButtonClicked() {
-        self.contentViewModel.hideSettingsDialog()
-    }
-}
-
-struct SettingsView_Previews: PreviewProvider {
-    static var previews: some View {
-        Text("Hello world")
-//        Group {
-//            SettingsView()
-//            SettingsView()
-//        }
+        self.appState.showSettingsDialog = false
     }
 }

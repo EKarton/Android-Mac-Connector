@@ -107,7 +107,7 @@ class MockedDeviceWebService: DeviceWebService {
 }
 
 //
-// This class is used to interface with the rest api
+// This class is a stateless service used to interface with the rest api
 //
 class DeviceWebServiceImpl: DeviceWebService {
     private let isDeviceRegisteredUrl = "http://192.168.0.102:3000/api/v1/devices/registered"

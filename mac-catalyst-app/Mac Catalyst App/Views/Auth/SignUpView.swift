@@ -52,6 +52,7 @@ struct SignUpView: View {
             }
         }
         .padding(20)
+        .frame(maxWidth: 500)
     }
     
     func handleSignUp() {

@@ -9,9 +9,12 @@
 import SwiftUI
 
 struct AddDeviceView: View {
-    @EnvironmentObject var contentViewModel: ContentViewModel
+    @Environment(\.presentationMode) var presentation
+    @EnvironmentObject var appState: AppStateStore
     @EnvironmentObject var sessionStore: SessionStore
-    @EnvironmentObject var deviceViewModel: DeviceViewModel
+    @EnvironmentObject var deviceRegistrationStore: DeviceRegistrationStore
+    @EnvironmentObject var deviceStore: DevicesStore
+    
     @State private var error = ""
     
     var body: some View {
@@ -65,28 +68,29 @@ struct AddDeviceView: View {
     
     private func onRegisterDeviceButtonClick() {
         print("Register device button clicked")
-        let authToken = sessionStore.currentSession.accessToken
         
-        deviceViewModel.registerDevice() { err1 in
+        deviceRegistrationStore.registerDevice() { err1 in
             if let err1 = err1 {
                 self.error = err1.localizedDescription
                 return
             }
             
-            self.deviceViewModel.fetchDevices(authToken) { err2 in
+            self.deviceStore.fetchDevices() { err2 in
                 if let err2 = err2 {
                     self.error = err2.localizedDescription
                     return
                 }
                 
-                self.contentViewModel.goToDevicesPage()
+                self.appState.curState = .DevicesList
+                self.presentation.wrappedValue.dismiss()
             }
         }
     }
     
     private func onCancelButtonClick() {
         print("Cancel button clicked")
-        self.contentViewModel.goToDevicesPage()
+        self.appState.curState = .DevicesList
+        self.presentation.wrappedValue.dismiss()
     }
 }
 
