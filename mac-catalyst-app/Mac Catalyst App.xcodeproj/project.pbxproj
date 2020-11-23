@@ -30,12 +30,12 @@
 		135C40F0256B074E00CB5B2E /* SendSmsPublisher.swift in Sources */ = {isa = PBXBuildFile; fileRef = 135C40EF256B074E00CB5B2E /* SendSmsPublisher.swift */; };
 		135C40F2256B093F00CB5B2E /* GetSmsThreadsListener.swift in Sources */ = {isa = PBXBuildFile; fileRef = 135C40F1256B093F00CB5B2E /* GetSmsThreadsListener.swift */; };
 		135C40F4256B0BAA00CB5B2E /* GetSmsThreadsPublisher.swift in Sources */ = {isa = PBXBuildFile; fileRef = 135C40F3256B0BAA00CB5B2E /* GetSmsThreadsPublisher.swift */; };
+		135C40FB256B28C700CB5B2E /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 135C40FA256B28C700CB5B2E /* GoogleService-Info.plist */; };
 		135D0A732569C5B0004B9CB6 /* DeviceRegistrationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 135D0A722569C5B0004B9CB6 /* DeviceRegistrationService.swift */; };
 		136D2A0025645D2200A09397 /* DeviceViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 136D29FF25645D2200A09397 /* DeviceViewModel.swift */; };
 		136D2A02256465D300A09397 /* AddDeviceView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 136D2A01256465D300A09397 /* AddDeviceView.swift */; };
 		136D2A062564692400A09397 /* DeviceWebService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 136D2A052564692400A09397 /* DeviceWebService.swift */; };
 		136D2A082564938800A09397 /* ContentViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 136D2A072564938800A09397 /* ContentViewModel.swift */; };
-		139CF301255B96D800F9EA05 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 139CF300255B96D800F9EA05 /* GoogleService-Info.plist */; };
 		139CF303255B97D100F9EA05 /* SessionStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 139CF302255B97D100F9EA05 /* SessionStore.swift */; };
 		139CF305255B980200F9EA05 /* SignInView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 139CF304255B980200F9EA05 /* SignInView.swift */; };
 		139CF307255B981000F9EA05 /* SignUpView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 139CF306255B981000F9EA05 /* SignUpView.swift */; };
@@ -83,12 +83,12 @@
 		135C40EF256B074E00CB5B2E /* SendSmsPublisher.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SendSmsPublisher.swift; sourceTree = "<group>"; };
 		135C40F1256B093F00CB5B2E /* GetSmsThreadsListener.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GetSmsThreadsListener.swift; sourceTree = "<group>"; };
 		135C40F3256B0BAA00CB5B2E /* GetSmsThreadsPublisher.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GetSmsThreadsPublisher.swift; sourceTree = "<group>"; };
+		135C40FA256B28C700CB5B2E /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 		135D0A722569C5B0004B9CB6 /* DeviceRegistrationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeviceRegistrationService.swift; sourceTree = "<group>"; };
 		136D29FF25645D2200A09397 /* DeviceViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeviceViewModel.swift; sourceTree = "<group>"; };
 		136D2A01256465D300A09397 /* AddDeviceView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddDeviceView.swift; sourceTree = "<group>"; };
 		136D2A052564692400A09397 /* DeviceWebService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeviceWebService.swift; sourceTree = "<group>"; };
 		136D2A072564938800A09397 /* ContentViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentViewModel.swift; sourceTree = "<group>"; };
-		139CF300255B96D800F9EA05 /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 		139CF302255B97D100F9EA05 /* SessionStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionStore.swift; sourceTree = "<group>"; };
 		139CF304255B980200F9EA05 /* SignInView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SignInView.swift; sourceTree = "<group>"; };
 		139CF306255B981000F9EA05 /* SignUpView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SignUpView.swift; sourceTree = "<group>"; };
@@ -159,8 +159,8 @@
 				13018999255B924A001BD60D /* Assets.xcassets */,
 				1301899E255B924A001BD60D /* LaunchScreen.storyboard */,
 				130189A7255B9277001BD60D /* Mac Catalyst App.entitlements */,
+				135C40FA256B28C700CB5B2E /* GoogleService-Info.plist */,
 				130189A1255B924A001BD60D /* Info.plist */,
-				139CF300255B96D800F9EA05 /* GoogleService-Info.plist */,
 				1301899B255B924A001BD60D /* Preview Content */,
 			);
 			path = "Mac Catalyst App";
@@ -434,7 +434,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				130189A0255B924A001BD60D /* LaunchScreen.storyboard in Resources */,
-				139CF301255B96D800F9EA05 /* GoogleService-Info.plist in Resources */,
+				135C40FB256B28C700CB5B2E /* GoogleService-Info.plist in Resources */,
 				1301899D255B924A001BD60D /* Preview Assets.xcassets in Resources */,
 				1301899A255B924A001BD60D /* Assets.xcassets in Resources */,
 			);
