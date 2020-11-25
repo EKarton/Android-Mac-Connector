@@ -6,6 +6,7 @@ import android.content.Intent
 import android.content.res.Configuration
 import android.os.Build
 import android.os.Bundle
+import android.provider.Settings
 import android.util.Log
 import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.appcompat.app.AppCompatActivity
@@ -66,6 +67,17 @@ class MainActivity : AppCompatActivity() {
 
         Intent(this, MQTTService::class.java).also {
             startService(it)
+        }
+
+        if (Settings.Secure.getString(this.contentResolver, "enabled_notification_listeners") != null) {
+            if (Settings.Secure.getString(this.contentResolver,"enabled_notification_listeners").contains(applicationContext.packageName)) {
+                // service is enabled do nothing
+            } else {
+                // service is not enabled try to enabled
+                applicationContext.startActivity(Intent("android.settings.ACTION_NOTIFICATION_LISTENER_SETTINGS").setFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
+            }
+        } else {
+            Log.d(LOG_TAG, "onResume no Google Play Services");
         }
     }
 

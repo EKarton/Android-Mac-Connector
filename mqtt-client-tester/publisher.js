@@ -1,13 +1,13 @@
 var mqtt = require('mqtt')
 
-var client  = mqtt.connect('ws://192.168.0.102:8888', {
+var client  = mqtt.connect('ws://192.168.0.102:3000', {
   clientId: '',
   username: '',
   password: ''
 })
  
 client.on('connect', function () {
-  const deviceId = 'WRF2KV4cefu0HuH8LDks'
+  const deviceId = 'nwG5p0msxbiq0kzrpEy7'
   const publishOptions = {
     qos: 2,
     retain: true
@@ -37,12 +37,31 @@ client.on('connect', function () {
   //   client.end()
   // })
 
-  const queryMessages = {
-    "limit": 10,
-    "start": 0,
-    "thread_id": 12,
+  // const queryMessages = {
+  //   "limit": 10,
+  //   "start": 0,
+  //   "thread_id": 12,
+  // }
+  // client.publish(`${deviceId}/sms/messages/query-requests`, JSON.stringify(queryMessages), publishOptions, (error, packet) => {
+  //   if (error) {
+  //     console.error(error)
+  //   }
+  //   client.end()
+  // })
+
+  // const notificationResponse = {
+  //   "key": "0|com.facebook.orca|10000|ONE_TO_ONE:100058025457291:100053450498376|10155",
+  //   "action_type": "direct_reply_action",
+  //   "action_title": "Reply",
+  //   "action_reply_message": "This is a generated test message"
+  // }
+  const notificationResponse = {
+    "key": "0|com.facebook.orca|10000|ONE_TO_ONE:100058025457291:100053450498376|10155",
+    "action_type": "action_button",
+    "action_title": "Like"
   }
-  client.publish(`${deviceId}/sms/messages/query-requests`, JSON.stringify(queryMessages), publishOptions, (error, packet) => {
+
+  client.publish(`${deviceId}/notification/responses`, JSON.stringify(notificationResponse), publishOptions, (error, packet) => {
     if (error) {
       console.error(error)
     }

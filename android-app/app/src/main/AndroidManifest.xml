@@ -39,7 +39,9 @@
             <intent-filter>
                 <action android:name="android.provider.Telephony.SMS_RECEIVED" />
             </intent-filter>
-        </receiver> <!-- The firebase messaging service -->
+        </receiver>
+
+        <!-- The firebase messaging service -->
         <service
             android:name=".fcm.FcmService"
             android:exported="false"
@@ -68,6 +70,8 @@
             android:name=".sms.sender.SendSmsReceiver"
             android:enabled="true"
             android:exported="true" />
+
+        <!-- Receive and respond to sms queries -->
         <receiver
             android:name=".sms.threads.ReadSmsThreadsReceiver"
             android:enabled="true"
@@ -76,6 +80,15 @@
             android:name=".sms.messages.ReadSmsMessagesReceiver"
             android:enabled="true"
             android:exported="true" />
+
+        <!-- Listen to app notifications -->
+        <service android:name=".notifications.NotificationsListener"
+            android:label="@string/app_name"
+            android:permission="android.permission.BIND_NOTIFICATION_LISTENER_SERVICE">
+            <intent-filter>
+                <action android:name="android.service.notification.NotificationListenerService" />
+            </intent-filter>
+        </service>
     </application>
 
 </manifest>

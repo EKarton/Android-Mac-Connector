@@ -3,12 +3,14 @@ package com.androidmacconnector.androidapp.mqtt
 import android.app.Service
 import android.content.Intent
 import android.net.Uri
+import android.os.Build
 import android.os.IBinder
 import android.util.Log
 import com.androidmacconnector.androidapp.R
 import com.androidmacconnector.androidapp.auth.SessionStoreImpl
 import com.androidmacconnector.androidapp.devices.DeviceRegistrationService
 import com.androidmacconnector.androidapp.devices.DeviceWebServiceImpl
+import com.androidmacconnector.androidapp.notifications.NotificationsListener
 import com.androidmacconnector.androidapp.ping.IncomingPingReceiver
 import com.androidmacconnector.androidapp.sms.messages.ReadSmsMessagesReceiver
 import com.androidmacconnector.androidapp.sms.sender.SendSmsReceiver
@@ -23,7 +25,7 @@ class MQTTService: Service() {
     private var client: MQTTClient? = null
 
     companion object {
-        private const val LOG_TAG = "MqttClientService"
+        private const val LOG_TAG = "MqttService"
         const val PUBLISH_INTENT_ACTION = "com.androidmacconnector.androidapp.mqtt.intent.action.PUBLISH"
     }
 
@@ -120,17 +122,28 @@ class MQTTService: Service() {
                 sendBroadcastIntent(IncomingPingReceiver::class.java, msg)
             }
         }
+
+        this.client?.subscribe("$deviceId/${NotificationsListener.RESPONSE_TOPIC}", 2) { msg, err ->
+            if (msg != null && err == null) {
+                val intent = createIntent(NotificationsListener::class.java, msg)
+                intent.action = NotificationsListener.RESPONSE_ACTION
+                startService(intent)
+            }
+        }
     }
 
     private fun sendBroadcastIntent(cls: Class<*>, message: MqttMessage) {
-        val intent = Intent(applicationContext, cls).also { intent ->
+        applicationContext.sendBroadcast(createIntent(cls, message))
+    }
+
+    private fun createIntent(cls: Class<*>, message: MqttMessage): Intent {
+        return Intent(applicationContext, cls).also { intent ->
             intent.putExtra("payload", String(message.payload))
             intent.putExtra("id", message.id)
             intent.putExtra("is_duplicate", message.isDuplicate)
             intent.putExtra("is_retained", message.isRetained)
             intent.putExtra("qos", message.qos)
         }
-        applicationContext.sendBroadcast(intent)
     }
 
     /**
