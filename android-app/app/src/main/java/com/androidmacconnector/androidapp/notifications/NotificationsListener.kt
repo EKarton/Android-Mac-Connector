@@ -7,6 +7,7 @@ import android.service.notification.NotificationListenerService
 import android.service.notification.StatusBarNotification
 import android.util.Log
 import androidx.annotation.RequiresApi
+import androidx.core.app.NotificationCompat
 import org.json.JSONObject
 
 /**
@@ -38,7 +39,7 @@ class NotificationsListener: NotificationListenerService() {
     override fun onNotificationPosted(sbn: StatusBarNotification?) {
         super.onNotificationPosted(sbn)
 
-        if (sbn != null && isNotificationPublishable(sbn.notification)) {
+        if (sbn != null && isNotificationPublishable(sbn)) {
             this.publisher.publishNotification(sbn)
         }
     }
@@ -53,12 +54,22 @@ class NotificationsListener: NotificationListenerService() {
         Log.d(LOG_TAG, "Notification removed: ${sbn?.key}")
     }
 
+    private var previousKey: String? = null
+    private var previousTimePosted: Long = 0
+    private var previousTitle: String? = null
+    private var previousText: String? = null
+
     /**
      * Checks if the notification is a notification that we want to publish
      * There are notifications that we don't want to publish, such as notification histories,
      * ongoing events (like downloads), notifications from foreground services, etc.
      */
-    private fun isNotificationPublishable(notification: Notification): Boolean {
+    @RequiresApi(Build.VERSION_CODES.KITKAT_WATCH)
+    private fun isNotificationPublishable(sbn: StatusBarNotification): Boolean {
+        val notification = sbn.notification
+
+        Log.d(LOG_TAG, "Notification flag: ${notification.flags}")
+
         // Ignore events that represent foreground services
         if ((notification.flags and Notification.FLAG_FOREGROUND_SERVICE) != 0) {
             Log.d(LOG_TAG, "Is foreground services")
@@ -90,7 +101,52 @@ class NotificationsListener: NotificationListenerService() {
             return false
         }
 
+        if ((sbn.key == previousKey) && (notification.`when` == previousTimePosted) && getTitle(sbn) == previousTitle && getContentText(sbn) == previousText) {
+            Log.d(LOG_TAG, "Is duplicate")
+            return false
+        }
+
+        Log.d(LOG_TAG, "Updating previous")
+
+        previousKey = sbn.key
+        previousTimePosted = notification.`when`
+        previousTitle = getTitle(sbn)
+        previousText = getContentText(sbn)
+
         return true
+    }
+
+    /**
+     * Obtains the title from the notification
+     */
+    private fun getTitle(sbn: StatusBarNotification): String? {
+        val notification = sbn.notification ?: return null
+        val extras = notification.extras
+
+        // The content title is from the bundle too
+        // https://developer.android.com/reference/android/app/Notification#EXTRA_TITLE
+        return extras.getString(NotificationCompat.EXTRA_TITLE)
+    }
+
+    /**
+     * Gets the text from the notification
+     */
+    private fun getContentText(sbn: StatusBarNotification): String? {
+        val notification = sbn.notification ?: return null
+
+        val extras = notification.extras
+
+        // The context text is from the bundle
+        // https://developer.android.com/reference/android/app/Notification#EXTRA_TEXT
+        if (extras.containsKey(NotificationCompat.EXTRA_BIG_TEXT)) {
+            return extras.getString(NotificationCompat.EXTRA_BIG_TEXT)
+        }
+
+        if (extras.containsKey(NotificationCompat.EXTRA_TEXT)) {
+            return extras.getString(NotificationCompat.EXTRA_TEXT)
+        }
+
+        return null
     }
 
     @RequiresApi(Build.VERSION_CODES.LOLLIPOP)

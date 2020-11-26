@@ -13,27 +13,33 @@ struct Device: Identifiable, Decodable {
     var capabilities: [String]
     var phoneNumber: String?
     
-    var hasPingDeviceCapability: Bool {
+    var canBePinged: Bool {
         if (capabilities.contains("ping_device")) {
             return true
         }
         return false
     }
     
-    var hasReadSmsCapability: Bool {
+    var canReadSms: Bool {
         return capabilities.contains("read_sms")
     }
     
-    var hasSendSmsCapability: Bool {
+    var canSendSms: Bool {
         return capabilities.contains("send_sms")
     }
     
-    var hasReceiveSmsCapability: Bool {
+    var canReceiveSms: Bool {
         return capabilities.contains("receive_sms")
     }
     
     var hasSmsCapability: Bool {
-        return hasReadSmsCapability || hasSendSmsCapability || hasReceiveSmsCapability
+        return canReadSms || canSendSms || canReceiveSms
+    }
+    
+    var canReceiveAppNotifications: Bool {
+        
+        // TODO: Handle permissions
+        return true
     }
 }
 

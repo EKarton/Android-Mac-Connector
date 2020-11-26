@@ -23,7 +23,7 @@ import org.json.JSONObject
 class NewNotificationsPublisher(private var context: Context) {
 
     companion object {
-        const val LOG_TAG = "GetSmsMessagesReceiver"
+        const val LOG_TAG = "NewNotificationsPub"
         const val TOPIC = "notification/new"
     }
 

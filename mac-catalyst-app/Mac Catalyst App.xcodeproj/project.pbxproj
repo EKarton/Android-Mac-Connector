@@ -35,6 +35,7 @@
 		136D2A02256465D300A09397 /* AddDeviceView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 136D2A01256465D300A09397 /* AddDeviceView.swift */; };
 		136D2A062564692400A09397 /* DeviceWebService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 136D2A052564692400A09397 /* DeviceWebService.swift */; };
 		138E39A6256B8596007661B4 /* AppStateStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 138E39A5256B8596007661B4 /* AppStateStore.swift */; };
+		139B0AB5256F308F00A3160A /* Notification.swift in Sources */ = {isa = PBXBuildFile; fileRef = 139B0AB4256F308F00A3160A /* Notification.swift */; };
 		139CF303255B97D100F9EA05 /* SessionStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 139CF302255B97D100F9EA05 /* SessionStore.swift */; };
 		139CF305255B980200F9EA05 /* SignInView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 139CF304255B980200F9EA05 /* SignInView.swift */; };
 		139CF307255B981000F9EA05 /* SignUpView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 139CF306255B981000F9EA05 /* SignUpView.swift */; };
@@ -89,6 +90,7 @@
 		136D2A01256465D300A09397 /* AddDeviceView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddDeviceView.swift; sourceTree = "<group>"; };
 		136D2A052564692400A09397 /* DeviceWebService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeviceWebService.swift; sourceTree = "<group>"; };
 		138E39A5256B8596007661B4 /* AppStateStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppStateStore.swift; sourceTree = "<group>"; };
+		139B0AB4256F308F00A3160A /* Notification.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Notification.swift; sourceTree = "<group>"; };
 		139CF302255B97D100F9EA05 /* SessionStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionStore.swift; sourceTree = "<group>"; };
 		139CF304255B980200F9EA05 /* SignInView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SignInView.swift; sourceTree = "<group>"; };
 		139CF306255B981000F9EA05 /* SignUpView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SignUpView.swift; sourceTree = "<group>"; };
@@ -302,6 +304,7 @@
 				139CF348255BA34000F9EA05 /* MQTT */,
 				1332DC592565B1DF00A65CE9 /* Ping */,
 				139CF349255BA34700F9EA05 /* SMS */,
+				139B0AB4256F308F00A3160A /* Notification.swift */,
 			);
 			path = Model;
 			sourceTree = "<group>";
@@ -500,6 +503,7 @@
 				139CF334255B9F1D00F9EA05 /* SmsThread.swift in Sources */,
 				139CF33C255BA11500F9EA05 /* ReceivedSmsMessage.swift in Sources */,
 				135D0A732569C5B0004B9CB6 /* DeviceRegistrationService.swift in Sources */,
+				139B0AB5256F308F00A3160A /* Notification.swift in Sources */,
 				13BADB41256C31F000DA5BCE /* MQTTService.swift in Sources */,
 				136D2A0025645D2200A09397 /* DevicesStore.swift in Sources */,
 				139CF303255B97D100F9EA05 /* SessionStore.swift in Sources */,

@@ -19,7 +19,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     
     override init() {
         self.context = AppContext()
-        self.mqtt = MqttAppDelegate(context.mqttService)
+        self.mqtt = MqttAppDelegate(context.mqttService, context.mqttPublisher)
         self.firebase = FirebaseAppDelegate(context.sessionStore)
     }
     
@@ -38,7 +38,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     // Called when a new scene session is being created.
     // Use this method to select a configuration to create the new scene with.
     func application(_ application: UIApplication, configurationForConnecting connectingSceneSession: UISceneSession, options: UIScene.ConnectionOptions) -> UISceneConfiguration {
-                
         return UISceneConfiguration(name: "Default Configuration", sessionRole: connectingSceneSession.role)
     }
 

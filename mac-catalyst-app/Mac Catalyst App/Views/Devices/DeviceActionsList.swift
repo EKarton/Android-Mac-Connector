@@ -15,7 +15,7 @@ struct DeviceActionsList: View {
     
     var body: some View {
         List {
-            if device.hasPingDeviceCapability {
+            if device.canBePinged {
                 Button(action: self.pingDevice) {
                     Text("Ping device")
                 }

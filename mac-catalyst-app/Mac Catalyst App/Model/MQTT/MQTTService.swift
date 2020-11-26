@@ -23,6 +23,9 @@ class MQTTService: SessionStoreObserver, DeviceRegistrationStoreObserver {
     
     private let incomingPingHandler: IncomingPingHandler
     
+    private let jsonDecoder = JSONDecoder()
+    private let jsonEncoder = JSONEncoder()
+    
     init(
         _ mqttClient: MQTTClient,
         _ mqttSubscriber: MQTTSubscriptionClient,
@@ -43,6 +46,8 @@ class MQTTService: SessionStoreObserver, DeviceRegistrationStoreObserver {
         self.deviceRegistrationStore = deviceRegistrationStore
         
         self.incomingPingHandler = pingRequestHandler
+        self.jsonDecoder.keyDecodingStrategy = .convertFromSnakeCase
+        self.jsonEncoder.keyEncodingStrategy = .convertToSnakeCase
                 
         self.sessionStore.addObserver(self)
         self.deviceRegistrationStore.addObserver(self)
@@ -127,7 +132,7 @@ class MQTTService: SessionStoreObserver, DeviceRegistrationStoreObserver {
     }
     
     private func subscribeToDevice(_ device: Device) {
-        if device.hasReceiveSmsCapability {
+        if device.canReceiveSms {
             let topic = "\(device.id)/sms/new-messages"
             let subscriber = MQTTSubscriptionListener(topic)
             subscriber.setHandler { (msg: String?, err: Error?) in
@@ -144,14 +149,41 @@ class MQTTService: SessionStoreObserver, DeviceRegistrationStoreObserver {
                     return
                 }
                 
-                self.showNotification(msgStruct, device)
+                self.showSmsNotification(msgStruct, device)
+            }
+            self.mqttSubscriber.addSubscriptionListener(subscriber)
+            self.subscribeToTopic(topic)
+        }
+        
+        if device.canReceiveAppNotifications {
+            let topic = "\(device.id)/notification/new"
+            let subscriber = MQTTSubscriptionListener(topic)
+            subscriber.setHandler { (msg: String?, err: Error?) in
+                print("Received incoming notification")
+                guard let msg = msg else {
+                    return
+                }
+                
+                guard err == nil else {
+                    return
+                }
+                
+                guard let jsonData = msg.data(using: .utf8) else {
+                    return
+                }
+                
+                guard let msgStruct = try? self.jsonDecoder.decode(NewNotification.self, from: jsonData) else {
+                    return
+                }
+                
+                self.showAppNotification(msgStruct, device)
             }
             self.mqttSubscriber.addSubscriptionListener(subscriber)
             self.subscribeToTopic(topic)
         }
     }
     
-    private func showNotification(_ msg: ReceivedSmsMessage, _ device: Device) {
+    private func showSmsNotification(_ msg: ReceivedSmsMessage, _ device: Device) {
         let content = UNMutableNotificationContent()
         content.title = msg.phoneNumber
         content.subtitle = "From \(device.name)"
@@ -164,6 +196,39 @@ class MQTTService: SessionStoreObserver, DeviceRegistrationStoreObserver {
         // Add our notification request
         let request = UNNotificationRequest(identifier: UUID().uuidString, content: content, trigger: trigger)
         UNUserNotificationCenter.current().add(request)
+    }
+    
+    // MARK: App notifications
+    private func showAppNotification(_ msg: NewNotification, _ device: Device) {
+        // Create the content of the notification
+        let content = UNMutableNotificationContent()
+        content.title = msg.title ?? msg.appName ?? "From an app"
+        content.subtitle = "from \(device.name)"
+        content.body = msg.text ?? "New notification"
+        content.sound = UNNotificationSound.default
+        content.userInfo = ["device_id": device.id, "notification_id": msg.id]
+        
+        // Add the actions
+        var actions: [UNNotificationAction] = []
+        msg.actions.forEach { action in
+            if action.type == "action_button" {
+                actions.append(UNNotificationAction(identifier: action.text, title: action.text))
+                
+            } else if action.type == "direct_reply_action" {
+                actions.append(UNTextInputNotificationAction(
+                    identifier: action.text, title: action.text, options: []
+                ))
+            }
+        }
+        
+        let actionsCategory = UNNotificationCategory(identifier: msg.id,actions: actions, intentIdentifiers: [], options: [])
+        content.categoryIdentifier = actionsCategory.identifier
+        
+        let trigger = UNTimeIntervalNotificationTrigger(timeInterval: 5, repeats: false)
+        let request = UNNotificationRequest(identifier: UUID().uuidString, content: content, trigger: trigger)
+        
+        UNUserNotificationCenter.current().add(request)
+        UNUserNotificationCenter.current().setNotificationCategories([actionsCategory])
     }
     
     private func subscribeToTopic(_ topic: String) {
