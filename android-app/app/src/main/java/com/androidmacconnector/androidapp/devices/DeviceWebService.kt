@@ -41,7 +41,21 @@ data class Device(
     fun canReceiveSms(): Boolean {
         return capabilities.contains("receive_sms")
     }
+
+    fun canReceiveNotifications(): Boolean {
+        return capabilities.contains("receive_notifications")
+    }
+
+    fun canRespondToNotifications(): Boolean {
+        return capabilities.contains("respond_to_notifications")
+    }
 }
+
+data class UpdatedDevice(
+    val name: String?,
+    val type: String?,
+    val capabilities: List<String>?
+)
 
 /**
  * An interface for device management
@@ -51,6 +65,8 @@ interface DeviceWebService {
     fun registerDevice(authToken: String, deviceType: String, hardwareId: String, capabilities: List<String>, handler: (String?, Throwable?) -> Unit)
     fun unregisterDevice(authToken: String, deviceId: String, handler: (Throwable?) -> Unit)
     fun getDevices(authToken: String, handler: (List<Device>, Throwable?) -> Unit)
+    fun getDevice(authToken: String, deviceId: String, handler: (Device, Throwable?) -> Unit)
+    fun updateDevice(authToken: String, deviceId: String, updatedDevice: UpdatedDevice, handler: (Throwable?) -> Unit)
     fun updatePushNotificationToken(authToken: String, deviceId: String, newToken: String, handler: (Throwable?) -> Unit)
 }
 
@@ -64,6 +80,8 @@ class DeviceWebServiceImpl(private val context: Context): DeviceWebService {
         private const val REGISTER_DEVICE_PATH = "/api/v1/devices/register"
         private const val UNREGISTER_DEVICE_PATH = "api/v1/devices/%s"
         private const val GET_DEVICES_PATH = "/api/v1/devices"
+        private const val GET_DEVICE_INFO_PATH = "api/v1/devices/%s"
+        private const val UPDATE_DEVICE_INFO_PATH = "api/v1/devices/%s"
         private const val UPDATE_PUSH_NOTIFICATION_TOKEN_PATH = "/api/v1/devices/%s/token"
     }
 
@@ -202,6 +220,16 @@ class DeviceWebServiceImpl(private val context: Context): DeviceWebService {
 
             handler(devices, null)
         }
+    }
+
+    override fun getDevice(authToken: String, deviceId: String, handler: (Device, Throwable?) -> Unit) {
+        Log.d(LOG_TAG, "Getting device info for $deviceId")
+        TODO("Not yet implemented")
+    }
+
+    override fun updateDevice(authToken: String, deviceId: String, updatedDevice: UpdatedDevice, handler: (Throwable?) -> Unit) {
+        Log.d(LOG_TAG, "Updating device info for $deviceId")
+        TODO("Not yet implemented")
     }
 
     override fun updatePushNotificationToken(authToken: String, deviceId: String, newToken: String, handler: (Throwable?) -> Unit) {

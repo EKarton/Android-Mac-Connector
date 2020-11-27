@@ -1,14 +1,9 @@
 import { Router } from "express";
 import asyncHandler from "express-async-handler"
-import { Authenticator } from "../services/authenticator";
-import { createAuthenticateMiddleware } from "./middlewares";
 import { DeviceService } from "../services/device_service";
 
-export const createDeviceRouter = (authenticator: Authenticator, deviceService: DeviceService) => {
-  const router = Router();
-
-  // Middleware to authenticate user
-  router.use(createAuthenticateMiddleware(authenticator))
+export const createDeviceRouter = (deviceService: DeviceService) => {
+  const router = Router();  
 
   router.get("/registered", asyncHandler(async (req, res) => {
     const userId = req.header("user_id")
@@ -49,6 +44,26 @@ export const createDeviceRouter = (authenticator: Authenticator, deviceService: 
       "devices": devices
     })
   }))
+
+  router.get("/:deviceId", asyncHandler(async (req, res) => {
+    const deviceId = req.params.deviceId
+    const device = await deviceService.getDevice(deviceId)
+
+    res.setHeader('Content-Type', 'application/json');
+    res.status(200).json(device)
+  }));
+
+  router.put("/:deviceId", asyncHandler(async (req, res) => {
+    const deviceId = req.params.deviceId
+    const updatedProperties = req.body
+
+    await deviceService.updateDevice(deviceId, updatedProperties)
+
+    res.setHeader('Content-Type', 'application/json');
+    res.status(200).json({
+      "status": "success"
+    })
+  }));
 
   router.delete("/:deviceId", asyncHandler(async (req, res) => {
     const deviceId = req.params.deviceId

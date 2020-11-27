@@ -19,7 +19,7 @@ class SessionStoreImpl(private val firebaseAuth: FirebaseAuth): SessionStore {
     override fun getAuthToken(handler: (String, Exception?) -> Unit) {
         val user = firebaseAuth.currentUser
         if (user == null) {
-            handler("", null)
+            handler("", Exception("No user signed in"))
             return
         }
 

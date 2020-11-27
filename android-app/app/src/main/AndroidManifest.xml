@@ -17,10 +17,11 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.AndroidToMacContinuity">
-
+        <activity android:name=".notifications.AllowNotificationsActivity"></activity>
         <activity android:name=".MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
@@ -28,9 +29,7 @@
         <activity android:name=".devices.RegisterDeviceActivity" />
         <activity android:name=".auth.SignUpActivity" />
         <activity android:name=".devices.DeviceDetailsActivity" />
-        <activity android:name=".settings.SettingsActivity" />
-
-        <!-- The broadcast receiver for SMS messages -->
+        <activity android:name=".settings.SettingsActivity" /> <!-- The broadcast receiver for SMS messages -->
         <receiver
             android:name=".sms.receiver.ReceivedSmsReceiver"
             android:enabled="true"
@@ -39,9 +38,7 @@
             <intent-filter>
                 <action android:name="android.provider.Telephony.SMS_RECEIVED" />
             </intent-filter>
-        </receiver>
-
-        <!-- The firebase messaging service -->
+        </receiver> <!-- The firebase messaging service -->
         <service
             android:name=".fcm.FcmService"
             android:exported="false"
@@ -69,9 +66,7 @@
         <receiver
             android:name=".sms.sender.SendSmsReceiver"
             android:enabled="true"
-            android:exported="true" />
-
-        <!-- Receive and respond to sms queries -->
+            android:exported="true" /> <!-- Receive and respond to sms queries -->
         <receiver
             android:name=".sms.threads.ReadSmsThreadsReceiver"
             android:enabled="true"
@@ -79,10 +74,9 @@
         <receiver
             android:name=".sms.messages.ReadSmsMessagesReceiver"
             android:enabled="true"
-            android:exported="true" />
-
-        <!-- Listen to app notifications -->
-        <service android:name=".notifications.NotificationsListener"
+            android:exported="true" /> <!-- Listen to app notifications -->
+        <service
+            android:name=".notifications.NotificationsListener"
             android:label="@string/app_name"
             android:permission="android.permission.BIND_NOTIFICATION_LISTENER_SERVICE">
             <intent-filter>

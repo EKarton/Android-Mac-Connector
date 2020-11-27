@@ -5,6 +5,16 @@ export interface Authenticator {
   getUserIdFromToken(token: string): Promise<string>
 }
 
+export class AllowAllAuthenticator implements Authenticator {
+  authenticate(deviceId: string, username: string, password: string): Promise<boolean> {
+    return Promise.resolve(true)
+  }
+
+  getUserIdFromToken(token: string): Promise<string> {
+    return Promise.resolve("User-1234")
+  }
+}
+
 export class FirebaseAuthenticator implements Authenticator {
   private readonly firebaseAuth: auth.Auth;
   private readonly firestore: FirebaseFirestore.Firestore;

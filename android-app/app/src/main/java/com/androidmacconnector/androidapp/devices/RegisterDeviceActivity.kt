@@ -4,6 +4,7 @@ import android.Manifest
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Bundle
+import android.provider.Settings
 import android.util.Log
 import android.view.View
 import android.widget.Toast
@@ -11,6 +12,7 @@ import androidx.appcompat.app.AppCompatActivity
 import com.androidmacconnector.androidapp.R
 import com.androidmacconnector.androidapp.auth.SessionStoreImpl
 import com.androidmacconnector.androidapp.mqtt.MQTTService
+import com.androidmacconnector.androidapp.notifications.AllowNotificationsActivity
 import com.androidmacconnector.androidapp.sms.messages.ReadSmsMessagesReceiver
 import com.androidmacconnector.androidapp.sms.receiver.ReceivedSmsReceiver
 import com.androidmacconnector.androidapp.sms.sender.SendSmsReceiver
@@ -77,11 +79,6 @@ class RegisterDeviceActivity : AppCompatActivity() {
             .check()
     }
 
-    /** Called when the user clicks on the 'No Thanks' button **/
-    fun onCancelButtonClicked(view: View) {
-        finish()
-    }
-
     private fun onPermissionsGrantedHandler(report: MultiplePermissionsReport) {
         val capabilities = getCapabilities(report)
 
@@ -92,10 +89,22 @@ class RegisterDeviceActivity : AppCompatActivity() {
             }
 
             Toast.makeText(this, "Successfully registered device", Toast.LENGTH_LONG).show()
-            Intent(this, MQTTService::class.java).also {
-                stopService(it)
-                startService(it)
+
+            // Check if it can already listen to notifications
+            if (Settings.Secure.getString(this.contentResolver, "enabled_notification_listeners") != null) {
+                if (Settings.Secure.getString(this.contentResolver, "enabled_notification_listeners").contains(applicationContext.packageName)) {
+                    Log.d(LOG_TAG, "Not listening to notifications yet!")
+
+                    startActivity(Intent(this, AllowNotificationsActivity::class.java))
+                }
+
+            } else {
+                Intent(this, MQTTService::class.java).also {
+                    stopService(it)
+                    startService(it)
+                }
             }
+
             finish()
         }
     }
@@ -113,5 +122,10 @@ class RegisterDeviceActivity : AppCompatActivity() {
         newCapabilities.add("ping_device")
 
         return newCapabilities
+    }
+
+    /** Called when the user clicks on the 'No Thanks' button **/
+    fun onCancelButtonClicked(view: View) {
+        finish()
     }
 }

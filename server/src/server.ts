@@ -42,6 +42,9 @@ if (cluster.isMaster) {
   const deviceService = new FirebaseDeviceService(firestore)
 
   const httpApp = new RestApiAppBuilder()
+    .withOpts({
+      verifyAuthentication: !(process.env.VERIFY_AUTHENTICATION == "false"),
+    })
     .withAuthenticator(authenticator)
     .withDeviceService(deviceService)
     .build()

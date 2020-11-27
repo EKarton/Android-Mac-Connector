@@ -1,3 +1,4 @@
+import { stringify } from "querystring";
 import { HttpError } from "../rest_api/middlewares";
 
 export interface DeviceService {
@@ -5,6 +6,10 @@ export interface DeviceService {
   registerDevice(userId: string, deviceType: string, hardwareId: string, capabilities: String[]): Promise<string>
   removeDevice(deviceId: string)
   getDevices(userId: string): Promise<Device[]>
+
+  getDevice(deviceId: String): Promise<Device>
+  updateDevice(deviceId: String, updatedInfo: UpdatedDevice)
+
   doesDeviceIdExist(deviceId: string): Promise<boolean>
   getDeviceType(deviceId: string): Promise<string>
 	updateDeviceCapabilities(deviceId: string, capabilities: string[])
@@ -20,11 +25,59 @@ export interface Device {
   capabilities: string[],
 }
 
+export interface UpdatedDevice {
+  new_type?: string,
+  new_name?: string,
+  new_capabilities?: string[]
+}
+
 export class FirebaseDeviceService implements DeviceService {
   private readonly firestoreClient: FirebaseFirestore.Firestore;
 
   constructor(firestoreClient: FirebaseFirestore.Firestore) {
     this.firestoreClient = firestoreClient
+  }
+
+  async getDevice(deviceId: string): Promise<Device> {
+    const devicesCollection = this.firestoreClient.collection("devices")
+    const doc = await devicesCollection.doc(deviceId).get()
+    if (!doc.exists) {
+      throw new HttpError(404, "DeviceNotExist", "Device does not exist")
+    }
+
+    const data = doc.data()
+
+    return {
+      id: doc.id,
+      type: <string> data["device_type"],
+      name: <string> data["name"],
+      capabilities: <string[]> data["capabilities"]
+    }
+  }
+
+  async updateDevice(deviceId: string, updatedInfo: UpdatedDevice) {
+    const devicesCollection = this.firestoreClient.collection("devices")
+    const result = await devicesCollection.doc(deviceId)
+    const doesDocExist = (await result.get()).exists
+
+    if (!doesDocExist) {
+      throw new HttpError(404, "DeviceNotExist", "Device does not exist")
+    }
+
+    const newData = {}
+    if (updatedInfo.new_name) {
+      newData["name"] = updatedInfo.new_name
+    }
+
+    if (updatedInfo.new_type) {
+      newData["device_type"] = updatedInfo.new_type
+    }
+
+    if (updatedInfo.new_capabilities) {
+      newData["capabilities"] = updatedInfo.new_capabilities
+    }
+    
+    await result.update(newData)
   }
 
   async doesDeviceExist(userId: string, deviceType: string, hardwareId: string): Promise<string> {
