@@ -42,6 +42,15 @@ class AllowNotificationsActivity : AppCompatActivity() {
         if (!checkIfPermissionGranted()) {
             val intent = Intent("android.settings.ACTION_NOTIFICATION_LISTENER_SETTINGS")
             startActivityForResult(intent, 1)
+
+        } else {
+            Log.d(LOG_TAG, "Already has permissions granted")
+            addPermissionToDeviceCapabilities { err ->
+                if (err != null) {
+                    Log.d(LOG_TAG, "Failed to add permission to device capabilities: $err")
+                }
+                finish()
+            }
         }
     }
 

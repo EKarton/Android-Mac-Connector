@@ -69,16 +69,16 @@ class MainActivity : AppCompatActivity() {
             startService(it)
         }
 
-        if (Settings.Secure.getString(this.contentResolver, "enabled_notification_listeners") != null) {
-            if (Settings.Secure.getString(this.contentResolver,"enabled_notification_listeners").contains(applicationContext.packageName)) {
-                // service is enabled do nothing
-            } else {
-                // service is not enabled try to enabled
-                applicationContext.startActivity(Intent("android.settings.ACTION_NOTIFICATION_LISTENER_SETTINGS").setFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
-            }
-        } else {
-            Log.d(LOG_TAG, "onResume no Google Play Services");
-        }
+//        if (Settings.Secure.getString(this.contentResolver, "enabled_notification_listeners") != null) {
+//            if (Settings.Secure.getString(this.contentResolver,"enabled_notification_listeners").contains(applicationContext.packageName)) {
+//                // service is enabled do nothing
+//            } else {
+//                // service is not enabled try to enabled
+//                applicationContext.startActivity(Intent("android.settings.ACTION_NOTIFICATION_LISTENER_SETTINGS").setFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
+//            }
+//        } else {
+//            Log.d(LOG_TAG, "onResume no Google Play Services");
+//        }
     }
 
     private fun setupTabs() {

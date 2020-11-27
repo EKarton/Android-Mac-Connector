@@ -55,7 +55,9 @@
                 bind:canPingDevice="@{device.canPingDevice()}"
                 bind:canSendSms="@{device.canSendSms()}"
                 bind:canReadSms="@{device.canReadSms()}"
-                bind:canReceiveSms="@{device.canReceiveSms()}" />
+                bind:canReceiveSms="@{device.canReceiveSms()}"
+                bind:canReceiveNotifications="@{device.canReceiveNotifications()}"
+                bind:canRespondToNotifications="@{device.canRespondToNotifications()}"/>
 
         </LinearLayout>
     </androidx.coordinatorlayout.widget.CoordinatorLayout>

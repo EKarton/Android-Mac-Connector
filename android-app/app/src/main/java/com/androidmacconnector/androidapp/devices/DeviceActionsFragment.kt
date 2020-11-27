@@ -2,6 +2,7 @@ package com.androidmacconnector.androidapp.devices
 
 import android.content.Intent
 import android.os.Bundle
+import android.provider.Settings
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View

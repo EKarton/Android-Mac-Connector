@@ -10,6 +10,8 @@
         <variable name="canReadSms" type="Boolean"/>
         <variable name="canSendSms" type="Boolean"/>
         <variable name="canReceiveSms" type="Boolean"/>
+        <variable name="canReceiveNotifications" type="Boolean"/>
+        <variable name="canRespondToNotifications" type="Boolean"/>
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -73,6 +75,20 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 bind:capabilityName="@{`Receive SMS`}" />
+
+            <include
+                layout="@layout/device_capabilities_row"
+                android:visibility="@{canReceiveNotifications ? View.VISIBLE : View.GONE}"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                bind:capabilityName="@{`Receive Notifications`}" />
+
+            <include
+                layout="@layout/device_capabilities_row"
+                android:visibility="@{canRespondToNotifications ? View.VISIBLE : View.GONE}"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                bind:capabilityName="@{`Respond to Notifications`}" />
 
         </LinearLayout>
     </androidx.constraintlayout.widget.ConstraintLayout>
