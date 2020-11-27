@@ -37,9 +37,11 @@ struct Device: Identifiable, Decodable {
     }
     
     var canReceiveAppNotifications: Bool {
-        
-        // TODO: Handle permissions
-        return true
+        return capabilities.contains("receive_notifications")
+    }
+    
+    var canRespondToAppNotifications: Bool {
+        return capabilities.contains("respond_to_notifications")
     }
 }
 

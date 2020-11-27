@@ -63,7 +63,7 @@ data class UpdatedDevice(
  */
 interface DeviceWebService {
     fun isDeviceRegistered(authToken: String, deviceType: String, hardwareId: String, handler: (Boolean, String, Throwable?) -> Unit)
-    fun registerDevice(authToken: String, deviceType: String, hardwareId: String, capabilities: List<String>, handler: (String?, Throwable?) -> Unit)
+    fun registerDevice(authToken: String, deviceType: String, hardwareId: String, name: String, capabilities: List<String>, handler: (String?, Throwable?) -> Unit)
     fun unregisterDevice(authToken: String, deviceId: String, handler: (Throwable?) -> Unit)
     fun getDevices(authToken: String, handler: (List<Device>, Throwable?) -> Unit)
     fun getDevice(authToken: String, deviceId: String, handler: (Device?, Throwable?) -> Unit)
@@ -115,7 +115,7 @@ class DeviceWebServiceImpl(private val context: Context): DeviceWebService {
         }
     }
 
-    override fun registerDevice(authToken: String, deviceType: String, hardwareId: String, capabilities: List<String>, handler: (String?, Throwable?) -> Unit) {
+    override fun registerDevice(authToken: String, deviceType: String, hardwareId: String, name: String, capabilities: List<String>, handler: (String?, Throwable?) -> Unit) {
         Log.d(LOG_TAG, "Registering device")
 
         val capabilitiesJsonArray = JSONArray()
@@ -124,6 +124,7 @@ class DeviceWebServiceImpl(private val context: Context): DeviceWebService {
         val jsonBody = JSONObject()
             .put("device_type", deviceType)
             .put("hardware_id", hardwareId)
+            .put("name", name)
             .put("capabilities", capabilitiesJsonArray)
 
         val uri = getUri(REGISTER_DEVICE_PATH)

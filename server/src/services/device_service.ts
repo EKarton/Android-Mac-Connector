@@ -3,7 +3,7 @@ import { HttpError } from "../rest_api/middlewares";
 
 export interface DeviceService {
   doesDeviceExist(userId: string, deviceType: string, hardwareId: string): Promise<string>
-  registerDevice(userId: string, deviceType: string, hardwareId: string, capabilities: String[]): Promise<string>
+  registerDevice(userId: string, deviceType: string, hardwareId: string, name: string, capabilities: String[]): Promise<string>
   removeDevice(deviceId: string)
   getDevices(userId: string): Promise<Device[]>
 
@@ -76,7 +76,7 @@ export class FirebaseDeviceService implements DeviceService {
     if (updatedInfo.new_capabilities) {
       newData["capabilities"] = updatedInfo.new_capabilities
     }
-    
+
     await result.update(newData)
   }
 
@@ -99,7 +99,7 @@ export class FirebaseDeviceService implements DeviceService {
     return results.docs[0].id
   }
   
-  async registerDevice(userId: string, deviceType: string, hardwareId: string, capabilities: String[]): Promise<string> {
+  async registerDevice(userId: string, deviceType: string, hardwareId: string, name: string, capabilities: String[]): Promise<string> {
     if (await this.doesDeviceExist(userId, deviceType, hardwareId)) {
       throw new HttpError(409, "DeviceAlreadyExists", "Device already exist")
     }
@@ -109,6 +109,7 @@ export class FirebaseDeviceService implements DeviceService {
       "user_id":                 userId,
       "device_type":             deviceType,
       "hardware_id":             hardwareId,
+      "name":                    name,
       "push_notification_token": "",
       "capabilities":            capabilities,
     })
@@ -154,11 +155,12 @@ export class FirebaseDeviceService implements DeviceService {
     const results = await query.get()
 
     return results.docs.map(doc => {
+      const data = doc.data()
       return {
         id: doc.id,
-        type: <string> doc.data()["device_type"],
-        name: "My Phone",
-        capabilities: <string[]> doc.data()["capabilities"],
+        type: <string> data["device_type"],
+        name: <string> data["name"],
+        capabilities: <string[]> data["capabilities"],
       }
     })
   }

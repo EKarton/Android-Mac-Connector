@@ -30,6 +30,7 @@ struct GetDevices2xxResponse: Decodable {
 struct RegisterDeviceRequest: Encodable {
     var deviceType: String
     var hardwareId: String
+    var name: String
     var capabilities: [String]
 }
 

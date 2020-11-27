@@ -17,7 +17,7 @@ struct DeviceActionsList: View {
         List {
             if device.canBePinged {
                 Button(action: self.pingDevice) {
-                    Text("Ping device")
+                    DeviceActionsListRow(type: .PingDevice)
                 }
             }
             
@@ -28,11 +28,11 @@ struct DeviceActionsList: View {
                         device: self.device
                     )
                 )) {
-                    Text("Send / Read SMS")
+                    DeviceActionsListRow(type: .ReadSendSms)
                 }
             }
         }
-        .navigationBarTitle("\(self.device.name) | \(self.device.id)", displayMode: .inline)
+        .navigationBarTitle("\(self.device.name)", displayMode: .inline)
     }
     
     private func pingDevice() {

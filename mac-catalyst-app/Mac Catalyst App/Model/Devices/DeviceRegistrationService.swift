@@ -29,6 +29,7 @@ class DeviceRegistrationService {
         let newDevice = RegisterDeviceRequest(
             deviceType: getDeviceType(),
             hardwareId: getHardwareId(),
+            name: "Macbook",
             capabilities: ["ping_device"]
         )
         
@@ -57,6 +58,8 @@ class DeviceRegistrationService {
             return
         }
         
+        self.removeDeviceIdInCache()
+        
         self.getDeviceId { deviceId, err in
             if let err = err {
                 handler(err)
@@ -69,7 +72,6 @@ class DeviceRegistrationService {
                     return
                 }
                 
-                self.removeDeviceIdInCache()
                 handler(nil)
             }
         }

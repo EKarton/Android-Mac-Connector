@@ -30,7 +30,8 @@ class DeviceRegistrationService(
 
             val deviceType = getDeviceType()
             val hardwareId = getHardwareId()
-            deviceWebService.registerDevice(authToken, deviceType, hardwareId, capabilities) webService@ { deviceId, err2 ->
+            val name = "My Android Phone"
+            deviceWebService.registerDevice(authToken, deviceType, hardwareId, name, capabilities) webService@ { deviceId, err2 ->
                 if (err2 != null) {
                     Log.d(LOG_TAG, "Failed to register device, $err2")
                     handler(err2)

@@ -19,9 +19,7 @@ struct DevicesListView: View {
         NavigationView {
             List(self.devicesStore.devices, id: \.id) { device in
                 NavigationLink(destination: DeviceActionsList(device: device)) {
-                    HStack {
-                        Text(device.name)
-                    }
+                    DevicesListRow(device: device)
                 }
             }
             .navigationBarTitle(Text("Devices"), displayMode: .large)

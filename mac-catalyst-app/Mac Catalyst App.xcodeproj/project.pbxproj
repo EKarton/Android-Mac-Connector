@@ -55,6 +55,8 @@
 		13A9AF04256377E3008F7A86 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 13A9AF03256377E3008F7A86 /* SettingsView.swift */; };
 		13BADB41256C31F000DA5BCE /* MQTTService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 13BADB40256C31F000DA5BCE /* MQTTService.swift */; };
 		13BADB43256C360B00DA5BCE /* DeviceRegistrationStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 13BADB42256C360B00DA5BCE /* DeviceRegistrationStore.swift */; };
+		13D4B12E2571A83000DC6E01 /* DevicesListRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 13D4B12D2571A83000DC6E01 /* DevicesListRow.swift */; };
+		13D4B1302571AC6100DC6E01 /* DeviceActionsListRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 13D4B12F2571AC6100DC6E01 /* DeviceActionsListRow.swift */; };
 		851BC03AEA0E46F85139CE76 /* Pods_Mac_Catalyst_App.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7BCC7CACC89295CB3092844A /* Pods_Mac_Catalyst_App.framework */; };
 /* End PBXBuildFile section */
 
@@ -110,6 +112,8 @@
 		13A9AF03256377E3008F7A86 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		13BADB40256C31F000DA5BCE /* MQTTService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MQTTService.swift; sourceTree = "<group>"; };
 		13BADB42256C360B00DA5BCE /* DeviceRegistrationStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeviceRegistrationStore.swift; sourceTree = "<group>"; };
+		13D4B12D2571A83000DC6E01 /* DevicesListRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DevicesListRow.swift; sourceTree = "<group>"; };
+		13D4B12F2571AC6100DC6E01 /* DeviceActionsListRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeviceActionsListRow.swift; sourceTree = "<group>"; };
 		65F5BC7775227A7A85D48AEC /* Pods-Mac Catalyst App.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Mac Catalyst App.release.xcconfig"; path = "Target Support Files/Pods-Mac Catalyst App/Pods-Mac Catalyst App.release.xcconfig"; sourceTree = "<group>"; };
 		720D4BFC4F6479686F943906 /* Pods-Mac Catalyst App.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Mac Catalyst App.debug.xcconfig"; path = "Target Support Files/Pods-Mac Catalyst App/Pods-Mac Catalyst App.debug.xcconfig"; sourceTree = "<group>"; };
 		7BCC7CACC89295CB3092844A /* Pods_Mac_Catalyst_App.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_Mac_Catalyst_App.framework; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -292,7 +296,9 @@
 			isa = PBXGroup;
 			children = (
 				139CF308255B999200F9EA05 /* DevicesList.swift */,
+				13D4B12D2571A83000DC6E01 /* DevicesListRow.swift */,
 				139CF30A255B99C000F9EA05 /* DeviceActionsList.swift */,
+				13D4B12F2571AC6100DC6E01 /* DeviceActionsListRow.swift */,
 			);
 			path = Devices;
 			sourceTree = "<group>";
@@ -514,6 +520,7 @@
 				135C40EC256AFF3000CB5B2E /* SentSmsResultsListener.swift in Sources */,
 				139CF30D255B99E800F9EA05 /* Device.swift in Sources */,
 				135C40F2256B093F00CB5B2E /* GetSmsThreadsListener.swift in Sources */,
+				13D4B12E2571A83000DC6E01 /* DevicesListRow.swift in Sources */,
 				135C40EA256AFBEC00CB5B2E /* GetSmsMessagesListener.swift in Sources */,
 				13018998255B9246001BD60D /* ContentView.swift in Sources */,
 				135C40F4256B0BAA00CB5B2E /* GetSmsThreadsPublisher.swift in Sources */,
@@ -530,6 +537,7 @@
 				139CF336255B9F6200F9EA05 /* SmsMessage.swift in Sources */,
 				13A4D5B4255CDC9A00414751 /* SmsMessageRow.swift in Sources */,
 				139CF309255B999200F9EA05 /* DevicesList.swift in Sources */,
+				13D4B1302571AC6100DC6E01 /* DeviceActionsListRow.swift in Sources */,
 				13A9AF04256377E3008F7A86 /* SettingsView.swift in Sources */,
 				1332DC632565E31B00A65CE9 /* AppContext.swift in Sources */,
 				139CF30B255B99C000F9EA05 /* DeviceActionsList.swift in Sources */,

@@ -23,10 +23,11 @@ export const createDeviceRouter = (deviceService: DeviceService) => {
     const userId = req.header("user_id")
     const deviceType = req.body["device_type"]
     const hardwareId = req.body["hardware_id"]
+    const name = req.body["name"]
     const capabilities = <string[]>req.body["capabilities"]
 
     // Register the device
-    const deviceId = await deviceService.registerDevice(userId, deviceType, hardwareId, capabilities)
+    const deviceId = await deviceService.registerDevice(userId, deviceType, hardwareId, name, capabilities)
 
     res.setHeader('Content-Type', 'application/json');
     res.status(200).json({
