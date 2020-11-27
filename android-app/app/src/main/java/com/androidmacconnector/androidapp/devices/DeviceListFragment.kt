@@ -33,27 +33,7 @@ class DeviceListFragment: Fragment() {
      */
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
-        val context = this.requireContext()
-
-        SessionStoreImpl(FirebaseAuth.getInstance()).getAuthToken { authToken, err ->
-            if (err != null) {
-                Log.d(LOG_TAG, "Error when getting auth token: $err")
-                return@getAuthToken
-            }
-
-            DeviceWebServiceImpl(context).getDevices(authToken) { newDevices, err2 ->
-                if (err2 != null) {
-                    Log.d(LOG_TAG, "Error when getting devices: $err2")
-                    return@getDevices
-                }
-
-                devices.clear()
-                devices.addAll(newDevices)
-                adapter?.notifyDataSetChanged()
-                dataBindings?.showNoDevicesPrompt = devices.count() == 0
-            }
-        }
+        populateList()
     }
 
     /**
@@ -79,7 +59,38 @@ class DeviceListFragment: Fragment() {
         // Set up the data bindings
         dataBindings = FragmentDeviceListBinding.bind(view)
 
+        // Set up the refresh
+        dataBindings?.swipeRefresh?.setOnRefreshListener {
+            populateList {
+                dataBindings?.swipeRefresh?.isRefreshing = false
+            }
+        }
+
         return view
+    }
+
+    private fun populateList(onCompleteCallback: (() -> Unit)? = null) {
+        val context = this.requireContext()
+
+        SessionStoreImpl(FirebaseAuth.getInstance()).getAuthToken { authToken, err ->
+            if (err != null) {
+                Log.d(LOG_TAG, "Error when getting auth token: $err")
+                return@getAuthToken
+            }
+
+            DeviceWebServiceImpl(context).getDevices(authToken) { newDevices, err2 ->
+                if (err2 != null) {
+                    Log.d(LOG_TAG, "Error when getting devices: $err2")
+                    return@getDevices
+                }
+
+                devices.clear()
+                devices.addAll(newDevices)
+                adapter?.notifyDataSetChanged()
+                dataBindings?.showNoDevicesPrompt = devices.count() == 0
+                onCompleteCallback?.invoke()
+            }
+        }
     }
 }
 
