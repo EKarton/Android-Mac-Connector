@@ -41,8 +41,6 @@ class AllowNotificationsActivity : AppCompatActivity() {
     fun onAllowButtonClicked(view: View) {
         if (!checkIfPermissionGranted()) {
             val intent = Intent("android.settings.ACTION_NOTIFICATION_LISTENER_SETTINGS")
-                .setFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-
             startActivityForResult(intent, 1)
         }
     }
@@ -50,6 +48,8 @@ class AllowNotificationsActivity : AppCompatActivity() {
     /** This is called when the settings activity is returned back to the user */
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
+
+        Log.d(LOG_TAG, "Returned from settings activity")
 
         if (requestCode == 1) {
             if (checkIfPermissionGranted()) {
@@ -99,6 +99,11 @@ class AllowNotificationsActivity : AppCompatActivity() {
                         return@getDevice
                     }
 
+                    if (device == null) {
+                        handler(IllegalStateException("Device is null"))
+                        return@getDevice
+                    }
+
                     val updatedCapabilities = device.capabilities.toMutableList()
                     updatedCapabilities.add("receive_notifications")
                     updatedCapabilities.add("respond_to_notifications")
@@ -120,6 +125,6 @@ class AllowNotificationsActivity : AppCompatActivity() {
 
     /** Called when the No Thanks button was clicked */
     fun onCancelButtonClicked(view: View) {
-
+        finish()
     }
 }

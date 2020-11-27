@@ -91,12 +91,9 @@ class RegisterDeviceActivity : AppCompatActivity() {
             Toast.makeText(this, "Successfully registered device", Toast.LENGTH_LONG).show()
 
             // Check if it can already listen to notifications
-            if (Settings.Secure.getString(this.contentResolver, "enabled_notification_listeners") != null) {
-                if (Settings.Secure.getString(this.contentResolver, "enabled_notification_listeners").contains(applicationContext.packageName)) {
-                    Log.d(LOG_TAG, "Not listening to notifications yet!")
-
-                    startActivity(Intent(this, AllowNotificationsActivity::class.java))
-                }
+            if (!canHaveNotificationCapabilities()) {
+                Log.d(LOG_TAG, "Not listening to notifications yet!")
+                startActivity(Intent(this, AllowNotificationsActivity::class.java))
 
             } else {
                 Intent(this, MQTTService::class.java).also {
@@ -117,11 +114,24 @@ class RegisterDeviceActivity : AppCompatActivity() {
             PERMISSIONS_TO_CAPABILITIES[it.permissionName]!!
         }
 
-        val newCapabilities = mutableListOf<String>()
-        newCapabilities.addAll(capabilities)
+        val newCapabilities = capabilities.toMutableList()
         newCapabilities.add("ping_device")
 
+        if (canHaveNotificationCapabilities()) {
+            newCapabilities.add("receive_notifications")
+            newCapabilities.add("respond_to_notifications")
+        }
+
         return newCapabilities
+    }
+
+    private fun canHaveNotificationCapabilities(): Boolean {
+        if (Settings.Secure.getString(this.contentResolver, "enabled_notification_listeners") != null) {
+            if (Settings.Secure.getString(this.contentResolver, "enabled_notification_listeners").contains(applicationContext.packageName)) {
+                return true
+            }
+        }
+        return false
     }
 
     /** Called when the user clicks on the 'No Thanks' button **/

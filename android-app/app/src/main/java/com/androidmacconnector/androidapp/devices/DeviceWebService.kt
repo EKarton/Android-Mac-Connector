@@ -15,6 +15,7 @@ import org.json.JSONException
 import org.json.JSONObject
 import java.io.Serializable
 import java.lang.IllegalArgumentException
+import java.lang.IllegalStateException
 import java.lang.String.format
 
 /**
@@ -52,9 +53,9 @@ data class Device(
 }
 
 data class UpdatedDevice(
-    val name: String?,
-    val type: String?,
-    val capabilities: List<String>?
+    val newName: String?,
+    val newType: String?,
+    val newCapabilities: List<String>?
 )
 
 /**
@@ -65,7 +66,7 @@ interface DeviceWebService {
     fun registerDevice(authToken: String, deviceType: String, hardwareId: String, capabilities: List<String>, handler: (String?, Throwable?) -> Unit)
     fun unregisterDevice(authToken: String, deviceId: String, handler: (Throwable?) -> Unit)
     fun getDevices(authToken: String, handler: (List<Device>, Throwable?) -> Unit)
-    fun getDevice(authToken: String, deviceId: String, handler: (Device, Throwable?) -> Unit)
+    fun getDevice(authToken: String, deviceId: String, handler: (Device?, Throwable?) -> Unit)
     fun updateDevice(authToken: String, deviceId: String, updatedDevice: UpdatedDevice, handler: (Throwable?) -> Unit)
     fun updatePushNotificationToken(authToken: String, deviceId: String, newToken: String, handler: (Throwable?) -> Unit)
 }
@@ -125,13 +126,7 @@ class DeviceWebServiceImpl(private val context: Context): DeviceWebService {
             .put("hardware_id", hardwareId)
             .put("capabilities", capabilitiesJsonArray)
 
-        val uri = Uri.Builder()
-            .scheme(getServerProtocol())
-            .encodedAuthority(getServerAuthority())
-            .encodedPath(REGISTER_DEVICE_PATH)
-            .build()
-            .toString()
-
+        val uri = getUri(REGISTER_DEVICE_PATH)
         val headers = mapOf("Authorization" to format("Bearer %s", authToken))
         makeJsonObjectRequest(Request.Method.POST, uri, jsonBody, headers) { json, err ->
             if (err != null) {
@@ -150,14 +145,7 @@ class DeviceWebServiceImpl(private val context: Context): DeviceWebService {
     override fun unregisterDevice(authToken: String, deviceId: String, handler: (Throwable?) -> Unit) {
         Log.d(LOG_TAG, "Unregistering device $deviceId")
 
-        val apiPath = UNREGISTER_DEVICE_PATH.format(deviceId)
-        val uri = Uri.Builder()
-            .scheme(getServerProtocol())
-            .encodedAuthority(getServerAuthority())
-            .encodedPath(apiPath)
-            .build()
-            .toString()
-
+        val uri = getUri(UNREGISTER_DEVICE_PATH.format(deviceId))
         val headers = mapOf("Authorization" to format("Bearer %s", authToken))
         makeJsonObjectRequest(Request.Method.DELETE, uri, null, headers) { json, err ->
             if (err != null) {
@@ -177,13 +165,7 @@ class DeviceWebServiceImpl(private val context: Context): DeviceWebService {
     override fun getDevices(authToken: String, handler: (List<Device>, Throwable?) -> Unit) {
         Log.d(LOG_TAG, "Getting devices")
 
-        val uri = Uri.Builder()
-            .scheme(getServerProtocol())
-            .encodedAuthority(getServerAuthority())
-            .encodedPath(GET_DEVICES_PATH)
-            .build()
-            .toString()
-
+        val uri = getUri(GET_DEVICES_PATH)
         val headers = mapOf("Authorization" to format("Bearer %s", authToken))
         makeJsonObjectRequest(Request.Method.GET, uri, null, headers) { json, err ->
             if (err != null) {
@@ -222,14 +204,65 @@ class DeviceWebServiceImpl(private val context: Context): DeviceWebService {
         }
     }
 
-    override fun getDevice(authToken: String, deviceId: String, handler: (Device, Throwable?) -> Unit) {
+    override fun getDevice(authToken: String, deviceId: String, handler: (Device?, Throwable?) -> Unit) {
         Log.d(LOG_TAG, "Getting device info for $deviceId")
-        TODO("Not yet implemented")
+
+        val uri = getUri(GET_DEVICE_INFO_PATH.format(deviceId))
+        val headers = mapOf("Authorization" to format("Bearer %s", authToken))
+        makeJsonObjectRequest(Request.Method.GET, uri, null, headers) { jsonResponse, err ->
+            if (err != null) {
+                handler(null, err)
+                return@makeJsonObjectRequest
+            }
+
+            if (jsonResponse == null) {
+                handler(null, IllegalStateException("Json response is blank"))
+                return@makeJsonObjectRequest
+            }
+
+            try {
+                val id = jsonResponse.getString("id")
+                val type = jsonResponse.getString("type")
+                val name = "My Phone"
+
+                val capabilitiesJson = jsonResponse.getJSONArray("capabilities")
+                val capabilities = mutableListOf<String>()
+                for (i in 0 until capabilitiesJson.length()) {
+                    capabilities.add(capabilitiesJson.getString(i))
+                }
+
+                handler(Device(id, name, type, capabilities), null)
+
+            } catch (e: Exception) {
+                handler(null, e)
+            }
+        }
     }
 
     override fun updateDevice(authToken: String, deviceId: String, updatedDevice: UpdatedDevice, handler: (Throwable?) -> Unit) {
         Log.d(LOG_TAG, "Updating device info for $deviceId")
-        TODO("Not yet implemented")
+
+        val jsonBody = JSONObject()
+
+        if (updatedDevice.newName != null) {
+            jsonBody.put("new_name", updatedDevice.newName)
+        }
+
+        if (updatedDevice.newType != null) {
+            jsonBody.put("new_type", updatedDevice.newType)
+        }
+
+        if (updatedDevice.newCapabilities != null) {
+            val jsonArray = JSONArray()
+            updatedDevice.newCapabilities.forEach { jsonArray.put(it) }
+            jsonBody.put("new_capabilities", jsonArray)
+        }
+
+        val uri = getUri(UPDATE_DEVICE_INFO_PATH.format(deviceId))
+        val headers = mapOf("Authorization" to format("Bearer %s", authToken))
+        makeJsonObjectRequest(Request.Method.PUT, uri, jsonBody, headers) { _, err ->
+            handler(err)
+        }
     }
 
     override fun updatePushNotificationToken(authToken: String, deviceId: String, newToken: String, handler: (Throwable?) -> Unit) {
@@ -237,18 +270,20 @@ class DeviceWebServiceImpl(private val context: Context): DeviceWebService {
 
         val jsonBody = JSONObject().put("new_token", newToken)
 
-        val apiPath = UPDATE_PUSH_NOTIFICATION_TOKEN_PATH.format(deviceId)
-        val uri = Uri.Builder()
+        val uri = getUri(UPDATE_PUSH_NOTIFICATION_TOKEN_PATH.format(deviceId))
+        val headers = mapOf("Authorization" to format("Bearer %s", authToken))
+        makeJsonObjectRequest(Request.Method.PUT, uri, jsonBody, headers) { _, err ->
+            handler(err)
+        }
+    }
+
+    private fun getUri(apiPath: String): String {
+        return Uri.Builder()
             .scheme(getServerProtocol())
             .encodedAuthority(getServerAuthority())
             .encodedPath(apiPath)
             .build()
             .toString()
-
-        val headers = mapOf("Authorization" to format("Bearer %s", authToken))
-        makeJsonObjectRequest(Request.Method.PUT, uri, jsonBody, headers) { _, err ->
-            handler(err)
-        }
     }
 
     private fun getServerProtocol(): String {
