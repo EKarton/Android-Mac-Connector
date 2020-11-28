@@ -18,8 +18,7 @@ export class AndroidDeviceNotifier implements DeviceNotifier {
     let options: messaging.MessagingOptions = {
       priority: "high"
     }
-    let response = await this.fcmMessaging.sendToDevice(fcmToken, message, options)
-    console.log('Successfully sent message:', response)
+    await this.fcmMessaging.sendToDevice(fcmToken, message, options)
   }
 }
 
