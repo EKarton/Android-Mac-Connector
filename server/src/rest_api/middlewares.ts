@@ -43,7 +43,7 @@ export function createAuthenticateMiddleware(authService: Authenticator) {
         throw new HttpError(401, "InvalidAuthorization", "Missing Authorization header")
       }
 
-      if (authHeaderValue.length < 7) {
+      if (authHeaderValue.length < 8) {
         throw new HttpError(401, "InvalidAuthorization", "Malformed Authorization header")
       }
 
