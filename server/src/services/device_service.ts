@@ -1,4 +1,3 @@
-import { stringify } from "querystring";
 import { HttpError } from "../rest_api/middlewares";
 
 export interface DeviceService {
