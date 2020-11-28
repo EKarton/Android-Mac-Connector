@@ -40,19 +40,22 @@ describe("FirebaseUserBasedAuthorizer", () => {
     }
   })
 
-  describe("isPublishAuthorized()", () => {
-    it("given a valid topic and client id that belong to the same user, it should return true", async () => {
-      const getPropertyFn = jest.fn().mockImplementation(() => {
-        return "User1234"
-      })
+  describe("given a valid topic and client id that belong to the same user", () => {
+    const authorizer = new FirebaseUserBasedAuthorizer(new firestore())
+    const getPropertyFn = jest.fn().mockImplementation(() => {
+      return "User1234"
+    })
+
+    beforeAll(() => {
       getFn.mockImplementation(() => {
         return {
           exists: true,
           get: getPropertyFn
         }
       })
+    })
 
-      const authorizer = new FirebaseUserBasedAuthorizer(new firestore())
+    it("isPublishAuthorized() should return true", async () => {
       const result = await authorizer.isPublishAuthorized("1234/sms-messages", "1234")
 
       expect(collectionFn).toBeCalledWith("devices")
@@ -60,7 +63,19 @@ describe("FirebaseUserBasedAuthorizer", () => {
       expect(result).toBeTruthy()
     })
 
-    it("given a valid topic and client id that belong to a different user, it should return false", async () => {
+    it("isSubscriptionAuthorized() should return true", async () => {
+      const result = await authorizer.isSubscriptionAuthorized("1234/sms-messages", "1234")
+
+      expect(collectionFn).toBeCalledWith("devices")
+      expect(getPropertyFn).toBeCalledWith("user_id")
+      expect(result).toBeTruthy()
+    })
+  })
+
+  describe("given a valid topic and client id that belong to a different user", () => {
+    let authorizer = new FirebaseUserBasedAuthorizer(new firestore());
+
+    beforeEach(() => {
       docFn.mockImplementation((deviceId) => ({
         get: jest.fn().mockImplementation(() => ({
           exists: true,
@@ -69,18 +84,35 @@ describe("FirebaseUserBasedAuthorizer", () => {
           })
         }))
       }))
+    })
 
-      const authorizer = new FirebaseUserBasedAuthorizer(new firestore())
+    it("isPublishAuthorized() should return false", async () => {
       const result = await authorizer.isPublishAuthorized("1234/sms-messages", "6789")
       expect(result).toBeFalsy()
     })
 
-    it("given an invalid topic, it should throw an error", async () => {
-      const authorizer = new FirebaseUserBasedAuthorizer(new firestore())
+    it("isSubscriptionAuthorized() should return false", async () => {
+      const result = await authorizer.isSubscriptionAuthorized("1234/sms-messages", "6789")
+      expect(result).toBeFalsy()
+    })
+  })
+
+  describe("given an invalid topic", () => {
+    const authorizer = new FirebaseUserBasedAuthorizer(new firestore())
+
+    it("isPublishAuthorized() should throw an error", async () => {
       await expect(authorizer.isPublishAuthorized("1234", "6789")).rejects.toThrow("Invalid topic 1234")
     })
 
-    it("given a topic with an unknown device id, it should throw an error", async () => {
+    it("isPublishAuthorized() should throw an error", async () => {
+      await expect(authorizer.isSubscriptionAuthorized("1234", "6789")).rejects.toThrow("Invalid topic 1234")
+    })
+  })
+
+  describe("given a topic with an unknown device id", () => {
+    const authorizer = new FirebaseUserBasedAuthorizer(new firestore())
+
+    beforeAll(() => {
       docFn.mockImplementation((deviceId) => ({
         get: jest.fn().mockImplementation(() => ({
           exists: deviceId == "6789",
@@ -89,12 +121,21 @@ describe("FirebaseUserBasedAuthorizer", () => {
           })
         }))
       }))
+    })
 
-      const authorizer = new FirebaseUserBasedAuthorizer(new firestore())
+    it("isPublishAuthorized() should throw an error", async () => {
       await expect(authorizer.isPublishAuthorized("1234/messages", "6789")).rejects.toThrow("Device id 1234 does not exist")
     })
 
-    it("given a valid topic and an unknown client id, it should throw an error", async () => {
+    it("isSubscriptionAuthorized() should throw an error", async () => {
+      await expect(authorizer.isSubscriptionAuthorized("1234/messages", "6789")).rejects.toThrow("Device id 1234 does not exist")
+    })
+  })
+
+  describe("given a valid topic and an unknown client id", () => {
+    const authorizer = new FirebaseUserBasedAuthorizer(new firestore())
+
+    beforeAll(() => {
       docFn.mockImplementation((deviceId) => ({
         get: jest.fn().mockImplementation(() => ({
           exists: deviceId == "1234",
@@ -103,20 +144,34 @@ describe("FirebaseUserBasedAuthorizer", () => {
           })
         }))
       }))
-
-      const authorizer = new FirebaseUserBasedAuthorizer(new firestore())
+    })
+    
+    it("isPublishAuthorized() should throw an error", async () => {
       await expect(authorizer.isPublishAuthorized("1234/messages", "6789")).rejects.toThrow("Device id 6789 does not exist")
     })
 
-    it("given firebase throws an error, it should propagate that error", async () => {
+    it("isSubscriptionAuthorized() should throw an error", async () => {
+      await expect(authorizer.isSubscriptionAuthorized("1234/messages", "6789")).rejects.toThrow("Device id 6789 does not exist")
+    })
+  })
+
+  describe("given firebase throws an error", () => {
+    const authorizer = new FirebaseUserBasedAuthorizer(new firestore())
+
+    beforeAll(() => {
       docFn.mockImplementation((deviceId) => ({
         get: jest.fn().mockImplementation(() => {
           return Promise.reject(new Error("Unknown error encountered"))
         })
       }))
+    })
 
-      const authorizer = new FirebaseUserBasedAuthorizer(new firestore())
+    it("isPublishAuthorized() should propagate that error", async () => {
       await expect(authorizer.isPublishAuthorized("1234/messages", "6789")).rejects.toThrow("Unknown error encountered")
+    })
+
+    it("isSubscriptionAuthorized() should propagate that error", async () => {
+      await expect(authorizer.isSubscriptionAuthorized("1234/messages", "6789")).rejects.toThrow("Unknown error encountered")
     })
   })
 })
