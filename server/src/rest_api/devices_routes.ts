@@ -77,6 +77,7 @@ export const createDeviceRouter = (deviceService: DeviceService) => {
     })
   }));
 
+  // deprecated
   router.get("/:deviceId/capabilities", asyncHandler(async (req, res) => {
     const deviceId = req.params.deviceId
     const capabilities = await deviceService.getDeviceCapabilities(deviceId)
@@ -87,6 +88,7 @@ export const createDeviceRouter = (deviceService: DeviceService) => {
     })
   }));
 
+  // deprecated
   router.put("/:deviceId/capabilities", asyncHandler(async (req, res) => {
     const deviceId = req.params.deviceId
     const newCapabilities = req.body["new_capabilities"]

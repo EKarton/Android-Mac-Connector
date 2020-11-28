@@ -3,16 +3,25 @@ import { HttpError } from "../rest_api/middlewares";
 export interface DeviceService {
   doesDeviceExist(userId: string, deviceType: string, hardwareId: string): Promise<string>
   registerDevice(userId: string, deviceType: string, hardwareId: string, name: string, capabilities: String[]): Promise<string>
-  removeDevice(deviceId: string)
+  
+  // getDevices(userId: string, deviceType: string, hardwareId: string): Promise<Device>
   getDevices(userId: string): Promise<Device[]>
-
   getDevice(deviceId: String): Promise<Device>
   updateDevice(deviceId: String, updatedInfo: UpdatedDevice)
+  removeDevice(deviceId: string)
 
+  // Deprecated
   doesDeviceIdExist(deviceId: string): Promise<boolean>
+  
+  // Deprecated
   getDeviceType(deviceId: string): Promise<string>
-	updateDeviceCapabilities(deviceId: string, capabilities: string[])
+
+  // Deprecated
+  updateDeviceCapabilities(deviceId: string, capabilities: string[])
+  
+  // Deprecated
   getDeviceCapabilities(deviceId: string): Promise<string[]>
+
   updatePushNotificationToken(deviceId: string, newToken: string)
 	getPushNotificationToken(deviceId: string): Promise<string>
 }
@@ -35,6 +44,25 @@ export class FirebaseDeviceService implements DeviceService {
 
   constructor(firestoreClient: FirebaseFirestore.Firestore) {
     this.firestoreClient = firestoreClient
+  }
+
+  async doesDeviceExist(userId: string, deviceType: string, hardwareId: string): Promise<string> {
+    const devicesCollection = this.firestoreClient.collection("devices")
+    const query = devicesCollection
+      .where("user_id", "==", userId)
+      .where("device_type", "==", deviceType)
+      .where("hardware_id", "==", hardwareId)
+
+    const results = await query.get()
+    if (results.empty) {
+      return ""
+    }
+
+    if (results.docs.length > 1) {
+      return ""
+    }
+
+    return results.docs[0].id
   }
 
   async getDevice(deviceId: string): Promise<Device> {
@@ -76,26 +104,9 @@ export class FirebaseDeviceService implements DeviceService {
       newData["capabilities"] = updatedInfo.new_capabilities
     }
 
-    await result.update(newData)
-  }
-
-  async doesDeviceExist(userId: string, deviceType: string, hardwareId: string): Promise<string> {
-    const devicesCollection = this.firestoreClient.collection("devices")
-    const query = devicesCollection
-      .where("user_id", "==", userId)
-      .where("device_type", "==", deviceType)
-      .where("hardware_id", "==", hardwareId)
-
-    const results = await query.get()
-    if (results.empty) {
-      return ""
+    if (Object.keys(newData).length > 0) {
+      await result.update(newData)
     }
-
-    if (results.docs.length > 1) {
-      return ""
-    }
-
-    return results.docs[0].id
   }
   
   async registerDevice(userId: string, deviceType: string, hardwareId: string, name: string, capabilities: String[]): Promise<string> {

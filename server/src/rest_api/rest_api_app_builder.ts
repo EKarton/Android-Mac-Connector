@@ -31,7 +31,7 @@ export class RestApiAppBuilder {
   }
 
   public build(): express.Express {
-    if (!(this.opts?.verifyAuthentication)) {
+    if (this.opts && !this.opts.verifyAuthentication) {
       this.authenticator = new AllowAllAuthenticator()
     }
 
