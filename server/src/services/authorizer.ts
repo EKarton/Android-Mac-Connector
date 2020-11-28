@@ -57,7 +57,6 @@ export class FirebaseUserBasedAuthorizer implements Authorizer {
   }
 
   private async isUserIdOfTopicSameAsClientId(topic: string, clientId: string): Promise<boolean> {
-    console.log(topic, clientId)
     const resourceDevice = this.getDeviceIdOfTopic(topic)
     const resourceDeviceUserId = await this.getUserIdOfDevice(resourceDevice)
     const clientUserId = await this.getUserIdOfDevice(clientId)

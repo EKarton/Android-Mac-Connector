@@ -7,7 +7,7 @@ const FirebaseMessenger = jest.fn().mockImplementation(() => {
   }
 })
 
-describe("notifyDevice()", () => {
+describe("AndroidDeviceNotifier.notifyDevice()", () => {
   it("should call sendToDevice() with proper arguments, given valid fcm token", async () => {
     const messenger = new FirebaseMessenger()
     const notifier = new AndroidDeviceNotifier(messenger)
@@ -23,7 +23,7 @@ describe("notifyDevice()", () => {
     expect(sendToDeviceFn).toHaveBeenCalledWith("1234", expectedMessage, expectedOptions)
   })
 
-  it("should throw an error, given sendToDeviceFn() throws an error", () => {
+  it("should throw an error, given sendToDeviceFn() throws an error", async () => {
     sendToDeviceFn.mockImplementation(() => {
       return Promise.reject(new Error("Error message"))
     })
@@ -31,6 +31,6 @@ describe("notifyDevice()", () => {
     const messenger = new FirebaseMessenger()
     const notifier = new AndroidDeviceNotifier(messenger)
 
-    expect(notifier.notifyDevice("1234")).rejects.toMatch("Error message")
+    await expect(notifier.notifyDevice("1234")).rejects.toThrow("Error message")
   })
 })

@@ -21,9 +21,3 @@ export class AndroidDeviceNotifier implements DeviceNotifier {
     await this.fcmMessaging.sendToDevice(fcmToken, message, options)
   }
 }
-
-export class AppleDeviceNotifier implements DeviceNotifier {
-  notifyDevice(apnToken: String) {
-    throw new Error("Method not implemented.");
-  }
-}
