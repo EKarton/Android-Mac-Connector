@@ -32,7 +32,7 @@ struct ContentView: View {
             } else if self.appState.curState == .DeviceRegistration {
                 AddDeviceView()
                 
-            } else {
+            } else if self.appState.curState == .DevicesList {
                 DevicesListView()
             }
         }

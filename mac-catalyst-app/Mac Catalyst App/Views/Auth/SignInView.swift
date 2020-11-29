@@ -83,9 +83,12 @@ struct SignInView: View {
             
             self.deviceRegistrationStore.checkIfCurrentDeviceIsRegistered() { err in
                 if let err = err {
+                    print("Failed to check if it is registered or not: \(err.localizedDescription)")
                     self.error = "An error occured: \(err.localizedDescription)"
                     return
                 }
+                
+                print("Is registered? \(self.deviceRegistrationStore.isRegistered)")
                 
                 if self.deviceRegistrationStore.isRegistered {
                     self.appState.curState = .DevicesList

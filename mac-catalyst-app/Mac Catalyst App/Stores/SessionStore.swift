@@ -27,7 +27,7 @@ class SessionStore: ObservableObject {
     func listen() {
         self.unbind()
         handle = Auth.auth().addStateDidChangeListener { (auth: Auth, user: User?) in
-            self.updateSession(user)
+            self.updateSession(user) { _ in }
         }
     }
     
@@ -51,7 +51,9 @@ class SessionStore: ObservableObject {
     func signUp(email: String, password: String, handler: @escaping (Error?) -> Void) {
         Auth.auth().createUser(withEmail: email, password: password) { (result: AuthDataResult?, error: Error?) in
             if let user = result?.user {
-                self.updateSession(user)
+                self.updateSession(user) { err in
+                   handler(err)
+               }
             }
             handler(error)
         }
@@ -60,9 +62,12 @@ class SessionStore: ObservableObject {
     func signIn(email: String, password: String, handler: @escaping (Error?) -> Void) {
         Auth.auth().signIn(withEmail: email, password: password) { (result: AuthDataResult?, error: Error?) in
             if let user = result?.user {
-                self.updateSession(user)
+                self.updateSession(user) { err in
+                    handler(err)
+                }
+            } else {
+                handler(error)
             }
-            handler(error)
         }
     }
     
@@ -73,13 +78,13 @@ class SessionStore: ObservableObject {
     func signOut() {
         do {
             try Auth.auth().signOut()
-            updateSession(nil)
+            updateSession(nil){ _ in }
         } catch {
             print("Error signing out")
         }
     }
     
-    private func updateSession(_ user: User?) {
+    private func updateSession(_ user: User?, _ handler: @escaping (Error?) -> Void) {
         let oldSession = self.currentSession
         var newSession: Session? = nil
         
@@ -94,11 +99,13 @@ class SessionStore: ObservableObject {
                 
                 self.currentSession = newSession
                 self.notifyObservers(oldSession, newSession)
+                handler(error)
             }
             
         } else {
             self.currentSession = newSession
             self.notifyObservers(oldSession, newSession)
+            handler(nil)
         }
     }
     

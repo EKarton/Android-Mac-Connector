@@ -114,7 +114,7 @@ class DeviceRegistrationStore: ObservableObject, SessionStoreObserver {
     
     internal func onSessionChanged(_ oldSession: Session?, _ newSession: Session?) {
         print("DeviceRegistrationStore: session changed")
-        if newSession == nil {
+        if newSession != nil {
             self.checkIfCurrentDeviceIsRegistered() { err in
                 if let err = err {
                     print("DeviceRegistrationStore: Error when checking if device is registered: \(err.localizedDescription)")
