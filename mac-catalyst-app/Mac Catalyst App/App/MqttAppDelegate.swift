@@ -46,8 +46,13 @@ class MqttAppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCenter
         
         // Get the meeting ID from the original notification.
         let userInfo = response.notification.request.content.userInfo
-        let deviceId = userInfo["device_id"] as! String
-        let notificationId = userInfo["notification_id"] as! String
+        guard let deviceId = userInfo["device_id"] as? String else {
+            return
+        }
+        
+        guard let notificationId = userInfo["notification_id"] as? String else {
+            return
+        }
         
         // Perform the task associated with the action.
         if let textResponse = response as? UNTextInputNotificationResponse {

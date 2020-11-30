@@ -36,10 +36,12 @@ class NotificationsListener: NotificationListenerService() {
         this.directReplyHandler = NotificationResponseDirectReplyHandler(this)
 
         this.incomingHandler = NewNotificationInvalidFlagsRemover()
+        val handler1 = NewNotificationAppFilter(this)
         val handler2 = NewNotificationDuplicateRemover()
         val handler3 = NewNotificationPublisher(this)
 
-        this.incomingHandler.setNext(handler2)
+        this.incomingHandler.setNext(handler1)
+        handler1.setNext(handler2)
         handler2.setNext(handler3)
     }
 

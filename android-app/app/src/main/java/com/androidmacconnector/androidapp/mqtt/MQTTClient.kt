@@ -47,6 +47,10 @@ class MQTTClient(url: String, clientId: String): MqttCallbackExtended {
         this.client.connect(connectOptions).waitForCompletion()
     }
 
+    fun isConnected(): Boolean {
+        return this.client.isConnected
+    }
+
     fun subscribe(topic: String, qos: Int, callback: ((MqttMessage?, Throwable?) -> Unit)?) {
         val actionListener = object: IMqttActionListener {
             override fun onSuccess(asyncActionToken: IMqttToken?) {

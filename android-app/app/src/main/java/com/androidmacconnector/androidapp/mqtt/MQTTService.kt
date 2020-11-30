@@ -156,6 +156,10 @@ class MQTTService: Service() {
             return START_STICKY
         }
 
+        if (this.client == null || this.client!!.isConnected()) {
+            initializeMqttClient()
+        }
+
         val topic = intent.getStringExtra("topic") ?: return START_STICKY
 
         if (intent.action == PUBLISH_INTENT_ACTION && this.client != null) {
