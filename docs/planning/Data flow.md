@@ -6,17 +6,19 @@ This document is about how messages get sent back and forth to achieve the requi
 
 2. Connecting, subscribing, and publishing a message to the MQTT broker
 
-3. Receive sms text from my Android phone to my Mac
+3. Pinging a device
 
-4. Send sms text from my Mac to my Android phone
+4. Receive sms text from my Android phone to my Mac
 
-5. Getting a list of SMS conversations on the Android device from the Mac device
+5. Send sms text from my Mac to my Android phone
 
-6. When getting SMS messages of a particular thread on an Android device in the Mac device:
+6. Getting a list of SMS conversations on the Android device from the Mac device
 
-7. Recieve notifications from my Android phone to my Mac
+7. When getting SMS messages of a particular thread on an Android device in the Mac device:
 
-8. Reply to notifications from my Mac to my Android phone
+8. Recieve notifications from my Android phone to my Mac
+
+9. Reply to notifications from my Mac to my Android phone
 
 
 # Background information
@@ -172,6 +174,12 @@ This document is about how messages get sent back and forth to achieve the requi
     ```
 
 3. The Mac device receives the message, and makes a notification to the user
+
+### Pinging a device
+
+1. The device to be pinged is already subscribed to the topic ```<device-id>/ping/requests``` where ```<device-id>``` is the device's device id to be pinged
+
+2. Another device that will ping the device from (1) will publish a message to the topic ```<device-id>/ping/requests```
 
 ### Send sms text from my Mac to my Android phone
 
