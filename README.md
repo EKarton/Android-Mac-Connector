@@ -4,7 +4,7 @@ The Android Mac Connector project aims to bridge the connectivity between Androi
 
 ## Overview of the Project
 
-This project consists of an Android app, a SwiftUI app, and a Node JS app. A video of the project can be seen below:
+This project consists of a Kotlin-written Android app, a SwiftUI app, a MQTT broker, and a REST Api server written in TypeScript. A video of the project can be seen below:
 
 [![Video of our project](docs/demo/demo-video-image.png)](https://youtu.be/rFw6e5tkKy0)
 
