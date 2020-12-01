@@ -6,7 +6,7 @@ The Android Mac Connector project aims to bridge the connectivity between Androi
 
 This project consists of an Android app, a SwiftUI app, and a Node JS app. A video of the project can be seen below:
 
-[![Video of our project](docs/video-image.png)](link to youtube video)
+[![Video of our project](docs/demo-video-image.png)](https://youtu.be/rFw6e5tkKy0)
 
 This is the system architecture of the project:
 
