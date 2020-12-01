@@ -179,7 +179,11 @@ This document is about how messages get sent back and forth to achieve the requi
 
 1. The device to be pinged is already subscribed to the topic ```<device-id>/ping/requests``` where ```<device-id>``` is the device's device id to be pinged
 
-2. Another device that will ping the device from (1) will publish a message to the topic ```<device-id>/ping/requests```
+2. Another device that will ping the device from (1) will publish a message to ```<device-id>/ping/requests``` with an empty payload:
+
+    ```
+    {}
+    ```
 
 ### Send sms text from my Mac to my Android phone
 
