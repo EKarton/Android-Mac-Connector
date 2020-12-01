@@ -6,11 +6,11 @@ The Android Mac Connector project aims to bridge the connectivity between Androi
 
 This project consists of an Android app, a SwiftUI app, and a Node JS app. A video of the project can be seen below:
 
-[![Video of our project](docs/demo-video-image.png)](https://youtu.be/rFw6e5tkKy0)
+[![Video of our project](docs/demo/demo-video-image.png)](https://youtu.be/rFw6e5tkKy0)
 
 This is the system architecture of the project:
 
-![](docs/diagram.png)
+![](docs/diagram/diagram.png)
 
 The technologies behind this project first relies on an [MQTT](https://mqtt.org/) connection to establish a two-way communication between a device and the server while guaranteeing message delivery and low power consumption. 
 
