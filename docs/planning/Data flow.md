@@ -1,6 +1,6 @@
 # Introduction
 
-This document is about how messages get sent back and forth to achieve the required features ([link](Design\ Document.md)). These features are:
+This document is about how messages get sent back and forth to achieve the required features [(link)](Design\ Document.md)). These features are:
 
 1. Registering a device
 
