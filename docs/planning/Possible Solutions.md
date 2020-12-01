@@ -65,11 +65,35 @@ These are the solutions currently being considered:
   * More expensive and more complicated, but less expensive than solution #3 (not requiring Apple developer membership)
   * For the MacOS app to recieve notifications, it needs to long poll which is expensive
 
-# Proposed Solution:
-We propose the fourth solution because it is:
-1. More flexible: the devices don't have to be in the same network in order for syncing to work
-2. More robust: if the devices lose connection, they can pick up the notifications from the server
-3. Is cheaper: FCM, a small server, and a small database on GCP is free
+5. Make a Mac Catalyst app, Android app, and a server, that uses MQTT and remote push notifications
 
-If we have more money around, we can enable APN on the MacOS app
+* Intro:
+  * This involves creating a SwiftUI app, an Android app, MQTT broker, and a REST server
+  * When the MacOS app sends a notification to the server, it will publish a message to a topic to the MQTT broker.
+  * The server saves the message in an in-memory cache. The server then sends an empty notification to the Android device via FCM (Firebase Cloud Messaging). FCM then passes the notification to the Android app. 
+  * When the Android app is still connected to the MQTT broker, it will receive the notification. But if the Android app is not connected to the MQTT broker, the Android device will still receive the FCM notification, thereby allowing the Android device to wake up from sleep mode [(link)](https://firebase.google.com/docs/cloud-messaging/concept-options#setting-the-priority-of-a-message), and reconnect to the MQTT broker.
+  * The other way is similar; the Android device will publish a message to a topic to the MQTT broker. The broker will then transmit the message to the MacOS app, who is a subscriber to the topic that the Android device has published to. The MacOS app will then receive the message and perform actions related to that message
+
+* Pros:
+  * Can with without an Apple developer membership, and FCM is free
+  * Can work when the Android device are idle
+  * Can work when the devices are on different networks (since it uses a server)
+  * Mac Catalyst can target different Apple devices (iOS, iPad) [(link)](https://developer.apple.com/mac-catalyst/)
+  * Is network efficient - uses MQTT protocol which has small message payload sizes [(link)](http://www.steves-internet-guide.com/mqtt-protocol-messages-overview/#:~:text=The%20minimum%20size%20of%20the,1%20byte%20packet%20length%20field.)
+  * Can be used with web sockets [(link)](https://www.hivemq.com/blog/mqtt-essentials-special-mqtt-over-websockets/)
+  * Can work in unreliable network connections [(link)](https://mqtt.org/faq/)
+
+* Cons:
+  * More expensive (requires a server)
+  * Requires an MQTT broker
+
+# Proposed Solution:
+We propose the fifth solution because it is:
+1. Can target different Apple devices: the Mac Catalyst app could be run on iOS, iPad, and more [(link to wiki)](https://developer.apple.com/mac-catalyst/)
+2. More flexible: the devices don't have to be in the same network in order for syncing to work
+3. More robust: if the devices lose connection, they can pick up the lost notifications from the MQTT server [(link)](https://internetofthingsagenda.techtarget.com/definition/MQTT-MQ-Telemetry-Transport)
+4. Is cheaper: FCM (Firebase remote notifications service), Firebase Auth, and Firebase servers are initially free to try
+5. Is efficient: MQTT messages use less bandwidth since they are smaller [(link)](https://internetofthingsagenda.techtarget.com/definition/MQTT-MQ-Telemetry-Transport)
+
+If we have the Apple Developer program subscription, we can enable APN on the MacOS app so that it can receive notifications when the MacOS app is in the background
 
